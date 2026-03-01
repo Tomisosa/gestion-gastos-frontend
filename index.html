@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Gastos</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icono.png" type="image/png">
+  <link rel="apple-touch-icon" href="icono.png">
+
+  <script>
+    // Si ya existe el token, saltamos directo al dashboard
+    if (localStorage.getItem("token")) {
+        window.location.replace("dashboard.html");
+    }
+  </script>
+</head>
+<body class="inicio">
+  <header>
+    <h1>💰 Gestión de Gastos</h1>
+  </header>
+  <main>
+    <h2>Controla tus finanzas, vive sin estrés.</h2>
+    <p>Registra tus gastos e ingresos fácilmente y lleva tu economía al siguiente nivel.</p>
+    <div class="acciones">
+      <a href="login.html" class="btn">Iniciar sesión</a>
+      <a href="registro.html" class="btn btn-secundario">Crear cuenta</a>
+    </div>
+  </main>
+</body>
+</html>
