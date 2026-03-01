@@ -9,7 +9,7 @@ document.getElementById("btnLogin")?.addEventListener("click", () => {
 
   // URL unificada a tu servidor local
   // --- CONFIGURACIÓN DE PRODUCCIÓN (Railway) ---
-  const API = "https://gestion-gastos-backend-production.up.railway.app/api";
+const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 
     fetch(`${API}/usuarios/login`, { // <--- Usamos la variable API
       method: "POST",

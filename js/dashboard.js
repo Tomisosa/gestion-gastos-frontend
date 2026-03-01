@@ -1,6 +1,6 @@
 // --- CONFIGURACIÓN LOCAL ---
 // --- CONFIGURACIÓN DE PRODUCCIÓN (Railway) ---
-const API = "https://gestion-gastos-backend-production.up.railway.app/api";
+const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 const token = localStorage.getItem("token");
 
 // Seguridad: Si no hay token, al login
@@ -113,6 +113,9 @@ async function fetchGastos() {
 async function fetchIngresos() { 
     const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
     const data = await res.json(); 
+    
+    console.log("INGRESOS BACK:", data); // 👈 AGREGAR ESTA LÍNEA
+    
     globalIngresos = data; 
     return data; 
 }

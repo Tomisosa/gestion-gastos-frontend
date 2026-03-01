@@ -1,0 +1,17 @@
+{
+  "name": "Gestión de Gastos",
+  "short_name": "Gastos",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#2ac9bb",
+  "description": "App personal de finanzas",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/10433/10433048.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

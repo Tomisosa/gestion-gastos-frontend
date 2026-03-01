@@ -336,3 +336,15 @@ html, body {
       cursor: pointer !important;
   }
 }
+
+/* Evita que el usuario seleccione texto o le salga el menú azul al tocar botones */
+* {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* Permite seleccionar texto solo en los inputs para que pueda escribir */
+input, textarea {
+    user-select: text;
+}
+

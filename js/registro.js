@@ -11,7 +11,7 @@ document.getElementById("formRegistro")?.addEventListener("submit", (e) => {
   }
 
   // --- CONFIGURACIÓN DE PRODUCCIÓN (Railway) ---
-  const API = "https://gestion-gastos-backend-production.up.railway.app/api";
+const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 
     fetch(`${API}/usuarios/register`, { // <--- Usamos la variable API
       method: "POST",
