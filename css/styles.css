@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --color-primario: #00bcd4;      /* Tu color turquesa/cyan principal */
+  --color-primario: #00bcd4;      
   --color-whatsapp: #25D366;
   
-  /* Nuevos tonos Finanzas (Azules oscuros elegantes) */
-  --negro: #0b1121;               /* Fondo principal (Azul noche profundo) */
-  --gris-oscuro: #131c31;         /* Fondo de tarjetas y barra lateral (Azul marino) */
-  --gris: #1f2a44;                /* Bordes y efectos al pasar el mouse */
-  --gris-claro: #a0aec0;          /* Textos secundarios (más suaves a la vista) */
-  --blanco: #ffffff;              /* Textos principales */
+  /* Tonos Finanzas Invertidos (Efecto Elevación) */
+  --negro: #131c31;               /* Fondo derecho principal (antiguo color de barra) */
+  --gris-oscuro: #1e2a47;         /* Barra lateral izquierda y tarjetas (más claro) */
+  --gris: #2b3a5e;                /* Bordes, separadores y hovers (aún más claro) */
+  --gris-claro: #a0aec0;          
+  --blanco: #ffffff;              
 }
 
 /* =========================================================
@@ -27,12 +27,12 @@ body.inicio, body.auth {
 }
 
 body.inicio {
-    overflow: hidden; /* Evita scroll indeseado en la landing */
+    overflow: hidden; 
 }
 
 /* --- Landing Page Premium (Index) --- */
 body.premium-landing {
-    background: radial-gradient(circle at top, #18243e 0%, var(--negro) 100%);
+    background: radial-gradient(circle at top, var(--gris-oscuro) 0%, var(--negro) 100%);
 }
 
 .hero-container {
@@ -243,7 +243,7 @@ html, body {
     flex-direction: column; 
     justify-content: space-between; 
     padding: 1.5rem; 
-    border-right: 1px solid var(--gris); /* Un borde sutil que separa */
+    border-right: 1px solid var(--gris);
 }
 .sidebar .brand { text-align: center; font-weight: 700; font-size: 1.4rem; color: var(--color-primario); }
 .nav-list { list-style: none; margin-top: 2rem; }
@@ -338,7 +338,7 @@ html, body {
     justify-content: center; 
     align-items: center; 
     z-index: 3000; 
-    backdrop-filter: blur(5px); /* Le da un toque muy top al fondo borroso */
+    backdrop-filter: blur(5px); 
 }
 .modal-content { 
     background-color: var(--gris-oscuro); 
@@ -422,4 +422,38 @@ html, body {
 
 input, textarea {
     user-select: text;
+}
+
+/* =========================================================
+   ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
+   ========================================================= */
+
+.wallet-card, .cuenta-card, .saldos-container div {
+    background-color: var(--gris-oscuro) !important;
+    border-top: 1px solid var(--gris);
+    border-right: 1px solid var(--gris);
+    border-bottom: 1px solid var(--gris);
+}
+
+select {
+    background-color: var(--gris-oscuro) !important;
+    color: var(--blanco) !important;
+    border: 1px solid var(--gris) !important;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: border 0.3s ease;
+}
+
+select:focus {
+    border-color: var(--color-primario) !important;
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.3);
+}
+
+.filtro-container, .filtro-mes {
+    background-color: transparent !important;
 }
