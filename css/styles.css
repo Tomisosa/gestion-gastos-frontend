@@ -4,12 +4,12 @@
   --color-primario: #00bcd4;      
   --color-whatsapp: #25D366;
   
-  /* Tonos Finanzas Invertidos (Efecto Elevación) */
-  --negro: #131c31;               /* Fondo derecho principal (antiguo color de barra) */
-  --gris-oscuro: #1e2a47;         /* Barra lateral izquierda y tarjetas (más claro) */
-  --gris: #2b3a5e;                /* Bordes, separadores y hovers (aún más claro) */
-  --gris-claro: #a0aec0;          
-  --blanco: #ffffff;              
+  /* Modo Claro / Cremita Premium */
+  --negro: #FDFBF7;               /* Fondo derecho (Cremita muy suave) */
+  --gris-oscuro: #FFFFFF;         /* Barra izquierda y Tarjetas (Blanco puro para contrastar) */
+  --gris: #E2E8F0;                /* Bordes sutiles grises claritos */
+  --gris-claro: #64748B;          /* Textos secundarios (Gris medio) */
+  --blanco: #1E293B;              /* Letras principales (Azul muy oscuro para que se lean bien) */
 }
 
 /* =========================================================
