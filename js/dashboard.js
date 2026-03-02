@@ -1,11 +1,10 @@
-// --- CONFIGURACIÓN DE PRODUCCIÓN (Railway) ---
+// --- CONFIGURACIÓN DE PRODUCCIÓN ---
 const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
+const messageEl = document.getElementById("message");
 const token = localStorage.getItem("token");
 
-// Seguridad básica
-if (!token) {
-  console.warn("No hay token en localStorage");
-}
+// Seguridad: Si no hay token, al login
+if (!token) window.location.href = "login.html";
 
 let user = null;
 let miGrafico = null; 
@@ -27,192 +26,300 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-/* =========================
-   FETCH USER (ARREGLADO)
-========================= */
+/* --- GRÁFICOS --- */
+function generarGrafico(gastos) {
+  const canvas = document.getElementById('gastosChart');
+  if (!canvas) return;
+  if (miGrafico) { miGrafico.destroy(); miGrafico = null; }
+  const ctx = canvas.getContext('2d');
+  const datosAgrupados = {};
+  gastos.forEach(g => {
+    const cat = g.categoriaNombre || "Sin categoría";
+    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + Number(g.monto);
+  });
+  miGrafico = new Chart(ctx, {
+    type: 'doughnut', 
+    data: {
+      labels: Object.keys(datosAgrupados),
+      datasets: [{
+        data: Object.values(datosAgrupados),
+        backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff'],
+        borderWidth: 2, borderColor: '#1a1a1a'
+      }]
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff' } } } 
+    }
+  });
+}
+
+function calcularSaldosPorCuenta(gastos, ingresos) {
+  const saldos = { "BNA": 0, "MERCADO_PAGO": 0, "EFECTIVO": 0 };
+  ingresos.forEach(i => { const m = i.medioPago || "EFECTIVO"; if (saldos.hasOwnProperty(m)) saldos[m] += Number(i.monto); });
+  gastos.forEach(g => { const m = g.medioPago || "EFECTIVO"; if (saldos.hasOwnProperty(m)) saldos[m] -= Number(g.monto); });
+  if(document.getElementById("saldoBNA")) document.getElementById("saldoBNA").textContent = formatoMoneda(saldos["BNA"]);
+  if(document.getElementById("saldoMP")) document.getElementById("saldoMP").textContent = formatoMoneda(saldos["MERCADO_PAGO"]);
+  if(document.getElementById("saldoEfectivo")) document.getElementById("saldoEfectivo").textContent = formatoMoneda(saldos["EFECTIVO"]);
+}
+
+function cargarSelectorFechas() {
+  const selector = document.getElementById("filtroFechaMes");
+  if (!selector) return;
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const anios = [2025, 2026];
+  selector.innerHTML = "";
+  anios.forEach(anio => {
+    meses.forEach((mes, index) => {
+      const option = document.createElement("option");
+      const mesNum = (index + 1).toString().padStart(2, '0');
+      option.value = `${anio}-${mesNum}`;
+      option.textContent = `${mes} ${anio}`;
+      selector.appendChild(option);
+    });
+  });
+  const hoy = new Date();
+  const mesActual = (hoy.getMonth() + 1).toString().padStart(2, '0');
+  selector.value = `${hoy.getFullYear()}-${mesActual}`;
+  selector.onchange = () => refreshAll();
+}
 
 async function fetchUserInfo() {
   try {
-    const res = await fetch(`${API}/usuarios/me`, { 
-      headers: authHeaders() 
-    });
-
-    console.log("STATUS /usuarios/me:", res.status);
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Error respuesta:", text);
-      throw new Error("Error auth");
-    }
-
+    const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Error auth");
     user = await res.json();
-    console.log("USER:", user);
-
-    const emailEl = document.getElementById("userEmail");
-    if (emailEl) emailEl.textContent = user.email;
-
-  } catch (e) {
-    console.error("Error en fetchUserInfo:", e);
-    // 🚫 SACAMOS el redirect automático para evitar loop infinito
-    // window.location.href = "login.html";
-  }
+    if(document.getElementById("userEmail")) document.getElementById("userEmail").textContent = user.email;
+  } catch (e) { window.location.href = "login.html"; }
 }
 
-/* =========================
-   FETCH DATOS
-========================= */
-
 async function fetchCategorias() { 
-  try { 
-    const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
-    const data = await res.json(); 
-    renderCategorias(data); 
-    return data; 
-  } catch (e) { 
-    console.error("Error categorias", e);
-    return []; 
-  } 
+    try { 
+        const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
+        const data = await res.json(); 
+        renderCategorias(data); 
+        return data; 
+    } catch (e) { return []; } 
 }
 
 async function fetchGastos() { 
-  if (!user) return [];
-  const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
-  const data = await res.json(); 
-  globalGastos = data; 
-  return data; 
+    const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
+    const data = await res.json(); 
+    globalGastos = data; 
+    return data; 
 }
 
 async function fetchIngresos() { 
-  if (!user) return [];
-  const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
-  const data = await res.json(); 
-  console.log("INGRESOS BACK:", data);
-  globalIngresos = data; 
-  return data; 
+    const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
+    const data = await res.json(); 
+    globalIngresos = data; 
+    return data; 
 }
 
-/* =========================
-   REFRESH GENERAL
-========================= */
+function renderCategorias(categorias) {
+  const gSelect = document.getElementById("gastoCategoria");
+  const iSelect = document.getElementById("ingresoCategoria");
+  const filtroSel = document.getElementById("filtroCategoriaSelect");
+  const lista = document.getElementById("listaCategorias");
+  [gSelect, iSelect, filtroSel].forEach(select => {
+    if (!select) return;
+    const valPrevio = select.value;
+    select.innerHTML = select === filtroSel ? '<option value="all">Mostrar todas</option>' : '<option value="">Sin categoría</option>';
+    categorias.forEach(cat => { const opt = document.createElement("option"); opt.value = cat.id; opt.textContent = cat.nombre; select.appendChild(opt); });
+    if(valPrevio) select.value = valPrevio;
+  });
+}
 
 async function refreshAll() {
-  await fetchCategorias(); 
-  if(!user) return; 
-
-  const gTodos = await fetchGastos(); 
-  const iTodos = await fetchIngresos();
-
-  const mesSeleccionado = new Date().toISOString().slice(0, 7);
-
-  const gFiltrados = gTodos.filter(g => 
-    (g.fecha || g.fechaVencimiento || "").startsWith(mesSeleccionado)
-  );
-
-  const iFiltrados = iTodos.filter(i => 
-    (i.fecha || "").startsWith(mesSeleccionado)
-  );
-
-  const totalG = gFiltrados.reduce((s,x)=>s+Number(x.monto),0);
+  await fetchCategorias(); if(!user) return; 
+  const gTodos = await fetchGastos(); const iTodos = await fetchIngresos();
+  const selector = document.getElementById("filtroFechaMes");
+  const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+  
+  const gFiltrados = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
+  const iFiltrados = iTodos.filter(i => i.fecha.startsWith(mesSeleccionado));
+  
+  const gFijos = gFiltrados.filter(g => g.esFijo);
+  const gVariables = gFiltrados.filter(g => !g.esFijo);
+  
+  const totalG = gFijos.reduce((s,x)=>s+Number(x.monto),0) + gVariables.reduce((s,x)=>s+Number(x.monto),0);
   const totalI = iFiltrados.reduce((s,x)=>s+Number(x.monto),0);
-
+  
+  if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
+  if(document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(gFijos.reduce((s,x)=>s+Number(x.monto),0));
+  if(document.getElementById("totalVariables")) document.getElementById("totalVariables").textContent = formatoMoneda(gVariables.reduce((s,x)=>s+Number(x.monto),0));
+  
   const elBal = document.getElementById("balanceTotal");
   if(elBal) {
     const bal = totalI - totalG;
     elBal.textContent = formatoMoneda(bal);
+    elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
-
-  renderIngresos(iFiltrados);
+  
+  renderGastosFijos(gFijos); 
+  renderGastosVariables(gVariables); 
+  renderIngresos(iFiltrados); 
+  calcularSaldosPorCuenta(gFiltrados, iFiltrados); 
+  generarGrafico(gFiltrados);
 }
 
-/* =========================
-   RENDER CATEGORIAS
-========================= */
-function renderCategorias(categorias) {
-  // Buscamos los desplegables en tu HTML (fijate si el de gastos se llama distinto)
-  const selectIngreso = document.getElementById("ingresoCategoria");
-  const selectGasto = document.getElementById("gastoCategoria"); 
-
-  let opcionesHtml = '<option value="">Seleccione una categoría...</option>';
-
-  // Llenamos las opciones con lo que mandó la base de datos
-  if (categorias && categorias.length > 0) {
-    categorias.forEach(cat => {
-      opcionesHtml += `<option value="${cat.id}">${cat.nombre}</option>`;
-    });
-  }
-
-  // Se lo pasamos al HTML si existen
-  if (selectIngreso) selectIngreso.innerHTML = opcionesHtml;
-  if (selectGasto) selectGasto.innerHTML = opcionesHtml;
+function renderGastosFijos(lista) {
+  const tbody = document.querySelector("#tablaGastosFijos tbody");
+  if (!tbody) return; tbody.innerHTML = "";
+  lista.forEach(g => {
+    const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete">🗑️</button>`;
+    const estadoPago = g.pagado ? '<span style="color:#2ac9bb;">SÍ</span>' : '<span style="color:#ff6384;">NO</span>';
+    tbody.innerHTML += `<tr><td>${g.descripcion||"-"}</td><td>${formatoMoneda(g.monto)}</td><td>${g.fechaVencimiento||"-"}</td><td>${g.categoriaNombre||"-"}</td><td>${estadoPago}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${acciones}</td></tr>`;
+  });
 }
-/* =========================
-   RENDER INGRESOS
-========================= */
+
+function renderGastosVariables(lista) {
+  const tbody = document.querySelector("#tablaGastosVariables tbody");
+  if (!tbody) return; tbody.innerHTML = "";
+  lista.forEach(g => {
+    const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete">🗑️</button>`;
+    tbody.innerHTML += `<tr><td>${g.fecha}</td><td>${g.descripcion||"-"}</td><td>${g.categoriaNombre||"-"}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${formatoMoneda(g.monto)}</td><td>${acciones}</td></tr>`;
+  });
+}
 
 function renderIngresos(ingresos) {
   const tbody = document.querySelector('#tablaIngresos tbody');
-  if (!tbody) return;
-
-  tbody.innerHTML = '';
+  if (tbody) tbody.innerHTML = '';
   ingresos.forEach(i => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${i.fecha || "-"}</td>
-        <td>${i.descripcion || '-'}</td>
-        <td>${i.medioPago || 'EFECTIVO'}</td>
-        <td>${i.categoriaNombre || '-'}</td>
-        <td>${formatoMoneda(i.monto)}</td>
-      </tr>
-    `;
+    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete">🗑️</button>`;
+    tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td>${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
   });
 }
 
-/* =========================
-   FORM INGRESO
-========================= */
+// --- OPERACIONES CRUD ---
+window.eliminarGasto = async function(id) { 
+    if(confirm("¿Eliminar gasto?")) { 
+        await fetch(`${API}/gastos/${id}`, {method:"DELETE", headers:authHeaders()}); 
+        await refreshAll(); 
+    }
+};
 
-document.getElementById("formIngreso")?.addEventListener("submit", async (e) => { 
-  e.preventDefault(); 
+window.eliminarIngreso = async function(id) { 
+    if(confirm("¿Eliminar ingreso?")) { 
+        await fetch(`${API}/ingresos/${id}`, {method:"DELETE", headers:authHeaders()}); 
+        await refreshAll(); 
+    }
+};
 
-  if (!user) {
-    console.error("User null al crear ingreso");
-    return;
-  }
+document.getElementById("formGasto").onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const esFijo = document.getElementById("gastoEsFijo").checked;
+    const body = {
+        descripcion: document.getElementById("gastoDescripcion").value,
+        monto: document.getElementById("gastoMonto").value,
+        medioPago: document.getElementById("gastoMedio").value,
+        fecha: document.getElementById("gastoFecha").value,
+        esFijo: esFijo,
+        fechaVencimiento: esFijo ? document.getElementById("gastoVencimiento").value : null,
+        pagado: esFijo ? document.getElementById("gastoPagado").checked : false,
+        usuarioId: user.id,
+        categoriaId: document.getElementById("gastoCategoria").value || null
+    };
+    await fetch(`${API}/gastos`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(body)
+    });
+    document.getElementById("modalGasto").style.display = "none"; 
+    document.getElementById("formGasto").reset(); 
+    await refreshAll(); 
+};
 
-  const body = {
-    descripcion: document.getElementById("ingresoDescripcion").value,
-    monto: document.getElementById("ingresoMonto").value,
-    medioPago: document.getElementById("ingresoMedio").value,
-    fecha: document.getElementById("ingresoFecha").value,
-    usuarioId: user.id,
-    categoriaId: document.getElementById("ingresoCategoria").value || null
-  };
+document.getElementById("formIngreso").onsubmit = async (e) => { 
+    e.preventDefault(); 
+    const body = {
+        descripcion: document.getElementById("ingresoDescripcion").value,
+        monto: document.getElementById("ingresoMonto").value,
+        medioPago: document.getElementById("ingresoMedio").value,
+        fecha: document.getElementById("ingresoFecha").value,
+        usuarioId: user.id,
+        categoriaId: document.getElementById("ingresoCategoria").value || null
+    };
+    await fetch(`${API}/ingresos`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(body)
+    });
+    document.getElementById("modalIngreso").style.display = "none"; 
+    document.getElementById("formIngreso").reset(); 
+    await refreshAll(); 
+};
 
-  const res = await fetch(`${API}/ingresos`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify(body)
-  });
+// --- LÓGICA DE NAVEGACIÓN Y EVENTOS ---
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Navegación entre secciones (Inicio, Gastos, Ingresos, etc.)
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const sectionId = item.getAttribute('data-section');
+            if(!sectionId || sectionId === "logout") return;
 
-  console.log("POST ingreso status:", res.status);
+            // Caso especial: El botón de Proyección abre un modal, no una página
+            if (sectionId === "proyeccion") {
+                document.getElementById('modalProyeccion').style.display = 'flex';
+                return;
+            }
 
-  await refreshAll(); 
+            // Cambiar pestaña activa
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            // Mostrar página correspondiente
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
+            const targetPage = document.getElementById(sectionId);
+            if(targetPage) targetPage.classList.add('visible');
+        });
+    });
+
+    // 2. Lógica del Botón Flotante (+) Estilo WhatsApp
+    const fabMain = document.getElementById('fabMain');
+    const fabOptions = document.getElementById('fabOptions');
+    if (fabMain) {
+        fabMain.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fabOptions.classList.toggle('show'); // Sincronizado con CSS
+        });
+    }
+
+    // 3. Abrir Modales desde el FAB
+    document.getElementById('btnFabGasto').addEventListener('click', () => {
+        document.getElementById('modalGasto').style.display = 'flex';
+        fabOptions.classList.remove('show');
+    });
+
+    document.getElementById('btnFabIngreso').addEventListener('click', () => {
+        document.getElementById('modalIngreso').style.display = 'flex';
+        fabOptions.classList.remove('show');
+    });
+
+    // 4. Cerrar Modales (Cualquiera que tenga clase .close)
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.closest('.modal').style.display = 'none';
+        });
+    });
+
+    // Cerrar menú del + si hacés clic afuera
+    document.addEventListener('click', () => {
+        if(fabOptions) fabOptions.classList.remove('show');
+    });
+
+    // 5. Checkbox de Gasto Fijo: mostrar/ocultar campos
+    document.getElementById('gastoEsFijo').addEventListener('change', (e) => {
+        document.getElementById('camposFijos').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // 6. Configuración de Categorías (Icono Tuerca)
+    document.getElementById('btnGestionarCategorias').addEventListener('click', () => {
+        document.getElementById('modalCategorias').style.display = 'flex';
+    });
 });
 
-/* =========================
-   LOGOUT
-========================= */
-
-document.getElementById("logoutBtn")?.addEventListener("click", () => { 
-  localStorage.clear(); 
-  window.location.replace("index.html"); 
-});
-
-/* =========================
-   INIT
-========================= */
-
-(async function init() { 
-  await fetchUserInfo(); 
-  await refreshAll(); 
-})();
+// --- INICIALIZACIÓN DE DATOS ---
+document.getElementById("logoutBtn").onclick = () => { localStorage.clear(); window.location.href="login.html"; };
+(async function init() { await fetchUserInfo(); cargarSelectorFechas(); await refreshAll(); })();
