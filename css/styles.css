@@ -6,15 +6,17 @@
   
   /* === MODO PROFESIONAL (MIXTO) === */
   --bg-derecha: #F4F6F9;         /* Fondo derecho (Cremita claro) */
-  --bg-izquierda: #1e3a5f;       /* ¡NUEVO AZUL! Más claro y moderno */
+  --bg-izquierda: #1e3a5f;       /* Barra lateral Azul Marino */
   --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
+  
+  --bg-saldos: #334155;          /* ¡NUEVO! Gris oscuro premium para BNA, MP y Mes */
 
   --texto-oscuro: #1e293b;       
   --texto-claro: #64748b;        
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #2a4d7c;          /* Hover del nuevo azul más claro */
+  --hover-izq: #2a4d7c;          
 }
 
 /* =========================================================
@@ -426,32 +428,43 @@ input, textarea {
 }
 
 /* =========================================================
-   ARREGLO DEFINITIVO: TARJETAS SUPERIORES Y SELECTOR DE MES
+   ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
    ========================================================= */
 
-/* 1. El selector del MES */
-select, #filtroFechaMes {
-    background-color: var(--bg-izquierda) !important;
+/* Hacemos que usen el GRIS OSCURO y quitamos la regla que borraba los bordes */
+.wallet-card, .cuenta-card, .saldos-container div {
+    background-color: var(--bg-saldos) !important;
+    border-radius: 12px;
     color: var(--texto-blanco) !important;
-    border: 1px solid var(--borde) !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 
-/* 2. Tarjetas BNA, MP y Efectivo (Buscamos directo por el ID del saldo para no fallar) */
-.wallet-card, 
-.cuenta-card, 
-.saldos-container div,
-div:has(#saldoBNA),
-div:has(#saldoMP),
-div:has(#saldoEfectivo) {
-    background-color: var(--bg-izquierda) !important;
-    /* OJO: No le ponemos "border: none" así mantenés tus bordes de colores izquierdo */
+/* Forzamos que los textitos de adentro (ej: "BNA") se vean en blanco */
+.wallet-card h3, .cuenta-card h3, .saldos-container div h3,
+.wallet-card span, .cuenta-card span, .saldos-container div span {
+    color: var(--texto-blanco) !important;
 }
 
-/* 3. Forzamos que los textitos ("BNA", "Mercado Pago" y los números) sean blancos */
-div:has(#saldoBNA) *,
-div:has(#saldoMP) *,
-div:has(#saldoEfectivo) *,
-.wallet-card *, 
-.cuenta-card * {
+/* El selector del MES con el mismo gris oscuro */
+select {
+    background-color: var(--bg-saldos) !important;
     color: var(--texto-blanco) !important;
+    border: 1px solid var(--bg-saldos) !important;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+select:focus {
+    box-shadow: 0 0 0 2px var(--color-primario);
+}
+
+.filtro-container, .filtro-mes {
+    background-color: transparent !important;
 }
