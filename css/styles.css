@@ -6,17 +6,15 @@
   
   /* === MODO PROFESIONAL (MIXTO) === */
   --bg-derecha: #F4F6F9;         /* Fondo derecho (Cremita claro) */
-  --bg-izquierda: #1e3a5f;       /* Barra lateral Azul Marino */
+  --bg-izquierda: #1e3a5f;       /* ¡NUEVO AZUL! Más claro y moderno */
   --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
-  
-  --bg-saldos: #334155;          /* ¡NUEVO! Gris oscuro premium para BNA, MP y Mes */
 
   --texto-oscuro: #1e293b;       
   --texto-claro: #64748b;        
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #2a4d7c;          
+  --hover-izq: #2a4d7c;          /* Hover del nuevo azul más claro */
 }
 
 /* =========================================================
@@ -431,9 +429,10 @@ input, textarea {
    ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
    ========================================================= */
 
-/* Hacemos que usen el GRIS OSCURO y quitamos la regla que borraba los bordes */
+/* Hacemos que usen exactamente el mismo azul y sin bordes molestos */
 .wallet-card, .cuenta-card, .saldos-container div {
-    background-color: var(--bg-saldos) !important;
+    background-color: var(--bg-izquierda) !important;
+    border: none !important;
     border-radius: 12px;
     color: var(--texto-blanco) !important;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
@@ -445,11 +444,11 @@ input, textarea {
     color: var(--texto-blanco) !important;
 }
 
-/* El selector del MES con el mismo gris oscuro */
+/* El selector del MES con el mismo estilo azul */
 select {
-    background-color: var(--bg-saldos) !important;
+    background-color: var(--bg-izquierda) !important;
     color: var(--texto-blanco) !important;
-    border: 1px solid var(--bg-saldos) !important;
+    border: none !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
