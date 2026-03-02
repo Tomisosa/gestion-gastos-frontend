@@ -6,15 +6,17 @@
   
   /* === MODO PROFESIONAL (MIXTO) === */
   --bg-derecha: #F4F6F9;         /* Fondo derecho (Cremita claro) */
-  --bg-izquierda: #1e3a5f;       /* ¡NUEVO AZUL! Más claro y moderno */
+  --bg-izquierda: #1e3a5f;       /* Barra lateral Azul Marino */
   --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
+  
+  --bg-saldos: #111111;          /* ¡NEGRO CLÁSICO! Para BNA, MP y Mes */
 
   --texto-oscuro: #1e293b;       
   --texto-claro: #64748b;        
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #2a4d7c;          /* Hover del nuevo azul más claro */
+  --hover-izq: #2a4d7c;          
 }
 
 /* =========================================================
@@ -426,29 +428,29 @@ input, textarea {
 }
 
 /* =========================================================
-   ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
+   ARREGLO DEFINITIVO: TARJETAS SUPERIORES (SALDOS), SELECTOR DE MES Y MODAL
    ========================================================= */
 
-/* Hacemos que usen exactamente el mismo azul y sin bordes molestos */
+/* Hacemos que usen el NEGRO OSCURO y mantenemos tus bordes de colores vivos */
 .wallet-card, .cuenta-card, .saldos-container div {
-    background-color: var(--bg-izquierda) !important;
-    border: none !important;
+    background-color: var(--bg-saldos) !important;
     border-radius: 12px;
     color: var(--texto-blanco) !important;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 
-/* Forzamos que los textitos de adentro (ej: "BNA") se vean en blanco */
+/* Forzamos que los textitos de adentro se vean en blanco (incluyendo los del modal) */
 .wallet-card h3, .cuenta-card h3, .saldos-container div h3,
-.wallet-card span, .cuenta-card span, .saldos-container div span {
+.wallet-card span, .cuenta-card span, .saldos-container div span,
+.wallet-card p, .cuenta-card p, .saldos-container div p {
     color: var(--texto-blanco) !important;
 }
 
-/* El selector del MES con el mismo estilo azul */
-select {
-    background-color: var(--bg-izquierda) !important;
+/* El selector del MES con el mismo negro oscuro */
+select, #filtroFechaMes {
+    background-color: var(--bg-saldos) !important;
     color: var(--texto-blanco) !important;
-    border: none !important;
+    border: 1px solid var(--bg-saldos) !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
@@ -460,10 +462,43 @@ select {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-select:focus {
+select:focus, #filtroFechaMes:focus {
     box-shadow: 0 0 0 2px var(--color-primario);
 }
 
 .filtro-container, .filtro-mes {
     background-color: transparent !important;
+}
+
+/* =========================================================
+   PARCHE SALVAVIDAS: TEXTOS Y MODALES
+   ========================================================= */
+
+/* 1. Hacemos que tu email en la barra lateral sea gris clarito para que resalte */
+.sidebar p, .sidebar span, .sidebar small, .sidebar a {
+    color: #e2e8f0 !important; 
+}
+
+/* 2. Volvemos a poner los desplegables de los modales en "Modo Claro" */
+.modal-content select {
+    background-color: #f8fafc !important;
+    color: var(--texto-oscuro) !important;
+    border: 1px solid var(--borde) !important;
+    box-shadow: none !important;
+}
+
+/* 3. Forzamos que TODOS los textos de la Proyección (Ej: "Resumen de Cuentas") sean blancos */
+.modal-content .saldos-container *, 
+.modal-content .cuenta-card * {
+    color: var(--texto-blanco) !important;
+}
+
+/* 4. Le sacamos ese fondo negro feo al checkbox de "¿Es Gasto Fijo?" */
+.modal-content div:not(.cuenta-card):not(.saldos-container):not(.saldos-container div) {
+    background-color: transparent !important;
+}
+
+/* 5. Aseguramos que los títulos de los campos se lean bien */
+.modal-content label {
+    color: var(--texto-oscuro) !important;
 }
