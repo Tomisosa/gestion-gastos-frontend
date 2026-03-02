@@ -125,6 +125,27 @@ async function refreshAll() {
 }
 
 /* =========================
+   RENDER CATEGORIAS
+========================= */
+function renderCategorias(categorias) {
+  // Buscamos los desplegables en tu HTML (fijate si el de gastos se llama distinto)
+  const selectIngreso = document.getElementById("ingresoCategoria");
+  const selectGasto = document.getElementById("gastoCategoria"); 
+
+  let opcionesHtml = '<option value="">Seleccione una categoría...</option>';
+
+  // Llenamos las opciones con lo que mandó la base de datos
+  if (categorias && categorias.length > 0) {
+    categorias.forEach(cat => {
+      opcionesHtml += `<option value="${cat.id}">${cat.nombre}</option>`;
+    });
+  }
+
+  // Se lo pasamos al HTML si existen
+  if (selectIngreso) selectIngreso.innerHTML = opcionesHtml;
+  if (selectGasto) selectGasto.innerHTML = opcionesHtml;
+}
+/* =========================
    RENDER INGRESOS
 ========================= */
 
