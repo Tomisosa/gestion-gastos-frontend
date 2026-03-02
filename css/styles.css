@@ -36,44 +36,108 @@ body.premium-landing {
 .hero-container {
     animation: fadeIn 1.2s ease-out;
     width: 100%;
-    max-width: 400px;
+    max-width: 450px; /* Lo hicimos un poco más ancho para que el texto respire */
+    padding: 20px;
+    margin-top: -30px; /* Lo sube un poquitito para centrarlo mejor visualmente */
 }
 
 .logo-icon {
-    font-size: 5rem;
-    margin-bottom: 10px;
+    font-size: 5.5rem; /* Emoji apenas más grande */
+    margin-bottom: 35px; /* ¡MÁS AIRE ACÁ! Separamos el logo del título */
     display: inline-block;
-    filter: drop-shadow(0 0 15px rgba(0, 188, 212, 0.3)); /* Reflejo color primario */
-    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(0, 188, 212, 0.4)); 
+    animation: float 4s ease-in-out infinite;
 }
 
 .premium-landing header h1 {
-    font-size: 2.8rem;
+    font-size: 3rem;
     color: var(--blanco);
-    margin: 0;
+    margin: 0 0 30px 0; /* ¡MÁS AIRE ABAJO DEL TÍTULO! */
     letter-spacing: -1px;
-    display: block; 
+    line-height: 1.1;
 }
 
 .premium-landing header h1 span {
     color: var(--color-primario);
     display: block;
+    margin-top: 8px; /* Separa un poco las dos líneas del título */
 }
 
 .premium-landing main h2 {
-    color: var(--gris-claro);
-    font-size: 1.2rem;
-    font-weight: 400;
-    margin-top: 15px;
+    color: var(--blanco);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 20px;
     line-height: 1.4;
 }
 
 .premium-landing main p {
-    color: #888;
-    font-size: 0.95rem;
-    margin-bottom: 40px;
+    color: #a0a0a0;
+    font-size: 1.05rem;
+    line-height: 1.6; /* Separa los renglones del texto para que se lea mejor */
+    margin-bottom: 55px; /* ¡MUCHO MÁS AIRE ANTES DE LOS BOTONES! */
+    padding: 0 10px;
 }
 
+/* --- Botones Landing Premium --- */
+.premium-landing .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Separamos más el botón de Login del de Registro */
+    width: 100%;
+    padding: 0 15px; /* Evita que los botones toquen los bordes del celu */
+    box-sizing: border-box;
+}
+
+.btn-principal {
+    background: var(--color-primario);
+    color: var(--negro);
+    padding: 18px; /* Botones un poco más altos y cómodos para el dedo */
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 20px rgba(0, 188, 212, 0.25);
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.btn-secundario-new {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--blanco);
+    padding: 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: background 0.3s, transform 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.btn-principal:hover {
+    background: #009eb3;
+}
+
+.btn-secundario-new:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-principal:active, .btn-secundario-new:active {
+    transform: scale(0.96);
+}
+
+/* Animaciones */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
 /* --- Botones Landing Premium --- */
 .premium-landing .acciones {
     display: flex;
