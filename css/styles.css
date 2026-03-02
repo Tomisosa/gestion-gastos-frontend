@@ -13,7 +13,6 @@
 /* =========================================================
    PÁGINAS DE INICIO Y AUTENTICACIÓN (Index, Login, Registro)
    ========================================================= */
-
 body.inicio, body.auth {
     display: flex;
     flex-direction: column;
@@ -25,34 +24,105 @@ body.inicio, body.auth {
     padding: 20px;
 }
 
-/* --- Landing Page (Index) --- */
-.inicio header h1 {
-    font-size: 3.5rem;
-    color: var(--color-primario);
+body.inicio {
+    overflow: hidden; /* Evita scroll indeseado en la landing */
+}
+
+/* --- Landing Page Premium (Index) --- */
+body.premium-landing {
+    background: radial-gradient(circle at top, #1e1e1e 0%, var(--negro) 100%);
+}
+
+.hero-container {
+    animation: fadeIn 1.2s ease-out;
+    width: 100%;
+    max-width: 400px;
+}
+
+.logo-icon {
+    font-size: 5rem;
     margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
+    display: inline-block;
+    filter: drop-shadow(0 0 15px rgba(0, 188, 212, 0.3)); /* Reflejo color primario */
+    animation: float 3s ease-in-out infinite;
 }
-.inicio main h2 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
+
+.premium-landing header h1 {
+    font-size: 2.8rem;
     color: var(--blanco);
-    font-weight: 500;
+    margin: 0;
+    letter-spacing: -1px;
+    display: block; 
 }
-.inicio main p {
+
+.premium-landing header h1 span {
+    color: var(--color-primario);
+    display: block;
+}
+
+.premium-landing main h2 {
     color: var(--gris-claro);
-    margin-bottom: 40px;
-    max-width: 500px;
-    line-height: 1.6;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-top: 15px;
+    line-height: 1.4;
 }
-.acciones {
+
+.premium-landing main p {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+}
+
+/* --- Botones Landing Premium --- */
+.premium-landing .acciones {
     display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.btn-principal {
+    background: var(--color-primario);
+    color: var(--negro);
+    padding: 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 15px rgba(0, 188, 212, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.btn-secundario-new {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--blanco);
+    padding: 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: background 0.3s, transform 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.btn-principal:hover {
+    background: #009eb3;
+}
+
+.btn-secundario-new:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-principal:active, .btn-secundario-new:active {
+    transform: scale(0.96);
 }
 
 /* --- Cajas de Login y Registro --- */
@@ -118,10 +188,7 @@ body.inicio, body.auth {
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
-    width: 100%; /* Por defecto ocupa todo el ancho en formularios */
-}
-.acciones .btn {
-    width: auto; /* En el inicio se adaptan al texto */
+    width: 100%; 
 }
 .btn:hover {
     transform: translateY(-3px);
@@ -137,14 +204,15 @@ body.inicio, body.auth {
     color: var(--negro);
 }
 
-/* ==== GENERAL & LAYOUT ==== */
+/* =========================================================
+   GENERAL & LAYOUT (DASHBOARD)
+   ========================================================= */
 * { 
     margin: 0; 
     padding: 0; 
     box-sizing: border-box; 
 }
 
-/* Evita que toda la página se deslice hacia los costados en el celu */
 html, body {
   font-family: 'Inter', sans-serif;
   background-color: var(--negro);
@@ -184,11 +252,11 @@ html, body {
 .card h3 { font-size: 1rem; color: var(--gris-claro); }
 .card .highlight { font-size: 1.6rem; font-weight: 600; margin-top: 0.5rem; color: var(--color-primario); }
 
-/* ==== TABLAS DE DATOS (REPARADAS PARA CELULAR) ==== */
+/* ==== TABLAS DE DATOS ==== */
 .table-wrapper {
     width: 100%;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Deslizamiento suave en táctil */
+    -webkit-overflow-scrolling: touch; 
     padding-bottom: 10px;
 }
 
@@ -197,7 +265,7 @@ html, body {
     padding: 0.8rem; 
     text-align: left; 
     border-bottom: 1px solid var(--gris); 
-    white-space: nowrap; /* Evita que los textos se apilen en múltiples líneas */
+    white-space: nowrap; 
 }
 .highlight.positivo { color: #2ac9bb; }
 .highlight.negativo { color: #ff6384; }
@@ -272,7 +340,6 @@ html, body {
 }
 .close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: var(--gris-claro); cursor: pointer; }
 
-/* Estilos Premium para el Formulario */
 .modal-content h2 { color: var(--color-primario); margin-bottom: 20px; font-size: 1.4rem; }
 .modal-content form { display: flex; flex-direction: column; }
 .modal-content label { font-size: 0.9rem; color: var(--gris-claro); margin-top: 15px; margin-bottom: 5px; }
@@ -281,9 +348,10 @@ html, body {
 .modal-content input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
 .modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: var(--negro); border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* --- Animaciones Generales --- */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ==== ADAPTACIÓN PARA CELULARES (DISEÑO GRID / PANEL) ==== */
+/* ==== ADAPTACIÓN PARA CELULARES ==== */
 @media (max-width: 768px) {
   .app { flex-direction: column; height: auto; }
   .sidebar { width: 100%; height: auto; padding: 15px; }
@@ -291,60 +359,50 @@ html, body {
   
   .nav-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0; }
   .nav-item { font-size: 0.8rem; padding: 12px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #333; border-radius: 8px; }
-  .nav-item.logout { grid-column: span 3; margin-top: 10px; background-color: #2a0808; border-color: #ff4444; }
+  .nav-item.logout { grid-column: span 3; margin-top: 10px; background-color: #2a0808; border-color: #ff4444; color: #ff4444;}
   
   .content { padding: 15px; }
 
-  /* --- EL ARREGLO PARA NÚMEROS GIGANTES --- */
-  
-  /* Forzamos con !important a que las tarjetas vayan SÍ O SÍ una debajo de la otra */
   .cards, .wallet-cards { 
       display: flex !important;
       flex-direction: column !important;
       gap: 15px !important;
   }
 
-  /* Las tarjetas ocupan todo el ancho de la pantalla */
   .card { width: 100% !important; }
 
-  /* Achicamos la letra y le decimos que se corte si choca con el borde */
   .card .highlight {
       font-size: 1.3rem !important; 
-      word-break: break-all !important; /* Si el número es bestial, lo pasa a la línea de abajo */
+      word-break: break-all !important; 
       white-space: normal !important;
   }
 
   .fab-container { bottom: 20px; right: 20px; }
 
-  /* --- ARREGLO PARA LA RUEDITA DE CATEGORÍAS --- */
   .card h3 {
       display: flex !important;
       justify-content: space-between !important;
       align-items: center !important;
   }
 
-  /* Agrandamos el área "tocable" del ícono para el dedo */
   .card h3 i, 
   .card h3 span, 
   .card h3 button,
   .card i {
       padding: 15px !important; 
       margin: -10px !important;
-      font-size: 1.5rem !important; /* La hace un toque más grande a la vista */
+      font-size: 1.5rem !important; 
       position: relative !important;
-      z-index: 100 !important; /* La trae al frente de la pantalla para que nada la bloquee */
+      z-index: 100 !important; 
       cursor: pointer !important;
   }
 }
 
-/* Evita que el usuario seleccione texto o le salga el menú azul al tocar botones */
 * {
     -webkit-tap-highlight-color: transparent;
     user-select: none;
 }
 
-/* Permite seleccionar texto solo en los inputs para que pueda escribir */
 input, textarea {
     user-select: text;
 }
-
