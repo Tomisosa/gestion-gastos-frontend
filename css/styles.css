@@ -6,7 +6,7 @@
   
   /* === MODO PROFESIONAL (MIXTO) === */
   --bg-derecha: #F2EFE9;         /* Fondo derecho (Cremita cálido) */
-  --bg-izquierda: #1e3a5f;       /* Barra lateral Azul Marino */
+  --bg-izquierda: #2c639e;       /* ¡NUEVO! Azul mucho más claro y vivo */
   --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
   
   --bg-saldos: #111111;          /* Negro Clásico para BNA, MP y Mes */
@@ -16,7 +16,7 @@
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #2a4d7c;          
+  --hover-izq: #3a7ac4;          /* Hover más claro para acompañar */
 }
 
 /* =========================================================
@@ -28,7 +28,7 @@ body.inicio, body.auth {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--bg-derecha); /* Volvemos al cremita antifatiga */
+    background-color: var(--bg-derecha); 
     text-align: center;
     padding: 20px;
 }
@@ -60,7 +60,7 @@ body.premium-landing {
 
 .premium-landing header h1 {
     font-size: 3rem;
-    color: var(--texto-oscuro); /* Letras oscuras para que se lean en el cremita */
+    color: var(--texto-oscuro); 
     margin: 0 0 30px 0;
     letter-spacing: -1px;
     line-height: 1.1;
@@ -149,7 +149,7 @@ body.premium-landing {
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra suave para el modo claro */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
     border: 1px solid var(--borde);
 }
 .form-container h2 {
