@@ -5,16 +5,16 @@
   --color-whatsapp: #25D366;
   
   /* === MODO PROFESIONAL (MIXTO) === */
-  --bg-derecha: #F4F6F9;         /* Fondo derecho y Landing (Cremita muy claro) */
-  --bg-izquierda: #131c31;       /* Barra lateral (El Azul Noche que te gustó) */
-  --bg-tarjetas: #ffffff;        /* Tarjetas blancas para que resalten */
+  --bg-derecha: #F4F6F9;         /* Fondo derecho (Cremita claro) */
+  --bg-izquierda: #1e3a5f;       /* ¡NUEVO AZUL! Más claro y moderno */
+  --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
 
-  --texto-oscuro: #1e293b;       /* Letra principal para leer bien en el fondo claro */
-  --texto-claro: #64748b;        /* Textos secundarios (Gris medio) */
-  --texto-blanco: #ffffff;       /* Letra para la barra lateral oscura */
+  --texto-oscuro: #1e293b;       
+  --texto-claro: #64748b;        
+  --texto-blanco: #ffffff;       
 
-  --borde: #e2e8f0;              /* Bordes suaves y elegantes */
-  --hover-izq: #1e2a47;          /* Color al pasar el mouse en la barra izquierda */
+  --borde: #e2e8f0;              
+  --hover-izq: #2a4d7c;          /* Hover del nuevo azul más claro */
 }
 
 /* =========================================================
@@ -429,16 +429,26 @@ input, textarea {
    ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
    ========================================================= */
 
+/* Hacemos que usen exactamente el mismo azul y sin bordes molestos */
 .wallet-card, .cuenta-card, .saldos-container div {
-    background-color: var(--bg-tarjetas) !important;
-    border: 1px solid var(--borde);
+    background-color: var(--bg-izquierda) !important;
+    border: none !important;
     border-radius: 12px;
+    color: var(--texto-blanco) !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 
+/* Forzamos que los textitos de adentro (ej: "BNA") se vean en blanco */
+.wallet-card h3, .cuenta-card h3, .saldos-container div h3,
+.wallet-card span, .cuenta-card span, .saldos-container div span {
+    color: var(--texto-blanco) !important;
+}
+
+/* El selector del MES con el mismo estilo azul */
 select {
-    background-color: var(--bg-tarjetas) !important;
-    color: var(--texto-oscuro) !important;
-    border: 1px solid var(--borde) !important;
+    background-color: var(--bg-izquierda) !important;
+    color: var(--texto-blanco) !important;
+    border: none !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
@@ -446,12 +456,12 @@ select {
     font-size: 0.95rem;
     outline: none;
     cursor: pointer;
-    transition: border 0.3s ease;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 select:focus {
-    border-color: var(--color-primario) !important;
-    box-shadow: 0 0 8px rgba(0, 188, 212, 0.3);
+    box-shadow: 0 0 0 2px var(--color-primario);
 }
 
 .filtro-container, .filtro-mes {
