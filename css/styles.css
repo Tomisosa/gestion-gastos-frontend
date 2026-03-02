@@ -4,12 +4,17 @@
   --color-primario: #00bcd4;      
   --color-whatsapp: #25D366;
   
-  /* Modo Claro / Cremita Premium */
-  --negro: #FDFBF7;               /* Fondo derecho (Cremita muy suave) */
-  --gris-oscuro: #FFFFFF;         /* Barra izquierda y Tarjetas (Blanco puro para contrastar) */
-  --gris: #E2E8F0;                /* Bordes sutiles grises claritos */
-  --gris-claro: #64748B;          /* Textos secundarios (Gris medio) */
-  --blanco: #1E293B;              /* Letras principales (Azul muy oscuro para que se lean bien) */
+  /* === MODO PROFESIONAL (MIXTO) === */
+  --bg-derecha: #F4F6F9;         /* Fondo derecho y Landing (Cremita muy claro) */
+  --bg-izquierda: #131c31;       /* Barra lateral (El Azul Noche que te gustó) */
+  --bg-tarjetas: #ffffff;        /* Tarjetas blancas para que resalten */
+
+  --texto-oscuro: #1e293b;       /* Letra principal para leer bien en el fondo claro */
+  --texto-claro: #64748b;        /* Textos secundarios (Gris medio) */
+  --texto-blanco: #ffffff;       /* Letra para la barra lateral oscura */
+
+  --borde: #e2e8f0;              /* Bordes suaves y elegantes */
+  --hover-izq: #1e2a47;          /* Color al pasar el mouse en la barra izquierda */
 }
 
 /* =========================================================
@@ -21,7 +26,7 @@ body.inicio, body.auth {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--negro);
+    background-color: var(--bg-derecha);
     text-align: center;
     padding: 20px;
 }
@@ -32,7 +37,7 @@ body.inicio {
 
 /* --- Landing Page Premium (Index) --- */
 body.premium-landing {
-    background: radial-gradient(circle at top, var(--gris-oscuro) 0%, var(--negro) 100%);
+    background: radial-gradient(circle at top, #ffffff 0%, var(--bg-derecha) 100%);
 }
 
 .hero-container {
@@ -47,13 +52,13 @@ body.premium-landing {
     font-size: 5.5rem;
     margin-bottom: 35px;
     display: inline-block;
-    filter: drop-shadow(0 0 20px rgba(0, 188, 212, 0.4)); 
+    filter: drop-shadow(0 4px 15px rgba(0, 188, 212, 0.3)); 
     animation: float 4s ease-in-out infinite;
 }
 
 .premium-landing header h1 {
     font-size: 3rem;
-    color: var(--blanco);
+    color: var(--texto-oscuro);
     margin: 0 0 30px 0;
     letter-spacing: -1px;
     line-height: 1.1;
@@ -66,16 +71,16 @@ body.premium-landing {
 }
 
 .premium-landing main h2 {
-    color: var(--blanco);
+    color: var(--texto-oscuro);
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-top: 0;
     margin-bottom: 20px;
     line-height: 1.4;
 }
 
 .premium-landing main p {
-    color: var(--gris-claro);
+    color: var(--texto-claro);
     font-size: 1.05rem;
     line-height: 1.6;
     margin-bottom: 55px;
@@ -108,15 +113,14 @@ body.premium-landing {
 }
 
 .btn-secundario-new {
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--blanco);
+    background: transparent;
+    color: var(--texto-oscuro);
     padding: 18px;
     border-radius: 14px;
     text-decoration: none;
     font-weight: 600;
     font-size: 1.1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    border: 2px solid var(--color-primario);
     transition: background 0.3s, transform 0.2s;
     width: 100%;
     box-sizing: border-box;
@@ -128,7 +132,8 @@ body.premium-landing {
 }
 
 .btn-secundario-new:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-primario);
+    color: #000;
 }
 
 .btn-principal:active, .btn-secundario-new:active {
@@ -137,13 +142,13 @@ body.premium-landing {
 
 /* --- Cajas de Login y Registro --- */
 .form-container {
-    background-color: var(--gris-oscuro);
+    background-color: var(--bg-tarjetas);
     padding: 40px 30px;
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 1px solid var(--gris);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid var(--borde);
 }
 .form-container h2 {
     color: var(--color-primario);
@@ -159,9 +164,9 @@ body.premium-landing {
     width: 100%;
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid var(--gris);
-    background-color: var(--negro);
-    color: var(--blanco);
+    border: 1px solid var(--borde);
+    background-color: #f8fafc;
+    color: var(--texto-oscuro);
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
     outline: none;
@@ -172,7 +177,7 @@ body.premium-landing {
 }
 .form-container p {
     margin-top: 25px;
-    color: var(--gris-claro);
+    color: var(--texto-claro);
     font-size: 0.95rem;
 }
 .form-container a {
@@ -204,15 +209,6 @@ body.premium-landing {
     transform: translateY(-3px);
     background-color: #009eb3;
 }
-.btn-secundario {
-    background-color: transparent;
-    color: var(--color-primario);
-    border: 2px solid var(--color-primario);
-}
-.btn-secundario:hover {
-    background-color: var(--color-primario);
-    color: #000000;
-}
 
 /* =========================================================
    GENERAL & LAYOUT (DASHBOARD)
@@ -225,8 +221,8 @@ body.premium-landing {
 
 html, body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--negro);
-  color: var(--blanco);
+  background-color: var(--bg-derecha);
+  color: var(--texto-oscuro);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -238,19 +234,18 @@ html, body {
 
 .sidebar { 
     width: 240px; 
-    background-color: var(--gris-oscuro); 
+    background-color: var(--bg-izquierda); 
     display: flex; 
     flex-direction: column; 
     justify-content: space-between; 
     padding: 1.5rem; 
-    border-right: 1px solid var(--gris);
 }
 .sidebar .brand { text-align: center; font-weight: 700; font-size: 1.4rem; color: var(--color-primario); }
 .nav-list { list-style: none; margin-top: 2rem; }
-.nav-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s ease; font-weight: 500; }
-.nav-item:hover { background-color: var(--gris); }
+.nav-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s ease; font-weight: 500; color: var(--texto-blanco); }
+.nav-item:hover { background-color: var(--hover-izq); }
 .nav-item.active { background-color: var(--color-primario); color: #000000; font-weight: 600; }
-.main { flex: 1; background-color: var(--negro); display: flex; flex-direction: column; }
+.main { flex: 1; background-color: var(--bg-derecha); display: flex; flex-direction: column; }
 .content { flex: 1; overflow-y: auto; padding: 2rem; position: relative; }
 
 /* ==== PESTAÑAS Y SECCIONES ==== */
@@ -258,9 +253,16 @@ html, body {
 .page.visible { display: block !important; animation: fadeIn 0.4s ease; }
 
 /* ==== PANELES Y TARJETAS ==== */
-.panel, .card { background-color: var(--gris-oscuro); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid var(--gris); }
+.panel, .card { 
+    background-color: var(--bg-tarjetas); 
+    border-radius: 12px; 
+    padding: 1.5rem; 
+    margin-bottom: 2rem; 
+    border: 1px solid var(--borde);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+}
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-.card h3 { font-size: 1rem; color: var(--gris-claro); }
+.card h3 { font-size: 1rem; color: var(--texto-claro); }
 .card .highlight { font-size: 1.6rem; font-weight: 600; margin-top: 0.5rem; color: var(--color-primario); }
 
 /* ==== TABLAS DE DATOS ==== */
@@ -275,7 +277,7 @@ html, body {
 .table th, .table td { 
     padding: 0.8rem; 
     text-align: left; 
-    border-bottom: 1px solid var(--gris); 
+    border-bottom: 1px solid var(--borde); 
     white-space: nowrap; 
 }
 .highlight.positivo { color: #2ac9bb; }
@@ -299,7 +301,7 @@ html, body {
     color: white;
     border: none;
     border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -323,7 +325,7 @@ html, body {
     pointer-events: all;
 }
 .fab-label-container { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.fab-label { background: white; color: #333; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; }
+.fab-label { background: white; color: #333; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 .fab-mini-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
 /* ==== MODALES Y FORMULARIOS ==== */
@@ -333,7 +335,7 @@ html, body {
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background-color: rgba(0,0,0,0.8); 
+    background-color: rgba(0,0,0,0.6); 
     display: none; 
     justify-content: center; 
     align-items: center; 
@@ -341,7 +343,7 @@ html, body {
     backdrop-filter: blur(5px); 
 }
 .modal-content { 
-    background-color: var(--gris-oscuro); 
+    background-color: var(--bg-tarjetas); 
     padding: 25px; 
     width: 90%; 
     max-width: 500px; 
@@ -349,16 +351,15 @@ html, body {
     position: relative; 
     max-height: 90vh; 
     overflow-y: auto; 
-    border: 1px solid var(--gris);
+    border: 1px solid var(--borde);
 }
-.close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: var(--gris-claro); cursor: pointer; }
+.close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: var(--texto-claro); cursor: pointer; }
 
 .modal-content h2 { color: var(--color-primario); margin-bottom: 20px; font-size: 1.4rem; }
 .modal-content form { display: flex; flex-direction: column; }
-.modal-content label { font-size: 0.9rem; color: var(--gris-claro); margin-top: 15px; margin-bottom: 5px; }
-.modal-content input, .modal-content select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--gris); background-color: var(--negro); color: var(--blanco); font-family: 'Inter', sans-serif; font-size: 1rem; outline: none; }
+.modal-content label { font-size: 0.9rem; color: var(--texto-oscuro); margin-top: 15px; margin-bottom: 5px; font-weight: 600; }
+.modal-content input, .modal-content select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--borde); background-color: #f8fafc; color: var(--texto-oscuro); font-family: 'Inter', sans-serif; font-size: 1rem; outline: none; }
 .modal-content input:focus, .modal-content select:focus { border-color: var(--color-primario); }
-.modal-content input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; }
 .modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: #000000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
 
 /* --- Animaciones Generales --- */
@@ -371,11 +372,11 @@ html, body {
 /* ==== ADAPTACIÓN PARA CELULARES ==== */
 @media (max-width: 768px) {
   .app { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; height: auto; padding: 15px; border-right: none; border-bottom: 1px solid var(--gris); }
-  .sidebar .brand h1 { text-align: center; font-size: 2.2rem; margin-bottom: 20px; }
+  .sidebar { width: 100%; height: auto; padding: 15px; border-bottom: 1px solid var(--borde); }
+  .sidebar .brand h1 { text-align: center; font-size: 2.2rem; margin-bottom: 20px; color: var(--texto-blanco); }
   
   .nav-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0; }
-  .nav-item { font-size: 0.8rem; padding: 12px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--gris); border-radius: 8px; }
+  .nav-item { font-size: 0.8rem; padding: 12px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--hover-izq); border-radius: 8px; }
   .nav-item.logout { grid-column: span 3; margin-top: 10px; background-color: rgba(255, 68, 68, 0.1); border-color: rgba(255, 68, 68, 0.3); color: #ff4444;}
   
   .content { padding: 15px; }
@@ -429,16 +430,15 @@ input, textarea {
    ========================================================= */
 
 .wallet-card, .cuenta-card, .saldos-container div {
-    background-color: var(--gris-oscuro) !important;
-    border-top: 1px solid var(--gris);
-    border-right: 1px solid var(--gris);
-    border-bottom: 1px solid var(--gris);
+    background-color: var(--bg-tarjetas) !important;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
 }
 
 select {
-    background-color: var(--gris-oscuro) !important;
-    color: var(--blanco) !important;
-    border: 1px solid var(--gris) !important;
+    background-color: var(--bg-tarjetas) !important;
+    color: var(--texto-oscuro) !important;
+    border: 1px solid var(--borde) !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
