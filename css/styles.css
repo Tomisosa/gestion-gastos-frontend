@@ -426,44 +426,32 @@ input, textarea {
 }
 
 /* =========================================================
-   ARREGLO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR DE MES
+   ARREGLO DEFINITIVO: TARJETAS SUPERIORES Y SELECTOR DE MES
    ========================================================= */
 
-/* Hacemos que usen exactamente el mismo azul y sin bordes molestos */
-.wallet-card, .cuenta-card, .saldos-container div {
-    background-color: var(--bg-izquierda) !important;
-    border: none !important;
-    border-radius: 12px;
-    color: var(--texto-blanco) !important;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-}
-
-/* Forzamos que los textitos de adentro (ej: "BNA") se vean en blanco */
-.wallet-card h3, .cuenta-card h3, .saldos-container div h3,
-.wallet-card span, .cuenta-card span, .saldos-container div span {
-    color: var(--texto-blanco) !important;
-}
-
-/* El selector del MES con el mismo estilo azul */
-select {
+/* 1. El selector del MES */
+select, #filtroFechaMes {
     background-color: var(--bg-izquierda) !important;
     color: var(--texto-blanco) !important;
-    border: none !important;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 0.95rem;
-    outline: none;
-    cursor: pointer;
-    transition: box-shadow 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid var(--borde) !important;
 }
 
-select:focus {
-    box-shadow: 0 0 0 2px var(--color-primario);
+/* 2. Tarjetas BNA, MP y Efectivo (Buscamos directo por el ID del saldo para no fallar) */
+.wallet-card, 
+.cuenta-card, 
+.saldos-container div,
+div:has(#saldoBNA),
+div:has(#saldoMP),
+div:has(#saldoEfectivo) {
+    background-color: var(--bg-izquierda) !important;
+    /* OJO: No le ponemos "border: none" así mantenés tus bordes de colores izquierdo */
 }
 
-.filtro-container, .filtro-mes {
-    background-color: transparent !important;
+/* 3. Forzamos que los textitos ("BNA", "Mercado Pago" y los números) sean blancos */
+div:has(#saldoBNA) *,
+div:has(#saldoMP) *,
+div:has(#saldoEfectivo) *,
+.wallet-card *, 
+.cuenta-card * {
+    color: var(--texto-blanco) !important;
 }
