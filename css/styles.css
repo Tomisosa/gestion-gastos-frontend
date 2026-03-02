@@ -28,8 +28,7 @@ body.inicio, body.auth {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    /* Le ponemos el azul oscuro de la barra al inicio */
-    background-color: var(--bg-izquierda);
+    background-color: var(--bg-derecha); /* Volvemos al cremita antifatiga */
     text-align: center;
     padding: 20px;
 }
@@ -40,8 +39,7 @@ body.inicio {
 
 /* --- Landing Page Premium (Index) --- */
 body.premium-landing {
-    /* Gradiente sutil usando los azules de la barra */
-    background: radial-gradient(circle at top, var(--hover-izq) 0%, var(--bg-izquierda) 100%);
+    background: radial-gradient(circle at top, #ffffff 0%, var(--bg-derecha) 100%);
 }
 
 .hero-container {
@@ -62,7 +60,7 @@ body.premium-landing {
 
 .premium-landing header h1 {
     font-size: 3rem;
-    color: var(--texto-blanco); /* Letra blanca para que resalte en el fondo azul */
+    color: var(--texto-oscuro); /* Letras oscuras para que se lean en el cremita */
     margin: 0 0 30px 0;
     letter-spacing: -1px;
     line-height: 1.1;
@@ -75,7 +73,7 @@ body.premium-landing {
 }
 
 .premium-landing main h2 {
-    color: var(--texto-blanco); /* Letra blanca */
+    color: var(--texto-oscuro);
     font-size: 1.25rem;
     font-weight: 600;
     margin-top: 0;
@@ -84,7 +82,7 @@ body.premium-landing {
 }
 
 .premium-landing main p {
-    color: #cbd5e1; /* Un gris azulado clarito para que se lea perfecto */
+    color: var(--texto-claro);
     font-size: 1.05rem;
     line-height: 1.6;
     margin-bottom: 55px;
@@ -118,7 +116,7 @@ body.premium-landing {
 
 .btn-secundario-new {
     background: transparent;
-    color: var(--texto-blanco); /* Blanco para que se vea bien en el fondo azul */
+    color: var(--texto-oscuro);
     padding: 18px;
     border-radius: 14px;
     text-decoration: none;
@@ -151,8 +149,8 @@ body.premium-landing {
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Somba más fuerte porque flota en azul */
-    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra suave para el modo claro */
+    border: 1px solid var(--borde);
 }
 .form-container h2 {
     color: var(--color-primario);
@@ -277,17 +275,16 @@ html, body {
 }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 
-/* ¡NUEVO! Jerarquía visual en los textos de las tarjetas blancas */
 .card h3 { 
     font-size: 0.85rem; 
     color: var(--texto-claro);
-    text-transform: uppercase; /* Queda como etiqueta */
+    text-transform: uppercase; 
     font-weight: 700;
     letter-spacing: 0.5px;
 }
 .card .highlight { 
-    font-size: 2rem; /* ¡Números gigantes! */
-    font-weight: 800; /* Letra extra gruesa */
+    font-size: 2rem; 
+    font-weight: 800; 
     margin-top: 0.5rem; 
     color: var(--color-primario); 
 }
@@ -463,9 +460,8 @@ input, textarea {
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 
-/* ¡NUEVO! Jerarquía para las tarjetas negras */
 .wallet-card h3, .cuenta-card h3, .saldos-container div h3 {
-    color: #94a3b8 !important; /* Etiqueta gris clarito para diferenciar del monto */
+    color: #94a3b8 !important; 
     font-size: 0.85rem !important;
     text-transform: uppercase !important;
     font-weight: 700 !important;
@@ -475,8 +471,8 @@ input, textarea {
 
 .wallet-card span, .cuenta-card span, .saldos-container div span,
 .wallet-card p, .cuenta-card p, .saldos-container div p {
-    color: var(--texto-blanco) !important; /* Números en blanco brillante */
-    font-size: 1.8rem !important; /* ¡Más grandes! */
+    color: var(--texto-blanco) !important; 
+    font-size: 1.8rem !important; 
     font-weight: 800 !important;
 }
 
