@@ -5,7 +5,7 @@
   --color-whatsapp: #25D366;
   
   /* === MODO PROFESIONAL (MIXTO) === */
-  --bg-derecha: #F2EFE9;         /* ¡NUEVO! Cremita cálido que no cansa la vista */
+  --bg-derecha: #F2EFE9;         /* Fondo derecho (Cremita cálido) */
   --bg-izquierda: #1e3a5f;       /* Barra lateral Azul Marino */
   --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
   
@@ -28,7 +28,8 @@ body.inicio, body.auth {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--bg-derecha);
+    /* Le ponemos el azul oscuro de la barra al inicio */
+    background-color: var(--bg-izquierda);
     text-align: center;
     padding: 20px;
 }
@@ -39,7 +40,8 @@ body.inicio {
 
 /* --- Landing Page Premium (Index) --- */
 body.premium-landing {
-    background: radial-gradient(circle at top, #ffffff 0%, var(--bg-derecha) 100%);
+    /* Gradiente sutil usando los azules de la barra */
+    background: radial-gradient(circle at top, var(--hover-izq) 0%, var(--bg-izquierda) 100%);
 }
 
 .hero-container {
@@ -60,7 +62,7 @@ body.premium-landing {
 
 .premium-landing header h1 {
     font-size: 3rem;
-    color: var(--texto-oscuro);
+    color: var(--texto-blanco); /* Letra blanca para que resalte en el fondo azul */
     margin: 0 0 30px 0;
     letter-spacing: -1px;
     line-height: 1.1;
@@ -73,7 +75,7 @@ body.premium-landing {
 }
 
 .premium-landing main h2 {
-    color: var(--texto-oscuro);
+    color: var(--texto-blanco); /* Letra blanca */
     font-size: 1.25rem;
     font-weight: 600;
     margin-top: 0;
@@ -82,7 +84,7 @@ body.premium-landing {
 }
 
 .premium-landing main p {
-    color: var(--texto-claro);
+    color: #cbd5e1; /* Un gris azulado clarito para que se lea perfecto */
     font-size: 1.05rem;
     line-height: 1.6;
     margin-bottom: 55px;
@@ -116,7 +118,7 @@ body.premium-landing {
 
 .btn-secundario-new {
     background: transparent;
-    color: var(--texto-oscuro);
+    color: var(--texto-blanco); /* Blanco para que se vea bien en el fondo azul */
     padding: 18px;
     border-radius: 14px;
     text-decoration: none;
@@ -149,8 +151,8 @@ body.premium-landing {
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    border: 1px solid var(--borde);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Somba más fuerte porque flota en azul */
+    border: none;
 }
 .form-container h2 {
     color: var(--color-primario);
@@ -243,11 +245,10 @@ html, body {
     padding: 1.5rem; 
 }
 
-/* ¡NUEVO LOGO! */
 .sidebar .brand { 
     text-align: center; 
     font-weight: 800; 
-    font-size: 1.5rem; /* ¡Acá le bajamos el tamaño para que entre perfecto! */
+    font-size: 1.5rem; 
     color: var(--texto-blanco); 
     letter-spacing: 1px;
     text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); 
@@ -275,8 +276,21 @@ html, body {
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
 }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-.card h3 { font-size: 1rem; color: var(--texto-claro); }
-.card .highlight { font-size: 1.6rem; font-weight: 600; margin-top: 0.5rem; color: var(--color-primario); }
+
+/* ¡NUEVO! Jerarquía visual en los textos de las tarjetas blancas */
+.card h3 { 
+    font-size: 0.85rem; 
+    color: var(--texto-claro);
+    text-transform: uppercase; /* Queda como etiqueta */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.card .highlight { 
+    font-size: 2rem; /* ¡Números gigantes! */
+    font-weight: 800; /* Letra extra gruesa */
+    margin-top: 0.5rem; 
+    color: var(--color-primario); 
+}
 
 /* ==== TABLAS DE DATOS ==== */
 .table-wrapper {
@@ -442,7 +456,6 @@ input, textarea {
    ARREGLO DEFINITIVO: TARJETAS SUPERIORES (SALDOS), SELECTOR DE MES Y MODAL
    ========================================================= */
 
-/* Hacemos que usen el NEGRO OSCURO y mantenemos tus bordes de colores vivos */
 .wallet-card, .cuenta-card, .saldos-container div {
     background-color: var(--bg-saldos) !important;
     border-radius: 12px;
@@ -450,14 +463,23 @@ input, textarea {
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 
-/* Forzamos que los textitos de adentro se vean en blanco (incluyendo los del modal) */
-.wallet-card h3, .cuenta-card h3, .saldos-container div h3,
-.wallet-card span, .cuenta-card span, .saldos-container div span,
-.wallet-card p, .cuenta-card p, .saldos-container div p {
-    color: var(--texto-blanco) !important;
+/* ¡NUEVO! Jerarquía para las tarjetas negras */
+.wallet-card h3, .cuenta-card h3, .saldos-container div h3 {
+    color: #94a3b8 !important; /* Etiqueta gris clarito para diferenciar del monto */
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 5px !important;
 }
 
-/* El selector del MES con el mismo negro oscuro */
+.wallet-card span, .cuenta-card span, .saldos-container div span,
+.wallet-card p, .cuenta-card p, .saldos-container div p {
+    color: var(--texto-blanco) !important; /* Números en blanco brillante */
+    font-size: 1.8rem !important; /* ¡Más grandes! */
+    font-weight: 800 !important;
+}
+
 select, #filtroFechaMes {
     background-color: var(--bg-saldos) !important;
     color: var(--texto-blanco) !important;
@@ -485,12 +507,10 @@ select:focus, #filtroFechaMes:focus {
    PARCHE SALVAVIDAS: TEXTOS Y MODALES
    ========================================================= */
 
-/* 1. Hacemos que tu email en la barra lateral sea gris clarito para que resalte */
 .sidebar p, .sidebar span, .sidebar small, .sidebar a {
     color: #e2e8f0 !important; 
 }
 
-/* 2. Volvemos a poner los desplegables de los modales en "Modo Claro" */
 .modal-content select {
     background-color: #f8fafc !important;
     color: var(--texto-oscuro) !important;
@@ -498,18 +518,15 @@ select:focus, #filtroFechaMes:focus {
     box-shadow: none !important;
 }
 
-/* 3. Forzamos que TODOS los textos de la Proyección sean blancos */
 .modal-content .saldos-container *, 
 .modal-content .cuenta-card * {
     color: var(--texto-blanco) !important;
 }
 
-/* 4. Le sacamos ese fondo negro feo al checkbox de "¿Es Gasto Fijo?" */
 .modal-content div:not(.cuenta-card):not(.saldos-container):not(.saldos-container div) {
     background-color: transparent !important;
 }
 
-/* 5. Aseguramos que los títulos de los campos se lean bien */
 .modal-content label {
     color: var(--texto-oscuro) !important;
 }
