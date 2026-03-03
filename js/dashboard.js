@@ -18,6 +18,15 @@ function authHeaders() {
   };
 }
 
+// --- FUNCIÓN SALVAVIDAS: Manejo de Errores de Sesión ---
+function handleAuthError(res) {
+    if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("token"); // Tira la llave rota a la basura
+        window.location.href = "login.html"; // Te manda al login sin bucle infinito
+        throw new Error("Sesión expirada");
+    }
+}
+
 function formatoMoneda(valor) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -88,15 +97,20 @@ function cargarSelectorFechas() {
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
-    if (!res.ok) throw new Error("Error auth");
+    handleAuthError(res); // Revisamos si la llave sirve
     user = await res.json();
     if(document.getElementById("userEmail")) document.getElementById("userEmail").textContent = user.email;
-  } catch (e) { window.location.href = "login.html"; }
+  } catch (e) { 
+    // Si falla fuerte, limpia y se va
+    localStorage.removeItem("token");
+    window.location.href = "login.html"; 
+  }
 }
 
 async function fetchCategorias() { 
     try { 
         const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
+        handleAuthError(res);
         const data = await res.json(); 
         renderCategorias(data); 
         return data; 
@@ -105,6 +119,7 @@ async function fetchCategorias() {
 
 async function fetchGastos() { 
     const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
+    handleAuthError(res);
     const data = await res.json(); 
     globalGastos = data; 
     return data; 
@@ -112,6 +127,7 @@ async function fetchGastos() {
 
 async function fetchIngresos() { 
     const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
+    handleAuthError(res);
     const data = await res.json(); 
     globalIngresos = data; 
     return data; 
@@ -253,40 +269,34 @@ document.getElementById("formIngreso").onsubmit = async (e) => {
 
 // --- LÓGICA DE NAVEGACIÓN Y EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Navegación entre secciones (Inicio, Gastos, Ingresos, etc.)
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
             if(!sectionId || sectionId === "logout") return;
 
-            // Caso especial: El botón de Proyección abre un modal, no una página
             if (sectionId === "proyeccion") {
                 document.getElementById('modalProyeccion').style.display = 'flex';
                 return;
             }
 
-            // Cambiar pestaña activa
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
-            // Mostrar página correspondiente
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             const targetPage = document.getElementById(sectionId);
             if(targetPage) targetPage.classList.add('visible');
         });
     });
 
-    // 2. Lógica del Botón Flotante (+) Estilo WhatsApp
     const fabMain = document.getElementById('fabMain');
     const fabOptions = document.getElementById('fabOptions');
     if (fabMain) {
         fabMain.addEventListener('click', (e) => {
             e.stopPropagation();
-            fabOptions.classList.toggle('show'); // Sincronizado con CSS
+            fabOptions.classList.toggle('show'); 
         });
     }
 
-    // 3. Abrir Modales desde el FAB
     document.getElementById('btnFabGasto').addEventListener('click', () => {
         document.getElementById('modalGasto').style.display = 'flex';
         fabOptions.classList.remove('show');
@@ -297,24 +307,20 @@ document.addEventListener('DOMContentLoaded', () => {
         fabOptions.classList.remove('show');
     });
 
-    // 4. Cerrar Modales (Cualquiera que tenga clase .close)
     document.querySelectorAll('.close').forEach(btn => {
         btn.addEventListener('click', () => {
             btn.closest('.modal').style.display = 'none';
         });
     });
 
-    // Cerrar menú del + si hacés clic afuera
     document.addEventListener('click', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // 5. Checkbox de Gasto Fijo: mostrar/ocultar campos
     document.getElementById('gastoEsFijo').addEventListener('change', (e) => {
         document.getElementById('camposFijos').style.display = e.target.checked ? 'block' : 'none';
     });
 
-    // 6. Configuración de Categorías (Icono Tuerca)
     document.getElementById('btnGestionarCategorias').addEventListener('click', () => {
         document.getElementById('modalCategorias').style.display = 'flex';
     });
