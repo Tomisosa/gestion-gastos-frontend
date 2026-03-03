@@ -1,22 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
+  /* Unificamos al turquesa elegante que ya usabas */
   --color-primario: #2ac9bb;      
-  --color-whatsapp: #2ac9bb; 
+  --color-whatsapp: #2ac9bb; /* Cambiamos el verde flúor por el turquesa de la marca */
   
   /* === MODO PROFESIONAL (Minimalista) === */
-  --bg-derecha: #f4f7f6;         
-  --bg-izquierda: #0f172a;       
+  --bg-derecha: #f4f7f6;         /* Gris súper clarito y limpio (adiós al crema) */
+  --bg-izquierda: #0f172a;       /* Azul noche/pizarra muy oscuro. Súper elegante y descansa la vista */
   --bg-tarjetas: #ffffff;        
   
-  --bg-saldos: #1e293b;          
+  --bg-saldos: #1e293b;          /* Gris azulado oscuro para las tarjetas de saldo */
 
   --texto-oscuro: #0f172a;       
   --texto-claro: #64748b;        
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #1e293b;          
+  --hover-izq: #1e293b;          /* Hover sutil */
 }
 
 /* =========================================================
@@ -264,7 +265,15 @@ input, textarea, select {
 .nav-item.active { background-color: var(--color-primario); color: #ffffff; font-weight: 600; }
 
 .main { flex: 1; background-color: var(--bg-derecha); display: flex; flex-direction: column; }
-.content { flex: 1; overflow-y: auto; padding: 2rem; position: relative; }
+
+/* AQUÍ ESTÁ EL TRUCO DE ORO: padding-bottom grande para dejar scrollear de más */
+.content { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 2rem; 
+    padding-bottom: 100px; /* Esto permite scroll por encima del botón */
+    position: relative; 
+}
 
 /* Cabecera y fondo oscuro del móvil (ocultos en PC) */
 .mobile-header { display: none; }
@@ -320,8 +329,8 @@ input, textarea, select {
 /* ==== BOTÓN FLOTANTE (+) ==== */
 .fab-container {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 20px; /* Pegado más abajo en PC */
+    right: 20px;  /* Pegado más a la derecha en PC */
     display: flex;
     flex-direction: column-reverse;
     align-items: flex-end;
@@ -440,39 +449,19 @@ input, textarea, select {
   .sidebar {
       position: fixed;
       top: 0;
-      left: -100%; /* Oculto fuera de la pantalla */
+      left: -100%; 
       height: 100vh;
       width: 250px;
       box-shadow: 2px 0 15px rgba(0,0,0,0.5);
   }
   
-  /* Clase que activa el menú */
-  .sidebar.active { 
-      left: 0; 
-  }
-  
-  .sidebar .brand { 
-      display: block; 
-      padding-top: 10px;
-      text-align: left;
-  } 
-  
-  .nav-list { 
-      margin-top: 1rem; 
-      display: flex;
-      flex-direction: column;
-  }
-  
-  .nav-item { 
-      font-size: 1rem; 
-      padding: 15px; 
-      border-radius: 8px; 
-      margin-bottom: 5px; 
-      text-align: left;
-  }
+  .sidebar.active { left: 0; }
+  .sidebar .brand { display: block; padding-top: 10px; text-align: left; } 
+  .nav-list { margin-top: 1rem; display: flex; flex-direction: column; }
+  .nav-item { font-size: 1rem; padding: 15px; border-radius: 8px; margin-bottom: 5px; text-align: left; }
   
   .nav-item.logout { 
-      margin-top: auto; /* Empuja el botón cerrar sesión al fondo */
+      margin-top: auto; 
       background-color: transparent; 
       border: 1px solid rgba(255, 68, 68, 0.5); 
       color: #ff4444;
@@ -482,45 +471,28 @@ input, textarea, select {
   /* Fondo oscuro cuando se abre el menú */
   .sidebar-overlay {
       position: fixed;
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 9998;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 9998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
   }
-  
-  .sidebar-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-  }
+  .sidebar-overlay.active { opacity: 1; pointer-events: all; }
 
-  .content { padding: 15px; }
-  
-  .cards, .wallet-cards { 
-      display: flex !important; 
-      flex-direction: column !important; 
-      gap: 15px !important; 
+  /* Mismo truco de scroll para el celular, pero pegamos el botón aún más a la esquina */
+  .content { 
+      padding: 15px; 
+      padding-bottom: 95px; /* Espacio extra para que no tape el botón borrar */
   }
   
+  .cards, .wallet-cards { display: flex !important; flex-direction: column !important; gap: 15px !important; }
   .card { width: 100% !important; }
+  .card .highlight { font-size: 1.3rem !important; word-break: break-all !important; white-space: normal !important; }
   
-  .card .highlight { 
-      font-size: 1.3rem !important; 
-      word-break: break-all !important; 
-      white-space: normal !important; 
+  /* Botón pegado bien a la esquina en celulares */
+  .fab-container { 
+      bottom: 15px; 
+      right: 15px; 
   }
   
-  .fab-container { bottom: 20px; right: 20px; }
-  
-  .card h3 { 
-      display: flex !important; 
-      justify-content: space-between !important; 
-      align-items: center !important; 
-  }
+  .card h3 { display: flex !important; justify-content: space-between !important; align-items: center !important; }
 }
 
 /* =========================================================
