@@ -18,6 +18,7 @@ function authHeaders() {
   };
 }
 
+// --- FUNCIÓN SALVAVIDAS: Manejo de Errores de Sesión ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("token"); 
@@ -93,6 +94,7 @@ function cargarSelectorFechas() {
   selector.onchange = () => refreshAll();
 }
 
+/* --- LLAMADAS API --- */
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
@@ -135,7 +137,7 @@ function renderCategorias(categorias) {
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
   const filtroSel = document.getElementById("filtroCategoriaSelect");
-  const lista = document.getElementById("listaCategorias");
+  if (!gSelect) return;
   [gSelect, iSelect, filtroSel].forEach(select => {
     if (!select) return;
     const valPrevio = select.value;
@@ -154,15 +156,10 @@ async function refreshAll() {
   const gFiltrados = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
   const iFiltrados = iTodos.filter(i => i.fecha.startsWith(mesSeleccionado));
   
-  const gFijos = gFiltrados.filter(g => g.esFijo);
-  const gVariables = gFiltrados.filter(g => !g.esFijo);
-  
-  const totalG = gFijos.reduce((s,x)=>s+Number(x.monto),0) + gVariables.reduce((s,x)=>s+Number(x.monto),0);
+  const totalG = gFiltrados.reduce((s,x)=>s+Number(x.monto),0);
   const totalI = iFiltrados.reduce((s,x)=>s+Number(x.monto),0);
   
   if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
-  if(document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(gFijos.reduce((s,x)=>s+Number(x.monto),0));
-  if(document.getElementById("totalVariables")) document.getElementById("totalVariables").textContent = formatoMoneda(gVariables.reduce((s,x)=>s+Number(x.monto),0));
   
   const elBal = document.getElementById("balanceTotal");
   if(elBal) {
@@ -172,24 +169,13 @@ async function refreshAll() {
   }
   
   // Ocultamos las cuotas de la tabla general para que no la ensucien
-  const gVariablesParaTabla = gVariables.filter(g => !(g.descripcion && g.descripcion.includes("(Cuota")));
+  const gVariablesParaTabla = gFiltrados.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
 
-  renderGastosFijos(gFijos); 
   renderGastosVariables(gVariablesParaTabla); 
   renderIngresos(iFiltrados); 
   calcularSaldosPorCuenta(gFiltrados, iFiltrados); 
   generarGrafico(gFiltrados);
   renderTarjetas(gFiltrados); 
-}
-
-function renderGastosFijos(lista) {
-  const tbody = document.querySelector("#tablaGastosFijos tbody");
-  if (!tbody) return; tbody.innerHTML = "";
-  lista.forEach(g => {
-    const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete">🗑️</button>`;
-    const estadoPago = g.pagado ? '<span style="color:#2ac9bb;">SÍ</span>' : '<span style="color:#ff6384;">NO</span>';
-    tbody.innerHTML += `<tr><td>${g.descripcion||"-"}</td><td>${formatoMoneda(g.monto)}</td><td>${g.fechaVencimiento||"-"}</td><td>${g.categoriaNombre||"-"}</td><td>${estadoPago}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${acciones}</td></tr>`;
-  });
 }
 
 function renderGastosVariables(lista) {
@@ -218,7 +204,6 @@ function renderTarjetas(lista) {
   
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
     
-    // Contadores separados para VISA y MERCADO PAGO
     let totalMesVisa = 0;
     let totalMesMP = 0;
   
@@ -240,7 +225,6 @@ function renderTarjetas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
 
-      // Etiqueta para saber de qué tarjeta es en la lista
       let tarjetaBadge = g.medioPago === "BNA" 
         ? `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">VISA</span>` 
         : `<span style="color: #009ee3; font-weight: bold; font-size: 0.8rem;">M. PAGO</span>`;
@@ -255,12 +239,8 @@ function renderTarjetas(lista) {
       </tr>`;
     });
   
-    // Actualizamos los números gigantes de las tarjetas
-    const elemTotalVisa = document.getElementById("totalVisaMes");
-    if (elemTotalVisa) elemTotalVisa.textContent = formatoMoneda(totalMesVisa);
-
-    const elemTotalMP = document.getElementById("totalMPMes");
-    if (elemTotalMP) elemTotalMP.textContent = formatoMoneda(totalMesMP);
+    if (document.getElementById("totalVisaMes")) document.getElementById("totalVisaMes").textContent = formatoMoneda(totalMesVisa);
+    if (document.getElementById("totalMPMes")) document.getElementById("totalMPMes").textContent = formatoMoneda(totalMesMP);
 }
 
 // --- OPERACIONES CRUD ---
@@ -280,23 +260,16 @@ window.eliminarIngreso = async function(id) {
 
 document.getElementById("formGasto").onsubmit = async (e) => { 
     e.preventDefault(); 
-    const esFijo = document.getElementById("gastoEsFijo").checked;
     const body = {
         descripcion: document.getElementById("gastoDescripcion").value,
         monto: document.getElementById("gastoMonto").value,
         medioPago: document.getElementById("gastoMedio").value,
         fecha: document.getElementById("gastoFecha").value,
-        esFijo: esFijo,
-        fechaVencimiento: esFijo ? document.getElementById("gastoVencimiento").value : null,
-        pagado: esFijo ? document.getElementById("gastoPagado").checked : false,
+        esFijo: document.getElementById("gastoEsFijo").checked,
         usuarioId: user.id,
         categoriaId: document.getElementById("gastoCategoria").value || null
     };
-    await fetch(`${API}/gastos`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(body)
-    });
+    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
     document.getElementById("modalGasto").style.display = "none"; 
     document.getElementById("formGasto").reset(); 
     await refreshAll(); 
@@ -312,81 +285,56 @@ document.getElementById("formIngreso").onsubmit = async (e) => {
         usuarioId: user.id,
         categoriaId: document.getElementById("ingresoCategoria").value || null
     };
-    await fetch(`${API}/ingresos`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify(body)
-    });
+    await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
     document.getElementById("modalIngreso").style.display = "none"; 
     document.getElementById("formIngreso").reset(); 
     await refreshAll(); 
 };
 
-// --- DIVIDIR COMPRA EN CUOTAS ---
 document.getElementById("formTarjeta").onsubmit = async (e) => {
     e.preventDefault();
-    
     const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
     btnSubmit.disabled = true;
-    btnSubmit.textContent = "Calculando cuotas...";
-
     try {
         const descripcion = document.getElementById("tarjetaDescripcion").value;
         const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
         const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
         const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
         const tarjetaTipo = document.getElementById("tarjetaTipo").value;
-
         const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
         const montoPorCuota = (montoTotal / cuotas).toFixed(2);
-
         const [year, month] = primeraCuota.split('-');
         let fechaActual = new Date(year, month - 1, 10); 
 
         for (let i = 1; i <= cuotas; i++) {
             const yyyy = fechaActual.getFullYear();
             const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-            const fechaGasto = `${yyyy}-${mm}-10`; 
-
-            const body = {
-                descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
-                monto: montoPorCuota,
-                medioPago: medioPagoBackend,
-                fecha: fechaGasto,
-                esFijo: false, 
-                fechaVencimiento: null,
-                pagado: false,
-                usuarioId: user.id,
-                categoriaId: null 
-            };
-
             await fetch(`${API}/gastos`, {
                 method: "POST",
                 headers: authHeaders(),
-                body: JSON.stringify(body)
+                body: JSON.stringify({
+                    descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                    monto: montoPorCuota,
+                    medioPago: medioPagoBackend,
+                    fecha: `${yyyy}-${mm}-10`,
+                    esFijo: false, 
+                    usuarioId: user.id
+                })
             });
-
             fechaActual.setMonth(fechaActual.getMonth() + 1);
         }
-
         document.getElementById("modalTarjeta").style.display = "none";
         document.getElementById("formTarjeta").reset();
         await refreshAll();
-        alert(`¡Éxito! Se generaron ${cuotas} cuotas de $${montoPorCuota} para ${descripcion}.`);
-
-    } catch (error) {
-        console.error(error);
-        alert("Hubo un error de conexión al guardar las cuotas.");
-    } finally {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "Calcular y Guardar Cuotas";
-    }
+        alert("Cuotas generadas con éxito.");
+    } catch (error) { alert("Error al guardar cuotas."); }
+    finally { btnSubmit.disabled = false; }
 };
 
-// --- LÓGICA DE NAVEGACIÓN Y EVENTOS ---
+// --- LÓGICA DE NAVEGACIÓN Y BOTÓN INTELIGENTE ---
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Navegación y Botón Inteligente
+    // 1. Navegación entre pestañas
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
@@ -397,10 +345,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Cambiar pestaña visualmente
+            // Cambiar pestaña activa visualmente
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
+            // Mostrar página correspondiente
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             const targetPage = document.getElementById(sectionId);
             if(targetPage) targetPage.classList.add('visible');
@@ -412,12 +361,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (btnIngreso && btnGasto && btnTarjeta) {
                 if (sectionId === 'tarjetas') {
-                    // Si estamos en Tarjetas, mostramos solo Agregar Tarjeta
+                    // Si estamos en la pestaña Tarjetas, mostramos Agregar Tarjeta y ocultamos el resto
                     btnIngreso.style.display = 'none';
                     btnGasto.style.display = 'none';
                     btnTarjeta.style.display = 'flex';
                 } else {
-                    // Si estamos en otra pestaña, mostramos Ingreso/Gasto normal
+                    // Si estamos en cualquier otra pestaña, mostramos Ingreso/Gasto normal
                     btnIngreso.style.display = 'flex';
                     btnGasto.style.display = 'flex';
                     btnTarjeta.style.display = 'none';
@@ -426,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. Comportamiento del Botón (+)
+    // 2. Control del Botón Flotante (+)
     const fabMain = document.getElementById('fabMain');
     const fabOptions = document.getElementById('fabOptions');
     if (fabMain) {
@@ -436,45 +385,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Abrir los modales desde los mini-botones
-    document.getElementById('btnFabGasto').addEventListener('click', () => {
+    // 3. Abrir Modales desde el FAB
+    document.getElementById('btnFabGasto').onclick = () => {
         document.getElementById('modalGasto').style.display = 'flex';
         fabOptions.classList.remove('show');
-    });
-
-    document.getElementById('btnFabIngreso').addEventListener('click', () => {
+    };
+    document.getElementById('btnFabIngreso').onclick = () => {
         document.getElementById('modalIngreso').style.display = 'flex';
         fabOptions.classList.remove('show');
-    });
-
-    // Nuevo listener para abrir el modal de crear tarjeta
-    document.getElementById('btnFabTarjeta').addEventListener('click', () => {
+    };
+    document.getElementById('btnFabTarjeta').onclick = () => {
         document.getElementById('modalNuevaTarjeta').style.display = 'flex';
         fabOptions.classList.remove('show');
-    });
+    };
 
-    // 4. Cerrar modales clickeando la [X]
+    // 4. Cerrar Modales
     document.querySelectorAll('.close').forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.closest('.modal').style.display = 'none';
-        });
+        btn.onclick = () => btn.closest('.modal').style.display = 'none';
     });
 
-    // 5. Cerrar el menú (+) si tocan afuera
     document.addEventListener('click', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // Otros eventos
-    document.getElementById('gastoEsFijo').addEventListener('change', (e) => {
-        document.getElementById('camposFijos').style.display = e.target.checked ? 'block' : 'none';
-    });
+    // 5. Mostrar campos adicionales si es gasto fijo
+    const chkFijo = document.getElementById('gastoEsFijo');
+    if(chkFijo) {
+        chkFijo.onchange = (e) => {
+            document.getElementById('camposFijos').style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
 
-    document.getElementById('btnGestionarCategorias').addEventListener('click', () => {
+    document.getElementById('btnGestionarCategorias').onclick = () => {
         document.getElementById('modalCategorias').style.display = 'flex';
-    });
+    };
 });
 
-// --- INICIALIZACIÓN DE DATOS ---
+// --- INICIALIZACIÓN ---
 document.getElementById("logoutBtn").onclick = () => { localStorage.clear(); window.location.href="login.html"; };
-(async function init() { await fetchUserInfo(); cargarSelectorFechas(); await refreshAll(); })();
+(async function init() { 
+    await fetchUserInfo(); 
+    cargarSelectorFechas(); 
+    await refreshAll(); 
+})();
