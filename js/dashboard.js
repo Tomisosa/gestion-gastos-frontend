@@ -18,7 +18,6 @@ function authHeaders() {
   };
 }
 
-// --- FUNCIÓN SALVAVIDAS: Manejo de Errores de Sesión ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("token"); 
@@ -77,7 +76,7 @@ function cargarSelectorFechas() {
   const selector = document.getElementById("filtroFechaMes");
   if (!selector) return;
   const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-  const anios = [2025, 2026, 2027, 2028]; // Agregamos años para las cuotas largas
+  const anios = [2025, 2026, 2027, 2028]; 
   selector.innerHTML = "";
   anios.forEach(anio => {
     meses.forEach((mes, index) => {
@@ -180,7 +179,7 @@ async function refreshAll() {
   renderIngresos(iFiltrados); 
   calcularSaldosPorCuenta(gFiltrados, iFiltrados); 
   generarGrafico(gFiltrados);
-  renderTarjetas(gFiltrados); // Llamamos a la nueva tabla de cuotas
+  renderTarjetas(gFiltrados); 
 }
 
 function renderGastosFijos(lista) {
@@ -211,30 +210,27 @@ function renderIngresos(ingresos) {
   });
 }
 
-// --- NUEVA FUNCIÓN: RENDERIZAR TABLA DE TARJETAS ---
+// --- RENDERIZAR TABLA DE TARJETAS ---
 function renderTarjetas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
   
-    // Filtramos solo los gastos que sean cuotas
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
     
-    // Contadores separados para cada tarjeta
+    // Contadores separados para VISA y MERCADO PAGO
     let totalMesVisa = 0;
-    let totalMesMaster = 0;
+    let totalMesMP = 0;
   
     consumosTarjeta.forEach(g => {
-      // Sumamos al total de la tarjeta correspondiente
       if (g.medioPago === "BNA") {
           totalMesVisa += Number(g.monto);
       } else if (g.medioPago === "MERCADO_PAGO") {
-          totalMesMaster += Number(g.monto);
+          totalMesMP += Number(g.monto);
       }
 
       const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
   
-      // Cortamos el texto para separar el nombre del producto y el número de cuota
       let desc = g.descripcion || "-";
       let badgeCuota = "";
       if (desc.includes("(Cuota")) {
@@ -244,10 +240,10 @@ function renderTarjetas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
 
-      // Etiquetita para saber con qué tarjeta se compró en la tabla
+      // Etiqueta para saber de qué tarjeta es en la lista
       let tarjetaBadge = g.medioPago === "BNA" 
         ? `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">VISA</span>` 
-        : `<span style="color: #ff8f00; font-weight: bold; font-size: 0.8rem;">MASTER</span>`;
+        : `<span style="color: #009ee3; font-weight: bold; font-size: 0.8rem;">M. PAGO</span>`;
   
       tbody.innerHTML += `<tr>
           <td style="color: var(--texto-claro);">${g.fecha} <br> ${tarjetaBadge}</td>
@@ -259,12 +255,12 @@ function renderTarjetas(lista) {
       </tr>`;
     });
   
-    // Actualizamos los números gigantes
+    // Actualizamos los números gigantes de las tarjetas
     const elemTotalVisa = document.getElementById("totalVisaMes");
     if (elemTotalVisa) elemTotalVisa.textContent = formatoMoneda(totalMesVisa);
 
-    const elemTotalMaster = document.getElementById("totalMasterMes");
-    if (elemTotalMaster) elemTotalMaster.textContent = formatoMoneda(totalMesMaster);
+    const elemTotalMP = document.getElementById("totalMPMes");
+    if (elemTotalMP) elemTotalMP.textContent = formatoMoneda(totalMesMP);
 }
 
 // --- OPERACIONES CRUD ---
@@ -326,11 +322,10 @@ document.getElementById("formIngreso").onsubmit = async (e) => {
     await refreshAll(); 
 };
 
-// --- NUEVA LÓGICA: DIVIDIR COMPRA EN CUOTAS ---
+// --- DIVIDIR COMPRA EN CUOTAS ---
 document.getElementById("formTarjeta").onsubmit = async (e) => {
     e.preventDefault();
     
-    // Cambiamos el texto del botón para que sepa que está pensando
     const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
     btnSubmit.disabled = true;
     btnSubmit.textContent = "Calculando cuotas...";
@@ -339,23 +334,19 @@ document.getElementById("formTarjeta").onsubmit = async (e) => {
         const descripcion = document.getElementById("tarjetaDescripcion").value;
         const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
         const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
-        const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; // Formato YYYY-MM
+        const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
         const tarjetaTipo = document.getElementById("tarjetaTipo").value;
 
-        // Mapeamos a las opciones que acepta tu backend
         const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
-        
-        // Hacemos la matemática
         const montoPorCuota = (montoTotal / cuotas).toFixed(2);
 
-        // Configuramos la fecha inicial
         const [year, month] = primeraCuota.split('-');
-        let fechaActual = new Date(year, month - 1, 10); // Día 10 del mes seleccionado
+        let fechaActual = new Date(year, month - 1, 10); 
 
         for (let i = 1; i <= cuotas; i++) {
             const yyyy = fechaActual.getFullYear();
             const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-            const fechaGasto = `${yyyy}-${mm}-10`; // Le asignamos el 10 del mes de vencimiento
+            const fechaGasto = `${yyyy}-${mm}-10`; 
 
             const body = {
                 descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
@@ -366,21 +357,18 @@ document.getElementById("formTarjeta").onsubmit = async (e) => {
                 fechaVencimiento: null,
                 pagado: false,
                 usuarioId: user.id,
-                categoriaId: null // Opcional, queda en "Sin categoría"
+                categoriaId: null 
             };
 
-            // Disparamos la creación al backend
             await fetch(`${API}/gastos`, {
                 method: "POST",
                 headers: authHeaders(),
                 body: JSON.stringify(body)
             });
 
-            // Le sumamos 1 mes mágico a la fecha para el próximo ciclo
             fechaActual.setMonth(fechaActual.getMonth() + 1);
         }
 
-        // Limpiamos y refrescamos todo
         document.getElementById("modalTarjeta").style.display = "none";
         document.getElementById("formTarjeta").reset();
         await refreshAll();

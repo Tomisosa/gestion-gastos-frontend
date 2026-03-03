@@ -173,16 +173,16 @@
 				                </div>
 				            </div>
 
-				            <div class="card" style="background: linear-gradient(135deg, #8b1832 0%, #111111 100%); border: none; position: relative; overflow: hidden;">
+				            <div class="card" style="background: linear-gradient(135deg, #009ee3 0%, #0f172a 100%); border: none; position: relative; overflow: hidden;">
 				                <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
 				                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
-				                    Mastercard - MP
-				                    <span style="font-size: 1.5rem; color: #ff8f00; font-weight: bold; font-style: italic; padding: 0;">mastercard</span>
+				                    Mercado Pago
+				                    <span style="font-size: 1rem; color: #ffffff; font-weight: bold; background: #00aae4; padding: 4px 8px; border-radius: 6px;">MP</span>
 				                </h3>
 				                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 15px;">A pagar este mes</p>
-				                <div id="totalMasterMes" class="highlight" style="color: #ffffff; font-size: 2.2rem;">$ 0,00</div>
+				                <div id="totalMPMes" class="highlight" style="color: #ffffff; font-size: 2.2rem;">$ 0,00</div>
 				                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-				                    <span><strong>Cierre:</strong> 25 del mes</span>
+				                    <span><strong>Cierre:</strong> Fin de mes</span>
 				                    <span><strong>Vto:</strong> 05 del mes</span>
 				                </div>
 				            </div>
@@ -278,55 +278,55 @@
             <form id="formIngreso" class="form"><input type="hidden" id="ingresoId" value=""><label>Descripción <input id="ingresoDescripcion" type="text" /></label><label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label><label>Acreditar en <select id="ingresoMedio" required><option value="BNA">🏦 BNA</option><option value="MERCADO_PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option></select></label><label>Fecha <input id="ingresoFecha" type="date" required /></label><label>Categoría <select id="ingresoCategoria"></select></label><button type="submit" class="btn">Guardar</button></form>
           </div>
         </div>
+
+        <div id="modalTarjeta" class="modal">
+            <div class="modal-content">
+              <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
+              <h3>🛒 Cargar Compra en Cuotas</h3>
+              <p style="color: var(--texto-claro); font-size: 0.85rem; margin-bottom: 15px;">La app calculará y dividirá las cuotas automáticamente mes a mes.</p>
+              
+              <form id="formTarjeta" class="form">
+                <label>Descripción (Ej: Celular Samsung)
+                    <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" />
+                </label>
+                
+                <label>Monto TOTAL de la compra
+                    <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="$ 0.00" />
+                </label>
+                
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label style="flex: 1;">Cantidad de Cuotas
+                        <select id="tarjetaCuotas" required>
+                            <option value="3">3 cuotas</option>
+                            <option value="6">6 cuotas</option>
+                            <option value="9">9 cuotas</option>
+                            <option value="12">12 cuotas</option>
+                            <option value="18">18 cuotas</option>
+                            <option value="24">24 cuotas</option>
+                        </select>
+                    </label>
+                    
+                    <label style="flex: 1;">Mes de la 1° Cuota
+                        <input id="tarjetaPrimeraCuota" type="month" required />
+                    </label>
+                </div>
+
+                <label>Seleccionar Tarjeta
+                    <select id="tarjetaTipo" required>
+                        <option value="VISA_BNA">VISA - Banco Nación</option>
+                        <option value="MP">Mercado Pago</option>
+                    </select>
+                </label>
+                
+                <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
+              </form>
+            </div>
+        </div>
         
         <div id="modalCategorias" class="modal">
             <div class="modal-content"><span class="close" id="closeCategorias">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="categoriaNombre" placeholder="Nueva categoría" /><button id="btnCrearCategoria" class="btn">Crear</button></div><ul id="listaCategorias" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div>
        </div>
-       
-       <div id="modalTarjeta" class="modal">
-	               <div class="modal-content">
-	                 <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
-	                 <h3>🛒 Cargar Compra en Cuotas</h3>
-	                 <p style="color: var(--texto-claro); font-size: 0.85rem; margin-bottom: 15px;">La app calculará y dividirá las cuotas automáticamente mes a mes.</p>
-	                 
-	                 <form id="formTarjeta" class="form">
-	                   <label>Descripción (Ej: Celular Samsung)
-	                       <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" />
-	                   </label>
-	                   
-	                   <label>Monto TOTAL de la compra
-	                       <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="$ 0.00" />
-	                   </label>
-	                   
-	                   <div style="display: flex; gap: 15px; margin-top: 10px;">
-	                       <label style="flex: 1;">Cantidad de Cuotas
-	                           <select id="tarjetaCuotas" required>
-	                               <option value="3">3 cuotas</option>
-	                               <option value="6">6 cuotas</option>
-	                               <option value="9">9 cuotas</option>
-	                               <option value="12">12 cuotas</option>
-	                               <option value="18">18 cuotas</option>
-	                               <option value="24">24 cuotas</option>
-	                           </select>
-	                       </label>
-	                       
-	                       <label style="flex: 1;">Mes de la 1° Cuota
-	                           <input id="tarjetaPrimeraCuota" type="month" required />
-	                       </label>
-	                   </div>
 
-	                   <label>Seleccionar Tarjeta
-	                       <select id="tarjetaTipo" required>
-	                           <option value="VISA_BNA">VISA - Banco Nación</option>
-	                           <option value="MASTER_MP">Mastercard - Mercado Pago</option>
-	                       </select>
-	                   </label>
-	                   
-	                   <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
-	                 </form>
-	               </div>
-	           </div>
-	   
        <div id="modalProyeccion" class="modal">
         <div class="modal-content" style="max-width: 600px;">
           <span class="close" id="closeProyeccion">&times;</span><h3>🎯 Proyección Mensual (50/30/20)</h3><p style="color: #888; margin-bottom: 20px;">Análisis basado en tus Ingresos de este mes.</p><table class="table" style="margin-bottom: 20px;"><thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead><tbody id="tablaProyeccionBody"></tbody></table><div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;"><h4 style="margin-bottom: 10px;">💳 Resumen de Cuentas</h4><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 BNA:</span> <span id="resumenBNA" style="font-weight: bold; color: #2ac9bb;">$0.00</span></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>📱 Mercado Pago:</span> <span id="resumenMP" style="font-weight: bold; color: #00aae4;">$0.00</span></div><div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>💵 Efectivo:</span> <span id="resumenEfectivo" style="font-weight: bold; color: #ffce56;">$0.00</span></div></div>
@@ -339,7 +339,6 @@
   <script src="js/dashboard.js"></script>
   <script>
     document.getElementById("logoutBtn").addEventListener("click", () => {
-        // Limpiamos todo para que el index no nos meta de nuevo automáticamente
         localStorage.clear();
         window.location.replace("index.html");
     });
