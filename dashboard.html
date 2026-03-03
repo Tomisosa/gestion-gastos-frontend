@@ -229,6 +229,13 @@
 
         <div class="fab-container">
             <div class="fab-options" id="fabOptions">
+                <div class="fab-label-container" id="btnFabTarjeta" style="display: none;">
+                    <span class="fab-label">Agregar Tarjeta</span>
+                    <button class="fab-mini-btn" style="color: #00bcd4;">
+                        <span class="material-icons">credit_card</span>
+                    </button>
+                </div>
+
                 <div class="fab-label-container" id="btnFabIngreso">
                     <span class="fab-label">Agregar Ingreso</span>
                     <button class="fab-mini-btn" style="color: #2ac9bb;">
@@ -326,6 +333,40 @@
         <div id="modalCategorias" class="modal">
             <div class="modal-content"><span class="close" id="closeCategorias">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="categoriaNombre" placeholder="Nueva categoría" /><button id="btnCrearCategoria" class="btn">Crear</button></div><ul id="listaCategorias" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div>
        </div>
+
+       <div id="modalNuevaTarjeta" class="modal">
+            <div class="modal-content">
+              <span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span>
+              <h3>💳 Agregar Nueva Tarjeta</h3>
+              <p style="color: var(--texto-claro); font-size: 0.85rem; margin-bottom: 15px;">Añadí una nueva tarjeta a tu billetera para gestionar sus cuotas.</p>
+              
+              <form id="formNuevaTarjeta" class="form">
+                <label>Nombre de la Tarjeta (Ej: Naranja, Ualá, Macro)
+                    <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" />
+                </label>
+
+                <div style="display: flex; gap: 15px; margin-top: 10px;">
+                    <label style="flex: 1;">Día de Cierre
+                        <input id="nuevaTarjetaCierre" type="number" min="1" max="31" required placeholder="Ej: 22" />
+                    </label>
+                    <label style="flex: 1;">Día de Vencimiento
+                        <input id="nuevaTarjetaVto" type="number" min="1" max="31" required placeholder="Ej: 5" />
+                    </label>
+                </div>
+
+                <label>Color de la Tarjeta
+                    <select id="nuevaTarjetaColor" required>
+                        <option value="naranja">Naranja (Tarjeta Naranja / Galicia)</option>
+                        <option value="azul">Azul (Macro / Frances)</option>
+                        <option value="verde">Verde (Credicoop / Modo)</option>
+                        <option value="negro">Negro (Ualá / Brubank)</option>
+                    </select>
+                </label>
+                
+                <button type="button" class="btn" style="margin-top: 20px;" onclick="alert('Pronto programaremos el guardado. ¡Pero mirá qué lindo diseño!')">Guardar Tarjeta</button>
+              </form>
+            </div>
+        </div>
 
        <div id="modalProyeccion" class="modal">
         <div class="modal-content" style="max-width: 600px;">

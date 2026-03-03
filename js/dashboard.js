@@ -385,6 +385,8 @@ document.getElementById("formTarjeta").onsubmit = async (e) => {
 
 // --- LÓGICA DE NAVEGACIÓN Y EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Navegación y Botón Inteligente
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
@@ -395,15 +397,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Cambiar pestaña visualmente
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             const targetPage = document.getElementById(sectionId);
             if(targetPage) targetPage.classList.add('visible');
+
+            // --- MAGIA DEL BOTÓN CONTEXTUAL ---
+            const btnIngreso = document.getElementById('btnFabIngreso');
+            const btnGasto = document.getElementById('btnFabGasto');
+            const btnTarjeta = document.getElementById('btnFabTarjeta');
+
+            if (btnIngreso && btnGasto && btnTarjeta) {
+                if (sectionId === 'tarjetas') {
+                    // Si estamos en Tarjetas, mostramos solo Agregar Tarjeta
+                    btnIngreso.style.display = 'none';
+                    btnGasto.style.display = 'none';
+                    btnTarjeta.style.display = 'flex';
+                } else {
+                    // Si estamos en otra pestaña, mostramos Ingreso/Gasto normal
+                    btnIngreso.style.display = 'flex';
+                    btnGasto.style.display = 'flex';
+                    btnTarjeta.style.display = 'none';
+                }
+            }
         });
     });
 
+    // 2. Comportamiento del Botón (+)
     const fabMain = document.getElementById('fabMain');
     const fabOptions = document.getElementById('fabOptions');
     if (fabMain) {
@@ -413,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 3. Abrir los modales desde los mini-botones
     document.getElementById('btnFabGasto').addEventListener('click', () => {
         document.getElementById('modalGasto').style.display = 'flex';
         fabOptions.classList.remove('show');
@@ -423,16 +447,25 @@ document.addEventListener('DOMContentLoaded', () => {
         fabOptions.classList.remove('show');
     });
 
+    // Nuevo listener para abrir el modal de crear tarjeta
+    document.getElementById('btnFabTarjeta').addEventListener('click', () => {
+        document.getElementById('modalNuevaTarjeta').style.display = 'flex';
+        fabOptions.classList.remove('show');
+    });
+
+    // 4. Cerrar modales clickeando la [X]
     document.querySelectorAll('.close').forEach(btn => {
         btn.addEventListener('click', () => {
             btn.closest('.modal').style.display = 'none';
         });
     });
 
+    // 5. Cerrar el menú (+) si tocan afuera
     document.addEventListener('click', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
+    // Otros eventos
     document.getElementById('gastoEsFijo').addEventListener('change', (e) => {
         document.getElementById('camposFijos').style.display = e.target.checked ? 'block' : 'none';
     });
