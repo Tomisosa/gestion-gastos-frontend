@@ -219,11 +219,19 @@ function renderTarjetas(lista) {
   
     // Filtramos solo los gastos que sean cuotas
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
+    
+    // Contadores separados para cada tarjeta
     let totalMesVisa = 0;
+    let totalMesMaster = 0;
   
     consumosTarjeta.forEach(g => {
-      // Sumamos al total de la tarjeta
-      totalMesVisa += Number(g.monto);
+      // Sumamos al total de la tarjeta correspondiente
+      if (g.medioPago === "BNA") {
+          totalMesVisa += Number(g.monto);
+      } else if (g.medioPago === "MERCADO_PAGO") {
+          totalMesMaster += Number(g.monto);
+      }
+
       const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
   
       // Cortamos el texto para separar el nombre del producto y el número de cuota
@@ -235,9 +243,14 @@ function renderTarjetas(lista) {
           const cuotaInfo = "Cuota " + partes[1].replace(")", "");
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
+
+      // Etiquetita para saber con qué tarjeta se compró en la tabla
+      let tarjetaBadge = g.medioPago === "BNA" 
+        ? `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">VISA</span>` 
+        : `<span style="color: #ff8f00; font-weight: bold; font-size: 0.8rem;">MASTER</span>`;
   
       tbody.innerHTML += `<tr>
-          <td style="color: var(--texto-claro);">${g.fecha}</td>
+          <td style="color: var(--texto-claro);">${g.fecha} <br> ${tarjetaBadge}</td>
           <td style="font-weight: 600;">${desc}</td>
           <td>${badgeCuota}</td>
           <td style="display: flex; justify-content: space-between; align-items: center; color: #ff6384; font-weight: 600;">
@@ -246,9 +259,12 @@ function renderTarjetas(lista) {
       </tr>`;
     });
   
-    // Actualizamos el número gigante
+    // Actualizamos los números gigantes
     const elemTotalVisa = document.getElementById("totalVisaMes");
     if (elemTotalVisa) elemTotalVisa.textContent = formatoMoneda(totalMesVisa);
+
+    const elemTotalMaster = document.getElementById("totalMasterMes");
+    if (elemTotalMaster) elemTotalMaster.textContent = formatoMoneda(totalMesMaster);
 }
 
 // --- OPERACIONES CRUD ---

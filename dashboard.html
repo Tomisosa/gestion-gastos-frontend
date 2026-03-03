@@ -106,24 +106,37 @@
                 <h2 style="color: var(--color-primario); margin-bottom: 10px;">Gestor de Tarjetas de Crédito</h2>
                 <p style="color: var(--texto-claro); margin-bottom: 25px;">Controlá tus consumos en cuotas y próximos vencimientos.</p>
 
-                <div class="cards">
-                    <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #111111 100%); border: none; position: relative; overflow: hidden;">
-                        <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                        
-                        <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
-                            VISA - Banco Nación
-                            <span style="font-size: 1.5rem; color: #ffffff; font-weight: bold; font-style: italic; padding: 0;">VISA</span>
-                        </h3>
-                        
-                        <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 15px;">A pagar este mes</p>
-                       <div id="totalVisaMes" class="highlight" style="color: #ffffff; font-size: 2.2rem;">$ 0,00</div>
-                        
-                        <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                            <span><strong>Cierre:</strong> 22 del mes</span>
-                            <span><strong>Vto:</strong> 02 del mes</span>
-                        </div>
-                    </div>
-                </div>
+				<div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+				            
+				            <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #111111 100%); border: none; position: relative; overflow: hidden;">
+				                <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+				                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
+				                    VISA - Banco Nación
+				                    <span style="font-size: 1.5rem; color: #ffffff; font-weight: bold; font-style: italic; padding: 0;">VISA</span>
+				                </h3>
+				                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 15px;">A pagar este mes</p>
+				                <div id="totalVisaMes" class="highlight" style="color: #ffffff; font-size: 2.2rem;">$ 0,00</div>
+				                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+				                    <span><strong>Cierre:</strong> 22 del mes</span>
+				                    <span><strong>Vto:</strong> 02 del mes</span>
+				                </div>
+				            </div>
+
+				            <div class="card" style="background: linear-gradient(135deg, #8b1832 0%, #111111 100%); border: none; position: relative; overflow: hidden;">
+				                <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+				                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
+				                    Mastercard - MP
+				                    <span style="font-size: 1.5rem; color: #ff8f00; font-weight: bold; font-style: italic; padding: 0;">mastercard</span>
+				                </h3>
+				                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 15px;">A pagar este mes</p>
+				                <div id="totalMasterMes" class="highlight" style="color: #ffffff; font-size: 2.2rem;">$ 0,00</div>
+				                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+				                    <span><strong>Cierre:</strong> 25 del mes</span>
+				                    <span><strong>Vto:</strong> 05 del mes</span>
+				                </div>
+				            </div>
+
+				        </div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
                 <div class="table-wrapper">
