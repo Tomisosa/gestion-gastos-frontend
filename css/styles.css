@@ -1,22 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --color-primario: #00bcd4;      
-  --color-whatsapp: #25D366;
+  /* Unificamos al turquesa elegante que ya usabas */
+  --color-primario: #2ac9bb;      
+  --color-whatsapp: #2ac9bb; /* Cambiamos el verde flúor por el turquesa de la marca */
   
-  /* === MODO PROFESIONAL (MIXTO) === */
-  --bg-derecha: #F2EFE9;         /* Fondo derecho (Cremita cálido) */
-  --bg-izquierda: #2c639e;       /* ¡NUEVO! Azul mucho más claro y vivo */
-  --bg-tarjetas: #ffffff;        /* Tarjetas blancas inferiores */
+  /* === MODO PROFESIONAL (Minimalista) === */
+  --bg-derecha: #f4f7f6;         /* Gris súper clarito y limpio (adiós al crema) */
+  --bg-izquierda: #0f172a;       /* Azul noche/pizarra muy oscuro. Súper elegante y descansa la vista */
+  --bg-tarjetas: #ffffff;        
   
-  --bg-saldos: #111111;          /* Negro Clásico para BNA, MP y Mes */
+  --bg-saldos: #1e293b;          /* Gris azulado oscuro para las tarjetas de saldo */
 
-  --texto-oscuro: #1e293b;       
+  --texto-oscuro: #0f172a;       
   --texto-claro: #64748b;        
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #3a7ac4;          /* Hover más claro para acompañar */
+  --hover-izq: #1e293b;          /* Hover sutil */
 }
 
 /* =========================================================
@@ -54,7 +55,7 @@ body.premium-landing {
     font-size: 5.5rem;
     margin-bottom: 35px;
     display: inline-block;
-    filter: drop-shadow(0 4px 15px rgba(0, 188, 212, 0.3)); 
+    filter: drop-shadow(0 4px 15px rgba(42, 201, 187, 0.3)); 
     animation: float 4s ease-in-out infinite;
 }
 
@@ -101,14 +102,14 @@ body.premium-landing {
 
 .btn-principal {
     background: var(--color-primario);
-    color: #000000;
+    color: #ffffff;
     padding: 18px;
     border-radius: 14px;
     text-decoration: none;
     font-weight: 700;
     font-size: 1.1rem;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 20px rgba(0, 188, 212, 0.25);
+    box-shadow: 0 8px 20px rgba(42, 201, 187, 0.25);
     width: 100%;
     box-sizing: border-box;
     display: inline-block;
@@ -130,12 +131,12 @@ body.premium-landing {
 }
 
 .btn-principal:hover {
-    background: #009eb3;
+    background: #1eb3a5;
 }
 
 .btn-secundario-new:hover {
     background: var(--color-primario);
-    color: #000;
+    color: #ffffff;
 }
 
 .btn-principal:active, .btn-secundario-new:active {
@@ -197,7 +198,7 @@ body.premium-landing {
     display: inline-block;
     padding: 14px 28px;
     background-color: var(--color-primario);
-    color: #000000;
+    color: #ffffff;
     text-decoration: none;
     border: none;
     border-radius: 10px;
@@ -209,7 +210,7 @@ body.premium-landing {
 }
 .btn:hover {
     transform: translateY(-3px);
-    background-color: #009eb3;
+    background-color: #1eb3a5;
 }
 
 /* =========================================================
@@ -256,7 +257,7 @@ html, body {
 .nav-list { list-style: none; margin-top: 2rem; }
 .nav-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s ease; font-weight: 500; color: var(--texto-blanco); }
 .nav-item:hover { background-color: var(--hover-izq); }
-.nav-item.active { background-color: var(--color-primario); color: #000000; font-weight: 600; }
+.nav-item.active { background-color: var(--color-primario); color: #ffffff; font-weight: 600; }
 .main { flex: 1; background-color: var(--bg-derecha); display: flex; flex-direction: column; }
 .content { flex: 1; overflow-y: auto; padding: 2rem; position: relative; }
 
@@ -384,7 +385,7 @@ html, body {
 .modal-content label { font-size: 0.9rem; color: var(--texto-oscuro); margin-top: 15px; margin-bottom: 5px; font-weight: 600; }
 .modal-content input, .modal-content select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--borde); background-color: #f8fafc; color: var(--texto-oscuro); font-family: 'Inter', sans-serif; font-size: 1rem; outline: none; }
 .modal-content input:focus, .modal-content select:focus { border-color: var(--color-primario); }
-.modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: #000000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
+.modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: #ffffff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
 
 /* --- Animaciones Generales --- */
 @keyframes float {
@@ -393,51 +394,63 @@ html, body {
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ==== ADAPTACIÓN PARA CELULARES ==== */
+/* ==== ADAPTACIÓN PARA CELULARES (DISEÑO LIMPIO) ==== */
 @media (max-width: 768px) {
   .app { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; height: auto; padding: 15px; border-bottom: 1px solid var(--borde); }
-  .sidebar .brand h1 { text-align: center; font-size: 2.2rem; margin-bottom: 20px; color: var(--texto-blanco); }
   
-  .nav-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0; }
-  .nav-item { font-size: 0.8rem; padding: 12px 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--hover-izq); border-radius: 8px; }
-  .nav-item.logout { grid-column: span 3; margin-top: 10px; background-color: rgba(255, 68, 68, 0.1); border-color: rgba(255, 68, 68, 0.3); color: #ff4444;}
+  /* Achicamos el header azul */
+  .sidebar { 
+      width: 100%; 
+      height: auto; 
+      padding: 15px 10px 5px 10px; 
+      border-bottom: 1px solid var(--borde); 
+  }
   
+  /* Achicamos el logo */
+  .sidebar .brand h1 { 
+      text-align: left; 
+      font-size: 1.5rem; 
+      margin-bottom: 10px; 
+      padding-left: 5px;
+      color: var(--texto-blanco); 
+  }
+  
+  /* Convertimos la grilla gigante en una fila con scroll horizontal (estilo Instagram/MercadoLibre) */
+  .nav-list { 
+      display: flex; 
+      flex-wrap: nowrap; 
+      overflow-x: auto; 
+      gap: 8px; 
+      margin: 0; 
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+  }
+  
+  /* Hacemos los botones tipo "píldora" */
+  .nav-item { 
+      font-size: 0.85rem; 
+      padding: 10px 15px; 
+      flex: 0 0 auto; /* Para que no se aplasten */
+      flex-direction: row; 
+      gap: 5px;
+      border: 1px solid var(--hover-izq); 
+      border-radius: 20px; 
+  }
+  
+  .nav-item.logout { 
+      margin-top: 0; 
+      background-color: transparent; 
+      border-color: rgba(255, 68, 68, 0.5); 
+      color: #ff4444;
+  }
+  
+  /* El resto queda igual */
   .content { padding: 15px; }
-
-  .cards, .wallet-cards { 
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 15px !important;
-  }
-
+  .cards, .wallet-cards { display: flex !important; flex-direction: column !important; gap: 15px !important; }
   .card { width: 100% !important; }
-
-  .card .highlight {
-      font-size: 1.3rem !important; 
-      word-break: break-all !important; 
-      white-space: normal !important;
-  }
-
+  .card .highlight { font-size: 1.3rem !important; word-break: break-all !important; white-space: normal !important; }
   .fab-container { bottom: 20px; right: 20px; }
-
-  .card h3 {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-  }
-
-  .card h3 i, 
-  .card h3 span, 
-  .card h3 button,
-  .card i {
-      padding: 15px !important; 
-      margin: -10px !important;
-      font-size: 1.5rem !important; 
-      position: relative !important;
-      z-index: 100 !important; 
-      cursor: pointer !important;
-  }
+  .card h3 { display: flex !important; justify-content: space-between !important; align-items: center !important; }
 }
 
 * {

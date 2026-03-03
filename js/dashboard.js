@@ -147,6 +147,7 @@ function renderCategorias(categorias) {
   });
 }
 
+// --- ACTUALIZACIÓN DE DATOS (REFRESH) ---
 async function refreshAll() {
   await fetchCategorias(); if(!user) return; 
   const gTodos = await fetchGastos(); const iTodos = await fetchIngresos();
@@ -155,9 +156,28 @@ async function refreshAll() {
   
   const gFiltrados = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
   const iFiltrados = iTodos.filter(i => i.fecha.startsWith(mesSeleccionado));
+
+  // --- LÓGICA DE AHORROS / INVERSIONES ---
+  const inversiones = iTodos.filter(i => i.descripcion && i.descripcion.includes("INV:"));
+  const ingresosNormales = iFiltrados.filter(i => !i.descripcion.includes("INV:"));
+
+  let totalUSD = 0;
+  let totalARS_Inv = 0;
+
+  inversiones.forEach(inv => {
+      const monto = Number(inv.monto);
+      if (inv.descripcion.includes("(USD)")) totalUSD += monto;
+      else totalARS_Inv += monto;
+  });
+
+  const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
+  const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
+  if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
+  if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
+  // ----------------------------------------
   
   const totalG = gFiltrados.reduce((s,x)=>s+Number(x.monto),0);
-  const totalI = iFiltrados.reduce((s,x)=>s+Number(x.monto),0);
+  const totalI = ingresosNormales.reduce((s,x)=>s+Number(x.monto),0);
   
   if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
   
@@ -168,12 +188,11 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
-  // Ocultamos las cuotas de la tabla general para que no la ensucien
   const gVariablesParaTabla = gFiltrados.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
 
   renderGastosVariables(gVariablesParaTabla); 
-  renderIngresos(iFiltrados); 
-  calcularSaldosPorCuenta(gFiltrados, iFiltrados); 
+  renderIngresos(ingresosNormales); 
+  calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
   generarGrafico(gFiltrados);
   renderTarjetas(gFiltrados); 
 }
@@ -255,6 +274,46 @@ window.eliminarIngreso = async function(id) {
     if(confirm("¿Eliminar ingreso?")) { 
         await fetch(`${API}/ingresos/${id}`, {method:"DELETE", headers:authHeaders()}); 
         await refreshAll(); 
+    }
+};
+
+// --- GUARDAR INVERSIÓN (NUEVO) ---
+document.getElementById("formInversion").onsubmit = async (e) => {
+    e.preventDefault();
+    const btnSubmit = document.querySelector("#formInversion button[type='submit']");
+    btnSubmit.disabled = true;
+
+    try {
+        const lugar = document.getElementById("invLugar").value;
+        const instrumento = document.getElementById("invInstrumento").value;
+        const moneda = document.getElementById("invMoneda").value;
+        const monto = document.getElementById("invMonto").value;
+        const fechaHoy = new Date().toISOString().split('T')[0];
+
+        // Guardamos la inversión como un ingreso, pero le ponemos un prefijo secreto
+        const body = {
+            descripcion: `INV: ${lugar} - ${instrumento} (${moneda})`,
+            monto: monto,
+            medioPago: "EFECTIVO", // No afecta saldos BNA ni MP
+            fecha: fechaHoy,
+            usuarioId: user.id,
+            categoriaId: null // Podrías crear una categoría de inversión en el futuro
+        };
+
+        await fetch(`${API}/ingresos`, { 
+            method: "POST", 
+            headers: authHeaders(), 
+            body: JSON.stringify(body) 
+        });
+
+        document.getElementById("modalInversion").style.display = "none";
+        document.getElementById("formInversion").reset();
+        await refreshAll();
+        alert("Inversión registrada con éxito.");
+    } catch (error) {
+        alert("Hubo un error al registrar la inversión.");
+    } finally {
+        btnSubmit.disabled = false;
     }
 };
 
@@ -361,12 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (btnIngreso && btnGasto && btnTarjeta) {
                 if (sectionId === 'tarjetas') {
-                    // Si estamos en la pestaña Tarjetas, mostramos Agregar Tarjeta y ocultamos el resto
                     btnIngreso.style.display = 'none';
                     btnGasto.style.display = 'none';
                     btnTarjeta.style.display = 'flex';
                 } else {
-                    // Si estamos en cualquier otra pestaña, mostramos Ingreso/Gasto normal
                     btnIngreso.style.display = 'flex';
                     btnGasto.style.display = 'flex';
                     btnTarjeta.style.display = 'none';
