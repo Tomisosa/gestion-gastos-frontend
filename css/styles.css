@@ -271,7 +271,7 @@ input, textarea, select {
     flex: 1; 
     overflow-y: auto; 
     padding: 2rem; 
-    padding-bottom: 100px; /* Esto permite scroll por encima del botón */
+    padding-bottom: 120px; /* Esto permite scroll por encima del botón */
     position: relative; 
 }
 
@@ -326,17 +326,16 @@ input, textarea, select {
 .highlight.positivo { color: #2ac9bb; }
 .highlight.negativo { color: #ff6384; }
 
-/* ==== BOTÓN FLOTANTE (+) ==== */
+/* =========================================================
+   BOTÓN FLOTANTE (CORREGIDO: Sin caja invisible)
+   ========================================================= */
 .fab-container {
     position: fixed;
-    bottom: 20px; /* Pegado más abajo en PC */
-    right: 20px;  /* Pegado más a la derecha en PC */
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    gap: 15px;
+    bottom: 25px;
+    right: 25px;
     z-index: 2000;
 }
+
 .fab-main {
     width: 65px;
     height: 65px;
@@ -350,23 +349,34 @@ input, textarea, select {
     justify-content: center;
     align-items: center;
     transition: transform 0.3s;
+    position: relative;
+    z-index: 2001; /* Queda por encima de todo */
 }
+
 .fab-main:hover { transform: scale(1.1); }
+
+/* Los botones ocultos ahora flotan sobre el botón principal en lugar de empujarlo */
 .fab-options {
+    position: absolute;
+    bottom: 100%; /* Se dibuja hacia arriba del botón principal */
+    right: 0;
+    margin-bottom: 15px; /* Separación del botón grande */
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 15px;
     opacity: 0;
     transform: translateY(20px);
-    pointer-events: none;
+    pointer-events: none; /* Destruye la caja invisible cuando está oculto */
     transition: all 0.3s ease;
 }
+
 .fab-options.show { 
     opacity: 1;
     transform: translateY(0);
-    pointer-events: all;
+    pointer-events: all; /* Activa los clics solo cuando se ve */
 }
+
 .fab-label-container { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .fab-label { background: white; color: #333; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 .fab-mini-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
@@ -476,27 +486,21 @@ input, textarea, select {
   }
   .sidebar-overlay.active { opacity: 1; pointer-events: all; }
 
-  /* Mismo truco de scroll para el celular, pero pegamos el botón aún más a la esquina */
-  .content { 
-      padding: 15px; 
-      padding-bottom: 95px; /* Espacio extra para que no tape el botón borrar */
-  }
+  /* Mismo margen extra para que no tape la basura de la tabla en celular */
+  .content { padding: 15px; padding-bottom: 120px; }
   
   .cards, .wallet-cards { display: flex !important; flex-direction: column !important; gap: 15px !important; }
   .card { width: 100% !important; }
   .card .highlight { font-size: 1.3rem !important; word-break: break-all !important; white-space: normal !important; }
   
   /* Botón pegado bien a la esquina en celulares */
-  .fab-container { 
-      bottom: 15px; 
-      right: 15px; 
-  }
+  .fab-container { bottom: 15px; right: 15px; }
   
   .card h3 { display: flex !important; justify-content: space-between !important; align-items: center !important; }
 }
 
 /* =========================================================
-   ARREGLO DEFINITIVO: TARJETAS SUPERIORES (SALDOS) Y SELECTOR
+   ARREGLO DEFINITIVO: TARJETAS SUPERIORES Y SELECTOR
    ========================================================= */
 
 .wallet-card, .cuenta-card, .saldos-container div {
