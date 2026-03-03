@@ -7,7 +7,7 @@
   
   /* === MODO PROFESIONAL (Minimalista) === */
   --bg-derecha: #f4f7f6;         /* Gris súper clarito y limpio (adiós al crema) */
-  --bg-izquierda: #0f172a;       /* Azul noche/pizarra muy oscuro. Súper elegante y descansa la vista */
+  --bg-izquierda: #243447;       /* Azul noche/pizarra muy oscuro. Súper elegante y descansa la vista */
   --bg-tarjetas: #ffffff;        
   
   --bg-saldos: #1e293b;          /* Gris azulado oscuro para las tarjetas de saldo */
@@ -17,7 +17,7 @@
   --texto-blanco: #ffffff;       
 
   --borde: #e2e8f0;              
-  --hover-izq: #1e293b;          /* Hover sutil */
+  --hover-izq: #334155;          /* Hover sutil */
 }
 
 /* =========================================================
@@ -327,54 +327,56 @@ input, textarea, select {
 .highlight.negativo { color: #ff6384; }
 
 /* =========================================================
-   BOTÓN FLOTANTE (CORREGIDO: Sin caja invisible)
+   BOTÓN FLOTANTE DEFINITIVO (PRO)
    ========================================================= */
+
 .fab-container {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
+    bottom: 20px;
+    right: 20px;
     z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .fab-main {
-    width: 65px;
-    height: 65px;
+    width: 56px;
+    height: 56px;
     background-color: var(--color-whatsapp);
     color: white;
     border: none;
     border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.3s;
-    position: relative;
-    z-index: 2001; /* Queda por encima de todo */
+    transition: all 0.25s ease;
 }
 
-.fab-main:hover { transform: scale(1.1); }
+.fab-main:hover {
+    transform: scale(1.08);
+}
 
-/* Los botones ocultos ahora flotan sobre el botón principal en lugar de empujarlo */
+/* Opciones que aparecen arriba */
 .fab-options {
     position: absolute;
-    bottom: 100%; /* Se dibuja hacia arriba del botón principal */
+    bottom: 70px;
     right: 0;
-    margin-bottom: 15px; /* Separación del botón grande */
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 15px;
+    gap: 12px;
     opacity: 0;
-    transform: translateY(20px);
-    pointer-events: none; /* Destruye la caja invisible cuando está oculto */
-    transition: all 0.3s ease;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: all 0.25s ease;
 }
 
-.fab-options.show { 
+.fab-options.show {
     opacity: 1;
     transform: translateY(0);
-    pointer-events: all; /* Activa los clics solo cuando se ve */
+    pointer-events: auto;
 }
 
 .fab-label-container { display: flex; align-items: center; gap: 10px; cursor: pointer; }
