@@ -7,13 +7,14 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
   <link rel="icon" href="icono.png" type="image/png">
-  <link rel="apple-touch-icon" href="icono.png">
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar">
+    
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
       <div class="brand"><h1>💰 Gastos</h1></div>
       <nav>
         <ul class="nav-list">
@@ -31,6 +32,14 @@
     </aside>
 
     <main class="main">
+      
+      <div class="mobile-header">
+        <button id="menuToggle" class="menu-btn">
+            <span class="material-icons">menu</span>
+        </button>
+        <h2>💰 Gastos</h2>
+      </div>
+
       <section class="content">
         
         <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; background: var(--bg-saldos); padding: 10px; border-radius: 8px; width: fit-content;">
@@ -61,9 +70,7 @@
                 <p id="countCategorias" class="highlight" style="margin: 0;">0</p>
               </div>
             </div>
-            
             <div class="card"><h3>Balance Total</h3><p id="balanceTotal" class="highlight">$0.00</p></div>
-            
             <div class="card"><h3>Total gastado</h3><p id="totalGastado" class="highlight">$0.00</p></div>
           </div>
         </div>
@@ -102,7 +109,7 @@
         <div id="ahorros" class="page">
             <div class="panel">
                 <h2 style="color: var(--color-primario); margin-bottom: 10px;">Portafolio de Inversiones</h2>
-                <p style="color: var(--texto-claro); margin-bottom: 25px;">Controlá tus compras de Dólar MEP, Plazos Fijos y Fondos Comunes (Balanz, Ualá, etc.).</p>
+                <p style="color: var(--texto-claro); margin-bottom: 25px;">Controlá tus compras de Dólar MEP, Plazos Fijos y Fondos Comunes.</p>
 
                 <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
                     <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
@@ -119,13 +126,7 @@
                 <div class="table-wrapper">
                     <table class="table" id="tablaAhorros">
                         <thead>
-                            <tr>
-                                <th>Lugar (Broker/Banco)</th>
-                                <th>Instrumento</th>
-                                <th>Capital Invertido</th>
-                                <th>Valor Actual</th>
-                                <th>Estado</th>
-                            </tr>
+                            <tr><th>Lugar (Broker/Banco)</th><th>Instrumento</th><th>Capital Invertido</th><th>Valor Actual</th><th>Estado</th></tr>
                         </thead>
                         <tbody>
                             <tr>
@@ -158,7 +159,6 @@
                 <p style="color: var(--texto-claro); margin-bottom: 25px;">Controlá tus consumos en cuotas y próximos vencimientos.</p>
 
 				<div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-				            
 				            <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #111111 100%); border: none; position: relative; overflow: hidden;">
 				                <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
 				                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
@@ -186,22 +186,13 @@
 				                    <span><strong>Vto:</strong> 05 del mes</span>
 				                </div>
 				            </div>
-
 				        </div>
 
                 <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
                 <div class="table-wrapper">
                     <table class="table" id="tablaTarjetas">
-                        <thead>
-                            <tr>
-                                <th>Fecha Compra</th>
-                                <th>Descripción</th>
-                                <th>Cuota Actual</th>
-                                <th>Monto Cuota</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
+                        <thead><tr><th>Fecha Compra</th><th>Descripción</th><th>Cuota Actual</th><th>Monto Cuota</th></tr></thead>
+                        <tbody></tbody>
                     </table>
                 </div>
                 
@@ -214,202 +205,49 @@
 		<div id="perfil" class="page">
 		  <div class="panel">
 		    <h3>⚙️ Configuración de Seguridad</h3>
-		    <p style="color: #888; margin-bottom: 20px;">Desde aquí podés modificar tu contraseña de acceso.</p>
 		    <form id="formCambiarPass" class="form" style="max-width: 400px;">
-		      <label>Nueva Contraseña</label>
-		      <input type="password" id="newPassword" required placeholder="Escribí tu nueva clave" style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
-		      
-		      <label>Confirmar Contraseña</label>
-		      <input type="password" id="confirmPassword" required placeholder="Repetí tu nueva clave" style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
-		      
+		      <label>Nueva Contraseña</label><input type="password" id="newPassword" required placeholder="Escribí tu nueva clave" style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+		      <label>Confirmar Contraseña</label><input type="password" id="confirmPassword" required placeholder="Repetí tu nueva clave" style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
 		      <button type="submit" class="btn">Actualizar Contraseña</button>
 		    </form>
 		  </div>
 		</div>
 
-        <div class="fab-container">
+        <div class="fab-container" id="mainFabContainer">
             <div class="fab-options" id="fabOptions">
                 <div class="fab-label-container" id="btnFabTarjeta" style="display: none;">
                     <span class="fab-label">Agregar Tarjeta</span>
-                    <button class="fab-mini-btn" style="color: #00bcd4;">
-                        <span class="material-icons">credit_card</span>
-                    </button>
+                    <button class="fab-mini-btn" style="color: #00bcd4;"><span class="material-icons">credit_card</span></button>
                 </div>
-
                 <div class="fab-label-container" id="btnFabIngreso">
                     <span class="fab-label">Agregar Ingreso</span>
-                    <button class="fab-mini-btn" style="color: #2ac9bb;">
-                        <span class="material-icons">attach_money</span>
-                    </button>
+                    <button class="fab-mini-btn" style="color: #2ac9bb;"><span class="material-icons">attach_money</span></button>
                 </div>
-                
                 <div class="fab-label-container" id="btnFabGasto">
                     <span class="fab-label">Agregar Gasto</span>
-                    <button class="fab-mini-btn" style="color: #ff6384;">
-                        <span class="material-icons">shopping_cart</span>
-                    </button>
+                    <button class="fab-mini-btn" style="color: #ff6384;"><span class="material-icons">shopping_cart</span></button>
                 </div>
             </div>
-
-            <button class="fab-main" id="fabMain">
-                <span class="material-icons" style="font-size: 32px;">add</span>
-            </button>
+            <button class="fab-main" id="fabMain"><span class="material-icons" style="font-size: 32px;">add</span></button>
         </div>
 
-        <div id="modalGasto" class="modal">
-            <div class="modal-content">
-              <span class="close" id="closeModal">&times;</span>
-              <h3>Agregar Gasto</h3>
-              <form id="formGasto" class="form">
-                <input type="hidden" id="gastoId" value="">
-                <div style="margin: 10px 0; background: #333; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px;">
-                  <input type="checkbox" id="gastoEsFijo" style="width: 20px; height: 20px; accent-color: #ffce56;">
-                  <label for="gastoEsFijo" style="margin:0; cursor:pointer;">🔒 ¿Es Gasto FIJO?</label>
-                </div>
-                <label>Concepto <input id="gastoDescripcion" type="text" /></label>
-                <label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label>
-                <div id="camposFijos" style="display: none; background: #222; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #ffce56;">
-                    <label>📅 Fecha Vencimiento <input id="gastoVencimiento" type="date" /></label>
-                    <label style="display:flex; gap:10px; margin-top:5px;"><input type="checkbox" id="gastoPagado"> ¿Ya está Pagado?</label>
-                </div>
-                <label>Fecha de Pago <input id="gastoFecha" type="date" required /></label>
-                <label>Categoría <select id="gastoCategoria"></select></label>
-                <label>Medio de Pago <select id="gastoMedio" required><option value="BNA">🏦 BNA</option><option value="MERCADO_PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option><option value="CF"> CF</option></select></label>
-                <button type="submit" class="btn">Guardar</button>
-              </form>
-            </div>
-        </div>
+        <div id="modalGasto" class="modal"><div class="modal-content"><span class="close" id="closeModal">&times;</span><h3>Agregar Gasto</h3><form id="formGasto" class="form"><input type="hidden" id="gastoId" value=""><div style="margin: 10px 0; background: #333; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px;"><input type="checkbox" id="gastoEsFijo" style="width: 20px; height: 20px; accent-color: #ffce56;"><label for="gastoEsFijo" style="margin:0; cursor:pointer;">🔒 ¿Es Gasto FIJO?</label></div><label>Concepto <input id="gastoDescripcion" type="text" /></label><label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label><div id="camposFijos" style="display: none; background: #222; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #ffce56;"><label>📅 Fecha Vencimiento <input id="gastoVencimiento" type="date" /></label><label style="display:flex; gap:10px; margin-top:5px;"><input type="checkbox" id="gastoPagado"> ¿Ya está Pagado?</label></div><label>Fecha de Pago <input id="gastoFecha" type="date" required /></label><label>Categoría <select id="gastoCategoria"></select></label><label>Medio de Pago <select id="gastoMedio" required><option value="BNA">🏦 BNA</option><option value="MERCADO_PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option><option value="CF"> CF</option></select></label><button type="submit" class="btn">Guardar</button></form></div></div>
         
-        <div id="modalIngreso" class="modal">
-          <div class="modal-content"><span class="close" id="closeIngreso">&times;</span><h3>Agregar Ingreso</h3>
-            <form id="formIngreso" class="form"><input type="hidden" id="ingresoId" value=""><label>Descripción <input id="ingresoDescripcion" type="text" /></label><label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label><label>Acreditar en <select id="ingresoMedio" required><option value="BNA">🏦 BNA</option><option value="MERCADO_PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option></select></label><label>Fecha <input id="ingresoFecha" type="date" required /></label><label>Categoría <select id="ingresoCategoria"></select></label><button type="submit" class="btn">Guardar</button></form>
-          </div>
-        </div>
+        <div id="modalIngreso" class="modal"><div class="modal-content"><span class="close" id="closeIngreso">&times;</span><h3>Agregar Ingreso</h3><form id="formIngreso" class="form"><input type="hidden" id="ingresoId" value=""><label>Descripción <input id="ingresoDescripcion" type="text" /></label><label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label><label>Acreditar en <select id="ingresoMedio" required><option value="BNA">🏦 BNA</option><option value="MERCADO_PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option></select></label><label>Fecha <input id="ingresoFecha" type="date" required /></label><label>Categoría <select id="ingresoCategoria"></select></label><button type="submit" class="btn">Guardar</button></form></div></div>
 
-        <div id="modalTarjeta" class="modal">
-            <div class="modal-content">
-              <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
-              <h3>🛒 Cargar Compra en Cuotas</h3>
-              <p style="color: var(--texto-claro); font-size: 0.85rem; margin-bottom: 15px;">La app calculará y dividirá las cuotas automáticamente mes a mes.</p>
-              
-              <form id="formTarjeta" class="form">
-                <label>Descripción (Ej: Celular Samsung)
-                    <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" />
-                </label>
-                
-                <label>Monto TOTAL de la compra
-                    <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="$ 0.00" />
-                </label>
-                
-                <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <label style="flex: 1;">Cantidad de Cuotas
-                        <select id="tarjetaCuotas" required>
-                            <option value="3">3 cuotas</option>
-                            <option value="6">6 cuotas</option>
-                            <option value="9">9 cuotas</option>
-                            <option value="12">12 cuotas</option>
-                            <option value="18">18 cuotas</option>
-                            <option value="24">24 cuotas</option>
-                        </select>
-                    </label>
-                    
-                    <label style="flex: 1;">Mes de la 1° Cuota
-                        <input id="tarjetaPrimeraCuota" type="month" required />
-                    </label>
-                </div>
-
-                <label>Seleccionar Tarjeta
-                    <select id="tarjetaTipo" required>
-                        <option value="VISA_BNA">VISA - Banco Nación</option>
-                        <option value="MP">Mercado Pago</option>
-                    </select>
-                </label>
-                
-                <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
-              </form>
-            </div>
-        </div>
+        <div id="modalTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span><h3>🛒 Cargar Compra en Cuotas</h3><form id="formTarjeta" class="form"><label>Descripción (Ej: Celular Samsung) <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" /></label><label>Monto TOTAL de la compra <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="$ 0.00" /></label><div style="display: flex; gap: 15px; margin-top: 10px;"><label style="flex: 1;">Cantidad de Cuotas <select id="tarjetaCuotas" required><option value="3">3 cuotas</option><option value="6">6 cuotas</option><option value="9">9 cuotas</option><option value="12">12 cuotas</option><option value="18">18 cuotas</option><option value="24">24 cuotas</option></select></label><label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label></div><label>Seleccionar Tarjeta <select id="tarjetaTipo" required><option value="VISA_BNA">VISA - Banco Nación</option><option value="MP">Mercado Pago</option></select></label><button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button></form></div></div>
         
-        <div id="modalCategorias" class="modal">
-            <div class="modal-content"><span class="close" id="closeCategorias">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="categoriaNombre" placeholder="Nueva categoría" /><button id="btnCrearCategoria" class="btn">Crear</button></div><ul id="listaCategorias" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div>
-       </div>
+        <div id="modalCategorias" class="modal"><div class="modal-content"><span class="close" id="closeCategorias">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="categoriaNombre" placeholder="Nueva categoría" /><button id="btnCrearCategoria" class="btn">Crear</button></div><ul id="listaCategorias" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div></div>
 
-       <div id="modalNuevaTarjeta" class="modal">
-            <div class="modal-content">
-              <span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span>
-              <h3>💳 Agregar Nueva Tarjeta</h3>
-              <p style="color: var(--texto-claro); font-size: 0.85rem; margin-bottom: 15px;">Añadí una nueva tarjeta a tu billetera para gestionar sus cuotas.</p>
-              
-              <form id="formNuevaTarjeta" class="form">
-                <label>Nombre de la Tarjeta (Ej: Naranja, Ualá, Macro)
-                    <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" />
-                </label>
+       <div id="modalNuevaTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span><h3>💳 Agregar Nueva Tarjeta</h3><form id="formNuevaTarjeta" class="form"><label>Nombre de la Tarjeta <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label><div style="display: flex; gap: 15px; margin-top: 10px;"><label style="flex: 1;">Día de Cierre <input id="nuevaTarjetaCierre" type="number" min="1" max="31" required placeholder="Ej: 22" /></label><label style="flex: 1;">Día de Vencimiento <input id="nuevaTarjetaVto" type="number" min="1" max="31" required placeholder="Ej: 5" /></label></div><label>Color de la Tarjeta <select id="nuevaTarjetaColor" required><option value="naranja">Naranja</option><option value="azul">Azul</option><option value="verde">Verde</option><option value="negro">Negro</option></select></label><button type="button" class="btn" style="margin-top: 20px;" onclick="alert('Pronto programaremos el guardado.')">Guardar Tarjeta</button></form></div></div>
 
-                <div style="display: flex; gap: 15px; margin-top: 10px;">
-                    <label style="flex: 1;">Día de Cierre
-                        <input id="nuevaTarjetaCierre" type="number" min="1" max="31" required placeholder="Ej: 22" />
-                    </label>
-                    <label style="flex: 1;">Día de Vencimiento
-                        <input id="nuevaTarjetaVto" type="number" min="1" max="31" required placeholder="Ej: 5" />
-                    </label>
-                </div>
+        <div id="modalInversion" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span><h3>📈 Nueva Inversión / Ahorro</h3><form id="formInversion" class="form"><label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label><label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label><div style="display: flex; gap: 15px;"><label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label><label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label></div><button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button></form></div></div>
 
-                <label>Color de la Tarjeta
-                    <select id="nuevaTarjetaColor" required>
-                        <option value="naranja">Naranja (Tarjeta Naranja / Galicia)</option>
-                        <option value="azul">Azul (Macro / Frances)</option>
-                        <option value="verde">Verde (Credicoop / Modo)</option>
-                        <option value="negro">Negro (Ualá / Brubank)</option>
-                    </select>
-                </label>
-                
-                <button type="button" class="btn" style="margin-top: 20px;" onclick="alert('Pronto programaremos el guardado. ¡Pero mirá qué lindo diseño!')">Guardar Tarjeta</button>
-              </form>
-            </div>
-        </div>
-
-        <div id="modalInversion" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span>
-                <h3>📈 Nueva Inversión / Ahorro</h3>
-                <form id="formInversion" class="form">
-                    <label>Lugar (Ej: BALANZ, UALÁ, BNA)
-                        <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" />
-                    </label>
-                    <label>Instrumento (Ej: Dólar MEP, Money Market)
-                        <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" />
-                    </label>
-                    <div style="display: flex; gap: 15px;">
-                        <label style="flex: 1;">Moneda
-                            <select id="invMoneda">
-                                <option value="ARS">Pesos ($)</option>
-                                <option value="USD">Dólares (USD)</option>
-                            </select>
-                        </label>
-                        <label style="flex: 1;">Monto Invertido
-                            <input id="invMonto" type="number" step="0.01" required placeholder="0.00" />
-                        </label>
-                    </div>
-                    <button type="submit" class="btn" style="margin-top: 20px;" onclick="alert('Pronto programaremos el guardado de la inversión')">Guardar en Portafolio</button>
-                </form>
-            </div>
-        </div>
-
-       <div id="modalProyeccion" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-          <span class="close" id="closeProyeccion">&times;</span><h3>🎯 Proyección Mensual (50/30/20)</h3><p style="color: #888; margin-bottom: 20px;">Análisis basado en tus Ingresos de este mes.</p><table class="table" style="margin-bottom: 20px;"><thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead><tbody id="tablaProyeccionBody"></tbody></table><div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;"><h4 style="margin-bottom: 10px;">💳 Resumen de Cuentas</h4><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 BNA:</span> <span id="resumenBNA" style="font-weight: bold; color: #2ac9bb;">$0.00</span></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>📱 Mercado Pago:</span> <span id="resumenMP" style="font-weight: bold; color: #00aae4;">$0.00</span></div><div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>💵 Efectivo:</span> <span id="resumenEfectivo" style="font-weight: bold; color: #ffce56;">$0.00</span></div></div>
-        </div>
-      </div>
+       <div id="modalProyeccion" class="modal"><div class="modal-content" style="max-width: 600px;"><span class="close" id="closeProyeccion">&times;</span><h3>🎯 Proyección Mensual</h3><table class="table" style="margin-bottom: 20px;"><thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead><tbody id="tablaProyeccionBody"></tbody></table><div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;"><h4 style="margin-bottom: 10px;">💳 Resumen</h4><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 BNA:</span> <span id="resumenBNA" style="font-weight: bold; color: #2ac9bb;">$0.00</span></div><div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>📱 Mercado Pago:</span> <span id="resumenMP" style="font-weight: bold; color: #00aae4;">$0.00</span></div><div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>💵 Efectivo:</span> <span id="resumenEfectivo" style="font-weight: bold; color: #ffce56;">$0.00</span></div></div></div></div>
       <div id="message" class="toast"></div>
       </section>
     </main>
   </div>
   <script src="js/dashboard.js"></script>
-  <script>
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.replace("index.html");
-    });
-  </script>
 </body>
 </html>

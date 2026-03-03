@@ -390,10 +390,26 @@ document.getElementById("formTarjeta").onsubmit = async (e) => {
     finally { btnSubmit.disabled = false; }
 };
 
-// --- LÓGICA DE NAVEGACIÓN Y BOTÓN INTELIGENTE ---
+// --- LÓGICA DE NAVEGACIÓN, MENÚ HAMBURGUESA Y BOTÓN INTELIGENTE ---
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Navegación entre pestañas
+    // Configuración Menú Hamburguesa
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if(menuToggle && sidebar && overlay) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+    
+    // Navegación entre pestañas
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
@@ -412,27 +428,45 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             const targetPage = document.getElementById(sectionId);
             if(targetPage) targetPage.classList.add('visible');
+            
+            // Cierra el menú hamburguesa automáticamente al tocar un botón
+            if (window.innerWidth <= 768 && sidebar && overlay) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
 
-            // --- MAGIA DEL BOTÓN CONTEXTUAL ---
+			// --- MAGIA DEL BOTÓN CONTEXTUAL ---
             const btnIngreso = document.getElementById('btnFabIngreso');
             const btnGasto = document.getElementById('btnFabGasto');
             const btnTarjeta = document.getElementById('btnFabTarjeta');
+            const fabContainer = document.querySelector('.fab-container'); 
 
-            if (btnIngreso && btnGasto && btnTarjeta) {
-                if (sectionId === 'tarjetas') {
-                    btnIngreso.style.display = 'none';
-                    btnGasto.style.display = 'none';
-                    btnTarjeta.style.display = 'flex';
-                } else {
-                    btnIngreso.style.display = 'flex';
-                    btnGasto.style.display = 'flex';
-                    btnTarjeta.style.display = 'none';
+            if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
+                
+                // Si estamos en Ahorros, ocultamos TODO el botón flotante
+                if (sectionId === 'ahorros') {
+                    fabContainer.style.display = 'none';
+                } 
+                else {
+                    fabContainer.style.display = 'flex';
+                    
+                    if (sectionId === 'tarjetas') {
+                        // En Tarjetas mostramos el de Agregar Tarjeta
+                        btnIngreso.style.display = 'none';
+                        btnGasto.style.display = 'none';
+                        btnTarjeta.style.display = 'flex';
+                    } else {
+                        // En Inicio/Gastos/Ingresos mostramos los clásicos
+                        btnIngreso.style.display = 'flex';
+                        btnGasto.style.display = 'flex';
+                        btnTarjeta.style.display = 'none';
+                    }
                 }
             }
         });
     });
 
-    // 2. Control del Botón Flotante (+)
+    // Control del Botón Flotante (+)
     const fabMain = document.getElementById('fabMain');
     const fabOptions = document.getElementById('fabOptions');
     if (fabMain) {
@@ -442,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Abrir Modales desde el FAB
+    // Abrir Modales desde el FAB
     document.getElementById('btnFabGasto').onclick = () => {
         document.getElementById('modalGasto').style.display = 'flex';
         fabOptions.classList.remove('show');
@@ -456,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fabOptions.classList.remove('show');
     };
 
-    // 4. Cerrar Modales
+    // Cerrar Modales
     document.querySelectorAll('.close').forEach(btn => {
         btn.onclick = () => btn.closest('.modal').style.display = 'none';
     });
@@ -465,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // 5. Mostrar campos adicionales si es gasto fijo
+    // Mostrar campos adicionales si es gasto fijo
     const chkFijo = document.getElementById('gastoEsFijo');
     if(chkFijo) {
         chkFijo.onchange = (e) => {
