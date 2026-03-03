@@ -8,10 +8,16 @@
   "description": "App personal de finanzas",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/10433/10433048.png",
+      "src": "icono.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icono.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
