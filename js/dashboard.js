@@ -21,8 +21,8 @@ function authHeaders() {
 // --- FUNCIÓN SALVAVIDAS: Manejo de Errores de Sesión ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem("token"); // Tira la llave rota a la basura
-        window.location.href = "login.html"; // Te manda al login sin bucle infinito
+        localStorage.removeItem("token"); 
+        window.location.href = "login.html"; 
         throw new Error("Sesión expirada");
     }
 }
@@ -77,7 +77,7 @@ function cargarSelectorFechas() {
   const selector = document.getElementById("filtroFechaMes");
   if (!selector) return;
   const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-  const anios = [2025, 2026];
+  const anios = [2025, 2026, 2027, 2028]; // Agregamos años para las cuotas largas
   selector.innerHTML = "";
   anios.forEach(anio => {
     meses.forEach((mes, index) => {
@@ -97,11 +97,10 @@ function cargarSelectorFechas() {
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
-    handleAuthError(res); // Revisamos si la llave sirve
+    handleAuthError(res);
     user = await res.json();
     if(document.getElementById("userEmail")) document.getElementById("userEmail").textContent = user.email;
   } catch (e) { 
-    // Si falla fuerte, limpia y se va
     localStorage.removeItem("token");
     window.location.href = "login.html"; 
   }
@@ -173,11 +172,15 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
+  // Ocultamos las cuotas de la tabla general para que no la ensucien
+  const gVariablesParaTabla = gVariables.filter(g => !(g.descripcion && g.descripcion.includes("(Cuota")));
+
   renderGastosFijos(gFijos); 
-  renderGastosVariables(gVariables); 
+  renderGastosVariables(gVariablesParaTabla); 
   renderIngresos(iFiltrados); 
   calcularSaldosPorCuenta(gFiltrados, iFiltrados); 
   generarGrafico(gFiltrados);
+  renderTarjetas(gFiltrados); // Llamamos a la nueva tabla de cuotas
 }
 
 function renderGastosFijos(lista) {
@@ -208,9 +211,49 @@ function renderIngresos(ingresos) {
   });
 }
 
+// --- NUEVA FUNCIÓN: RENDERIZAR TABLA DE TARJETAS ---
+function renderTarjetas(lista) {
+    const tbody = document.querySelector("#tablaTarjetas tbody");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+  
+    // Filtramos solo los gastos que sean cuotas
+    const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
+    let totalMesVisa = 0;
+  
+    consumosTarjeta.forEach(g => {
+      // Sumamos al total de la tarjeta
+      totalMesVisa += Number(g.monto);
+      const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
+  
+      // Cortamos el texto para separar el nombre del producto y el número de cuota
+      let desc = g.descripcion || "-";
+      let badgeCuota = "";
+      if (desc.includes("(Cuota")) {
+          const partes = desc.split("(Cuota");
+          desc = partes[0].trim();
+          const cuotaInfo = "Cuota " + partes[1].replace(")", "");
+          badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
+      }
+  
+      tbody.innerHTML += `<tr>
+          <td style="color: var(--texto-claro);">${g.fecha}</td>
+          <td style="font-weight: 600;">${desc}</td>
+          <td>${badgeCuota}</td>
+          <td style="display: flex; justify-content: space-between; align-items: center; color: #ff6384; font-weight: 600;">
+            ${formatoMoneda(g.monto)} ${acciones}
+          </td>
+      </tr>`;
+    });
+  
+    // Actualizamos el número gigante
+    const elemTotalVisa = document.getElementById("totalVisaMes");
+    if (elemTotalVisa) elemTotalVisa.textContent = formatoMoneda(totalMesVisa);
+}
+
 // --- OPERACIONES CRUD ---
 window.eliminarGasto = async function(id) { 
-    if(confirm("¿Eliminar gasto?")) { 
+    if(confirm("¿Eliminar este registro?")) { 
         await fetch(`${API}/gastos/${id}`, {method:"DELETE", headers:authHeaders()}); 
         await refreshAll(); 
     }
@@ -265,6 +308,75 @@ document.getElementById("formIngreso").onsubmit = async (e) => {
     document.getElementById("modalIngreso").style.display = "none"; 
     document.getElementById("formIngreso").reset(); 
     await refreshAll(); 
+};
+
+// --- NUEVA LÓGICA: DIVIDIR COMPRA EN CUOTAS ---
+document.getElementById("formTarjeta").onsubmit = async (e) => {
+    e.preventDefault();
+    
+    // Cambiamos el texto del botón para que sepa que está pensando
+    const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Calculando cuotas...";
+
+    try {
+        const descripcion = document.getElementById("tarjetaDescripcion").value;
+        const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
+        const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
+        const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; // Formato YYYY-MM
+        const tarjetaTipo = document.getElementById("tarjetaTipo").value;
+
+        // Mapeamos a las opciones que acepta tu backend
+        const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
+        
+        // Hacemos la matemática
+        const montoPorCuota = (montoTotal / cuotas).toFixed(2);
+
+        // Configuramos la fecha inicial
+        const [year, month] = primeraCuota.split('-');
+        let fechaActual = new Date(year, month - 1, 10); // Día 10 del mes seleccionado
+
+        for (let i = 1; i <= cuotas; i++) {
+            const yyyy = fechaActual.getFullYear();
+            const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+            const fechaGasto = `${yyyy}-${mm}-10`; // Le asignamos el 10 del mes de vencimiento
+
+            const body = {
+                descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                monto: montoPorCuota,
+                medioPago: medioPagoBackend,
+                fecha: fechaGasto,
+                esFijo: false, 
+                fechaVencimiento: null,
+                pagado: false,
+                usuarioId: user.id,
+                categoriaId: null // Opcional, queda en "Sin categoría"
+            };
+
+            // Disparamos la creación al backend
+            await fetch(`${API}/gastos`, {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify(body)
+            });
+
+            // Le sumamos 1 mes mágico a la fecha para el próximo ciclo
+            fechaActual.setMonth(fechaActual.getMonth() + 1);
+        }
+
+        // Limpiamos y refrescamos todo
+        document.getElementById("modalTarjeta").style.display = "none";
+        document.getElementById("formTarjeta").reset();
+        await refreshAll();
+        alert(`¡Éxito! Se generaron ${cuotas} cuotas de $${montoPorCuota} para ${descripcion}.`);
+
+    } catch (error) {
+        console.error(error);
+        alert("Hubo un error de conexión al guardar las cuotas.");
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "Calcular y Guardar Cuotas";
+    }
 };
 
 // --- LÓGICA DE NAVEGACIÓN Y EVENTOS ---
