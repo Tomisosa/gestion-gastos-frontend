@@ -517,16 +517,24 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.onclick = () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); };
     }
     
-    // Navegación entre pestañas
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.onclick = () => {
-            const sectionId = item.getAttribute('data-section');
-            if(!sectionId || sectionId === "logout") return;
-            
-            if (sectionId === "proyeccion") {
-                document.getElementById('modalProyeccion').style.display = 'flex';
-                return;
-            }
+	// Navegación entre pestañas
+	    document.querySelectorAll('.nav-item').forEach(item => {
+	        item.onclick = () => {
+	            
+	            // --- NUEVA LÓGICA PARA CERRAR SESIÓN ---
+	            if (item.id === "logoutBtn") {
+	                localStorage.clear();
+	                window.location.href = "login.html";
+	                return;
+	            }
+
+	            const sectionId = item.getAttribute('data-section');
+	            if(!sectionId) return;
+
+	            if (sectionId === "proyeccion") {
+	                document.getElementById('modalProyeccion').style.display = 'flex';
+	                return;
+	            }
 
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
