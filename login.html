@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sesión</title>
+  <title>Iniciar sesión - Gestión de Gastos</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2ac9bb">
+  <link rel="icon" href="icono.png" type="image/png">
   
   <script>
     if (localStorage.getItem("token")) {
@@ -17,11 +19,41 @@
 <body class="auth">
   <div class="form-container">
     <h2>Iniciar sesión</h2>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
+    
+    <div class="form-group">
+      <input type="email" id="email" placeholder="Correo">
+    </div>
+
+    <div class="form-group" style="position: relative;">
+      <input type="password" id="password" placeholder="Contraseña" style="padding-right: 45px; width: 100%; box-sizing: border-box;">
+      <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer;">
+        <span class="material-icons">visibility</span>
+      </button>
+    </div>
+
     <button id="btnLogin" class="btn">Entrar</button>
+    
+    <p style="margin-top: 15px;">
+      <a href="#" onclick="alert('Para recuperar tu contraseña, comunicate con el administrador (Tomás). Pronto habilitaremos el blanqueo automático por email.')" style="color: #2ac9bb; text-decoration: none; font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+    </p>
+
     <p>¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
   </div>
+
   <script src="js/login.js"></script>
+  <script>
+    // Lógica para mostrar/ocultar contraseña
+    document.getElementById('togglePassword').addEventListener('click', function () {
+      const passwordInput = document.getElementById('password');
+      const icon = this.querySelector('.material-icons');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        passwordInput.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    });
+  </script>
 </body>
 </html>
