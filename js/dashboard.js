@@ -137,6 +137,7 @@ function renderCategorias(categorias) {
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
   const filtroSel = document.getElementById("filtroCategoriaSelect");
+  
   if (!gSelect) return;
   [gSelect, iSelect, filtroSel].forEach(select => {
     if (!select) return;
@@ -145,6 +146,18 @@ function renderCategorias(categorias) {
     categorias.forEach(cat => { const opt = document.createElement("option"); opt.value = cat.id; opt.textContent = cat.nombre; select.appendChild(opt); });
     if(valPrevio) select.value = valPrevio;
   });
+
+  // Renderizar la lista de categorías en el modal de gestión (si existe)
+  const listaCat = document.getElementById("listaCategoriasGestion");
+  if (listaCat) {
+      listaCat.innerHTML = "";
+      categorias.forEach(cat => {
+          listaCat.innerHTML += `<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+              <span>${cat.nombre}</span>
+              <button onclick="eliminarCategoria(${cat.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>
+          </div>`;
+      });
+  }
 }
 
 // --- ACTUALIZACIÓN DE DATOS (REFRESH) ---
@@ -263,6 +276,8 @@ function renderTarjetas(lista) {
 }
 
 // --- OPERACIONES CRUD ---
+
+// Eliminar Gasto
 window.eliminarGasto = async function(id) { 
     if(confirm("¿Eliminar este registro?")) { 
         await fetch(`${API}/gastos/${id}`, {method:"DELETE", headers:authHeaders()}); 
@@ -270,6 +285,7 @@ window.eliminarGasto = async function(id) {
     }
 };
 
+// Eliminar Ingreso
 window.eliminarIngreso = async function(id) { 
     if(confirm("¿Eliminar ingreso?")) { 
         await fetch(`${API}/ingresos/${id}`, {method:"DELETE", headers:authHeaders()}); 
@@ -277,118 +293,175 @@ window.eliminarIngreso = async function(id) {
     }
 };
 
-// --- GUARDAR INVERSIÓN (NUEVO) ---
-document.getElementById("formInversion").onsubmit = async (e) => {
-    e.preventDefault();
-    const btnSubmit = document.querySelector("#formInversion button[type='submit']");
-    btnSubmit.disabled = true;
+// Eliminar Categoría
+window.eliminarCategoria = async function(id) {
+    if(confirm("¿Eliminar esta categoría? (Asegurate de que no tenga gastos asociados)")) {
+        try {
+            await fetch(`${API}/categorias/${id}`, {method: "DELETE", headers: authHeaders()});
+            await refreshAll();
+        } catch(e) {
+            alert("Error al eliminar la categoría.");
+        }
+    }
+};
+
+// Crear Categoría (Solución al error del Payload)
+window.crearCategoria = async function() {
+    const inputCat = document.getElementById("nuevaCategoriaInput"); // Ver nota abajo
+    if(!inputCat || !inputCat.value.trim()) {
+        alert("El nombre no puede estar vacío");
+        return;
+    }
 
     try {
-        const lugar = document.getElementById("invLugar").value;
-        const instrumento = document.getElementById("invInstrumento").value;
-        const moneda = document.getElementById("invMoneda").value;
-        const monto = document.getElementById("invMonto").value;
-        const fechaHoy = new Date().toISOString().split('T')[0];
-
-        // Guardamos la inversión como un ingreso, pero le ponemos un prefijo secreto
         const body = {
-            descripcion: `INV: ${lugar} - ${instrumento} (${moneda})`,
-            monto: monto,
-            medioPago: "EFECTIVO", // No afecta saldos BNA ni MP
-            fecha: fechaHoy,
-            usuarioId: user.id,
-            categoriaId: null // Podrías crear una categoría de inversión en el futuro
+            nombre: inputCat.value.trim(),
+            usuarioId: user.id
         };
 
-        await fetch(`${API}/ingresos`, { 
+        const res = await fetch(`${API}/categorias`, { 
             method: "POST", 
             headers: authHeaders(), 
             body: JSON.stringify(body) 
         });
 
-        document.getElementById("modalInversion").style.display = "none";
-        document.getElementById("formInversion").reset();
-        await refreshAll();
-        alert("Inversión registrada con éxito.");
+        if (!res.ok) throw new Error("Error del servidor");
+
+        inputCat.value = ""; // Limpiamos el campo
+        await refreshAll(); // Recargamos para que aparezca
+        
     } catch (error) {
-        alert("Hubo un error al registrar la inversión.");
-    } finally {
-        btnSubmit.disabled = false;
+        console.error("Falló la creación:", error);
+        alert("Hubo un error al crear la categoría.");
     }
 };
 
-document.getElementById("formGasto").onsubmit = async (e) => { 
-    e.preventDefault(); 
-    const body = {
-        descripcion: document.getElementById("gastoDescripcion").value,
-        monto: document.getElementById("gastoMonto").value,
-        medioPago: document.getElementById("gastoMedio").value,
-        fecha: document.getElementById("gastoFecha").value,
-        esFijo: document.getElementById("gastoEsFijo").checked,
-        usuarioId: user.id,
-        categoriaId: document.getElementById("gastoCategoria").value || null
-    };
-    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-    document.getElementById("modalGasto").style.display = "none"; 
-    document.getElementById("formGasto").reset(); 
-    await refreshAll(); 
-};
+// --- GUARDAR INVERSIÓN ---
+const formInversion = document.getElementById("formInversion");
+if(formInversion) {
+    formInversion.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formInversion button[type='submit']");
+        btnSubmit.disabled = true;
 
-document.getElementById("formIngreso").onsubmit = async (e) => { 
-    e.preventDefault(); 
-    const body = {
-        descripcion: document.getElementById("ingresoDescripcion").value,
-        monto: document.getElementById("ingresoMonto").value,
-        medioPago: document.getElementById("ingresoMedio").value,
-        fecha: document.getElementById("ingresoFecha").value,
-        usuarioId: user.id,
-        categoriaId: document.getElementById("ingresoCategoria").value || null
-    };
-    await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-    document.getElementById("modalIngreso").style.display = "none"; 
-    document.getElementById("formIngreso").reset(); 
-    await refreshAll(); 
-};
+        try {
+            const lugar = document.getElementById("invLugar").value;
+            const instrumento = document.getElementById("invInstrumento").value;
+            const moneda = document.getElementById("invMoneda").value;
+            const monto = document.getElementById("invMonto").value;
+            const fechaHoy = new Date().toISOString().split('T')[0];
 
-document.getElementById("formTarjeta").onsubmit = async (e) => {
-    e.preventDefault();
-    const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
-    btnSubmit.disabled = true;
-    try {
-        const descripcion = document.getElementById("tarjetaDescripcion").value;
-        const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
-        const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
-        const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
-        const tarjetaTipo = document.getElementById("tarjetaTipo").value;
-        const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
-        const montoPorCuota = (montoTotal / cuotas).toFixed(2);
-        const [year, month] = primeraCuota.split('-');
-        let fechaActual = new Date(year, month - 1, 10); 
+            const body = {
+                descripcion: `INV: ${lugar} - ${instrumento} (${moneda})`,
+                monto: monto,
+                medioPago: "EFECTIVO", 
+                fecha: fechaHoy,
+                usuarioId: user.id,
+                categoriaId: null 
+            };
 
-        for (let i = 1; i <= cuotas; i++) {
-            const yyyy = fechaActual.getFullYear();
-            const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-            await fetch(`${API}/gastos`, {
-                method: "POST",
-                headers: authHeaders(),
-                body: JSON.stringify({
-                    descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
-                    monto: montoPorCuota,
-                    medioPago: medioPagoBackend,
-                    fecha: `${yyyy}-${mm}-10`,
-                    esFijo: false, 
-                    usuarioId: user.id
-                })
+            await fetch(`${API}/ingresos`, { 
+                method: "POST", 
+                headers: authHeaders(), 
+                body: JSON.stringify(body) 
             });
-            fechaActual.setMonth(fechaActual.getMonth() + 1);
+
+            document.getElementById("modalInversion").style.display = "none";
+            document.getElementById("formInversion").reset();
+            await refreshAll();
+            alert("Inversión registrada con éxito.");
+        } catch (error) {
+            alert("Hubo un error al registrar la inversión.");
+        } finally {
+            btnSubmit.disabled = false;
         }
-        document.getElementById("modalTarjeta").style.display = "none";
-        document.getElementById("formTarjeta").reset();
-        await refreshAll();
-        alert("Cuotas generadas con éxito.");
-    } catch (error) { alert("Error al guardar cuotas."); }
-    finally { btnSubmit.disabled = false; }
-};
+    };
+}
+
+// --- GUARDAR GASTO ---
+const formGasto = document.getElementById("formGasto");
+if(formGasto) {
+    formGasto.onsubmit = async (e) => { 
+        e.preventDefault(); 
+        const body = {
+            descripcion: document.getElementById("gastoDescripcion").value,
+            monto: document.getElementById("gastoMonto").value,
+            medioPago: document.getElementById("gastoMedio").value,
+            fecha: document.getElementById("gastoFecha").value,
+            esFijo: document.getElementById("gastoEsFijo").checked,
+            usuarioId: user.id,
+            categoriaId: document.getElementById("gastoCategoria").value || null
+        };
+        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        document.getElementById("modalGasto").style.display = "none"; 
+        document.getElementById("formGasto").reset(); 
+        await refreshAll(); 
+    };
+}
+
+// --- GUARDAR INGRESO ---
+const formIngreso = document.getElementById("formIngreso");
+if(formIngreso) {
+    formIngreso.onsubmit = async (e) => { 
+        e.preventDefault(); 
+        const body = {
+            descripcion: document.getElementById("ingresoDescripcion").value,
+            monto: document.getElementById("ingresoMonto").value,
+            medioPago: document.getElementById("ingresoMedio").value,
+            fecha: document.getElementById("ingresoFecha").value,
+            usuarioId: user.id,
+            categoriaId: document.getElementById("ingresoCategoria").value || null
+        };
+        await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        document.getElementById("modalIngreso").style.display = "none"; 
+        document.getElementById("formIngreso").reset(); 
+        await refreshAll(); 
+    };
+}
+
+// --- GUARDAR TARJETA ---
+const formTarjeta = document.getElementById("formTarjeta");
+if(formTarjeta) {
+    formTarjeta.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
+        btnSubmit.disabled = true;
+        try {
+            const descripcion = document.getElementById("tarjetaDescripcion").value;
+            const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
+            const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
+            const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
+            const tarjetaTipo = document.getElementById("tarjetaTipo").value;
+            const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
+            const montoPorCuota = (montoTotal / cuotas).toFixed(2);
+            const [year, month] = primeraCuota.split('-');
+            let fechaActual = new Date(year, month - 1, 10); 
+
+            for (let i = 1; i <= cuotas; i++) {
+                const yyyy = fechaActual.getFullYear();
+                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                await fetch(`${API}/gastos`, {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                        monto: montoPorCuota,
+                        medioPago: medioPagoBackend,
+                        fecha: `${yyyy}-${mm}-10`,
+                        esFijo: false, 
+                        usuarioId: user.id
+                    })
+                });
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+            }
+            document.getElementById("modalTarjeta").style.display = "none";
+            document.getElementById("formTarjeta").reset();
+            await refreshAll();
+            alert("Cuotas generadas con éxito.");
+        } catch (error) { alert("Error al guardar cuotas."); }
+        finally { btnSubmit.disabled = false; }
+    };
+}
 
 // --- LÓGICA DE NAVEGACIÓN, MENÚ HAMBURGUESA Y BOTÓN INTELIGENTE ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -477,18 +550,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Abrir Modales desde el FAB
-    document.getElementById('btnFabGasto').onclick = () => {
-        document.getElementById('modalGasto').style.display = 'flex';
-        fabOptions.classList.remove('show');
-    };
-    document.getElementById('btnFabIngreso').onclick = () => {
-        document.getElementById('modalIngreso').style.display = 'flex';
-        fabOptions.classList.remove('show');
-    };
-    document.getElementById('btnFabTarjeta').onclick = () => {
-        document.getElementById('modalNuevaTarjeta').style.display = 'flex';
-        fabOptions.classList.remove('show');
-    };
+    if(document.getElementById('btnFabGasto')) {
+        document.getElementById('btnFabGasto').onclick = () => {
+            document.getElementById('modalGasto').style.display = 'flex';
+            fabOptions.classList.remove('show');
+        };
+    }
+    if(document.getElementById('btnFabIngreso')) {
+        document.getElementById('btnFabIngreso').onclick = () => {
+            document.getElementById('modalIngreso').style.display = 'flex';
+            fabOptions.classList.remove('show');
+        };
+    }
+    if(document.getElementById('btnFabTarjeta')) {
+        document.getElementById('btnFabTarjeta').onclick = () => {
+            document.getElementById('modalNuevaTarjeta').style.display = 'flex';
+            fabOptions.classList.remove('show');
+        };
+    }
 
     // Cerrar Modales
     document.querySelectorAll('.close').forEach(btn => {
@@ -507,13 +586,19 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    document.getElementById('btnGestionarCategorias').onclick = () => {
-        document.getElementById('modalCategorias').style.display = 'flex';
-    };
+    if(document.getElementById('btnGestionarCategorias')) {
+        document.getElementById('btnGestionarCategorias').onclick = () => {
+            document.getElementById('modalCategorias').style.display = 'flex';
+        };
+    }
 });
 
 // --- INICIALIZACIÓN ---
-document.getElementById("logoutBtn").onclick = () => { localStorage.clear(); window.location.href="login.html"; };
+const logoutBtn = document.getElementById("logoutBtn");
+if(logoutBtn) {
+    logoutBtn.onclick = () => { localStorage.clear(); window.location.href="login.html"; };
+}
+
 (async function init() { 
     await fetchUserInfo(); 
     cargarSelectorFechas(); 
