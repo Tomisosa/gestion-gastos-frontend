@@ -240,13 +240,12 @@
         <div id="modalCategorias" class="modal">
           <div class="modal-content">
             <span class="close" onclick="document.getElementById('modalCategorias').style.display = 'none'">&times;</span>
-            <h3>⚙️ Gestionar Categorías</h3>
-            <div class="categoria-form" style="display: flex; gap: 10px; margin-bottom: 15px;">
-              <input id="nuevaCategoriaInput" placeholder="Nombre de la nueva categoría" style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #1a1a1a; color: white;" />
-              <button onclick="crearCategoria()" class="btn" style="margin: 0;">Crear</button>
+            <h3>Categorías</h3>
+            <div class="categoria-form">
+              <input id="nuevaCategoriaInput" placeholder="Nueva categoría" />
+              <button onclick="crearCategoria()" class="btn">Crear</button>
             </div>
-            <div id="listaCategoriasGestion" style="margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
-              </div>
+            <ul id="listaCategoriasGestion" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul>
           </div>
         </div>
 
