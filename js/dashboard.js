@@ -154,6 +154,58 @@ async function fetchIngresos() {
     return data; 
 }
 
+// --- MAGIA NUEVA: TRAER Y DIBUJAR TARJETAS REALES ---
+async function fetchYRenderizarMisTarjetas() {
+    try {
+        const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
+        if (!res.ok) throw new Error("Error trayendo tarjetas");
+        const misTarjetasReales = await res.json();
+        
+        const contenedor = document.getElementById("contenedorMisTarjetas");
+        if (!contenedor) return;
+        
+        contenedor.innerHTML = ""; // Limpiamos el contenedor
+        
+        // Si el usuario no tiene tarjetas, le mostramos un mensaje lindo
+        if (misTarjetasReales.length === 0) {
+            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
+            return;
+        }
+        
+        // Si tiene, las dibujamos una por una
+        misTarjetasReales.forEach(t => {
+            // Decidimos el color de fondo dependiendo de lo que guardó
+            let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; // Gris por defecto
+            if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
+            if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
+            if (t.color === "verde") bgGradient = "linear-gradient(135deg, #166534 0%, #064e3b 100%)";
+            if (t.color === "negro") bgGradient = "linear-gradient(135deg, #262626 0%, #000000 100%)";
+
+            // Armamos el HTML de la tarjeta con su botón de eliminar 🗑️
+            contenedor.innerHTML += `
+            <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden;">
+                <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                
+                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
+                
+                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px;">
+                    ${t.nombre}
+                </h3>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 35px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <span><strong>Cierre:</strong> ${t.diaCierre} del mes</span>
+                    <span><strong>Vto:</strong> ${t.diaVencimiento} del mes</span>
+                </div>
+            </div>`;
+        });
+        
+    } catch (error) {
+        console.error("No se pudieron cargar las tarjetas de la base de datos.", error);
+    }
+}
+// ---------------------------------------------------
+
+
 function renderCategorias(categorias) {
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
@@ -191,6 +243,9 @@ function renderCategorias(categorias) {
 async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
+  
+  // Llamamos a nuestra función nueva para que actualice las tarjetas visuales
+  await fetchYRenderizarMisTarjetas();
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -237,7 +292,7 @@ async function refreshAll() {
   renderIngresos(ingresosNormales); 
   calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
   generarGrafico(gFiltrados);
-  renderTarjetas(gFiltrados); 
+  renderConsumosCuotas(gFiltrados); 
 }
 
 function renderGastosVariables(lista) {
@@ -260,22 +315,14 @@ function renderIngresos(ingresos) {
   });
 }
 
-function renderTarjetas(lista) {
+function renderConsumosCuotas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
     
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
-    let totalVisaMes = 0;
-    let totalMesMP = 0;
     
     consumosTarjeta.forEach(g => {
-      if (g.medioPago === "BNA") {
-          totalVisaMes += Number(g.monto);
-      } else if (g.medioPago === "MERCADO_PAGO") {
-          totalMesMP += Number(g.monto);
-      }
-      
       const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
       
       let desc = g.descripcion || "-";
@@ -293,9 +340,6 @@ function renderTarjetas(lista) {
           
       tbody.innerHTML += `<tr><td>${g.fecha} <br> ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td style="display: flex; justify-content: space-between; align-items: center;">${formatoMoneda(g.monto)} ${acciones}</td></tr>`;
     });
-    
-    if (document.getElementById("totalVisaMes")) document.getElementById("totalVisaMes").textContent = formatoMoneda(totalVisaMes);
-    if (document.getElementById("totalMPMes")) document.getElementById("totalMPMes").textContent = formatoMoneda(totalMesMP);
 }
 
 // --- OPERACIONES CRUD GLOBALES (WINDOW) ---
@@ -324,6 +368,20 @@ window.eliminarCategoria = async function(id) {
         }
     } 
 };
+
+// --- MAGIA NUEVA: ELIMINAR TARJETAS REALES ---
+window.eliminarMiTarjeta = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito de tu cuenta?")) {
+        try {
+            await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
+            await refreshAll(); // Actualizamos la pantalla para que desaparezca al instante
+        } catch(e) {
+            alert("Error al intentar eliminar la tarjeta.");
+        }
+    }
+};
+// ---------------------------------------------
+
 
 window.crearCategoria = async function() {
     const inputCat = document.getElementById("nuevaCategoriaInput");
