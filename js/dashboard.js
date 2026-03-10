@@ -505,6 +505,56 @@ if (formCambiarPass) {
     };
 }
 
+// --- GUARDAR NUEVA TARJETA EN LA BASE DE DATOS ---
+const formNuevaTarjeta = document.getElementById("formNuevaTarjeta");
+if (formNuevaTarjeta) {
+    formNuevaTarjeta.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        // Agarramos el botón para deshabilitarlo mientras carga
+        const btnSubmit = document.querySelector("#formNuevaTarjeta button[type='submit']");
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
+
+        try {
+            // Juntamos los datos que escribió el usuario
+            const body = {
+                nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
+                diaCierre: parseInt(document.getElementById("nuevaTarjetaCierre").value),
+                diaVencimiento: parseInt(document.getElementById("nuevaTarjetaVto").value),
+                color: document.getElementById("nuevaTarjetaColor").value,
+                usuarioId: user.id
+            };
+
+            // Se los mandamos al "mozo" de Java
+            const res = await fetch(`${API}/tarjetas`, { 
+                method: "POST", 
+                headers: authHeaders(), 
+                body: JSON.stringify(body) 
+            });
+
+            if (!res.ok) throw new Error("Error al guardar la tarjeta");
+
+            // Si salió todo bien: escondemos la ventanita, vaciamos el formulario y avisamos
+            document.getElementById("modalNuevaTarjeta").style.display = "none";
+            formNuevaTarjeta.reset();
+            alert("¡Tarjeta guardada con éxito!");
+            
+            // Recargamos los datos para que todo esté actualizado
+            await refreshAll();
+
+        } catch (error) {
+            console.error(error);
+            alert("Hubo un error al guardar la tarjeta. Revisá la conexión.");
+        } finally {
+            // Volvemos el botón a la normalidad
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar Tarjeta";
+        }
+    };
+}
+
+
 // --- NAVEGACIÓN, MENÚ HAMBURGUESA Y MODALES ---
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -517,24 +567,24 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.onclick = () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); };
     }
     
-	// Navegación entre pestañas
-	    document.querySelectorAll('.nav-item').forEach(item => {
-	        item.onclick = () => {
-	            
-	            // --- NUEVA LÓGICA PARA CERRAR SESIÓN ---
-	            if (item.id === "logoutBtn") {
-	                localStorage.clear();
-	                window.location.href = "login.html";
-	                return;
-	            }
+    // Navegación entre pestañas
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.onclick = () => {
+            
+            // --- NUEVA LÓGICA PARA CERRAR SESIÓN ---
+            if (item.id === "logoutBtn") {
+                localStorage.clear();
+                window.location.href = "login.html";
+                return;
+            }
 
-	            const sectionId = item.getAttribute('data-section');
-	            if(!sectionId) return;
+            const sectionId = item.getAttribute('data-section');
+            if(!sectionId) return;
 
-	            if (sectionId === "proyeccion") {
-	                document.getElementById('modalProyeccion').style.display = 'flex';
-	                return;
-	            }
+            if (sectionId === "proyeccion") {
+                document.getElementById('modalProyeccion').style.display = 'flex';
+                return;
+            }
 
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
