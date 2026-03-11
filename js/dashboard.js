@@ -155,7 +155,7 @@ async function fetchIngresos() {
     return data; 
 }
 
-// --- TRAER Y DIBUJAR TARJETAS REALES EN SU PESTAÑA ---
+// --- TRAER Y DIBUJAR TARJETAS REALES ---
 async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
@@ -168,7 +168,7 @@ async function fetchYRenderizarMisTarjetas() {
         contenedor.innerHTML = ""; 
         
         if (globalTarjetas.length === 0) {
-            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
+            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas/billeteras guardadas. ¡Agregá una nueva para empezar!</p>`;
             return;
         }
         
@@ -176,18 +176,17 @@ async function fetchYRenderizarMisTarjetas() {
             let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; 
             if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
             if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
+            if (t.color === "celeste") bgGradient = "linear-gradient(135deg, #009ee3 0%, #0284c7 100%)";
+            if (t.color === "violeta") bgGradient = "linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%)";
             if (t.color === "verde") bgGradient = "linear-gradient(135deg, #166534 0%, #064e3b 100%)";
             if (t.color === "negro") bgGradient = "linear-gradient(135deg, #262626 0%, #000000 100%)";
 
+            // Se dibuja la cajita pintada sin las fechas
             contenedor.innerHTML += `
-            <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden;">
+            <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden; padding-bottom: 25px;">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
-                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px;">${t.nombre}</h3>
-                <div style="display: flex; justify-content: space-between; margin-top: 35px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    <span><strong>Cierre:</strong> ${t.diaCierre} del mes</span>
-                    <span><strong>Vto:</strong> ${t.diaVencimiento} del mes</span>
-                </div>
+                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar">🗑️</button>
+                <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 15px;">${t.nombre}</h3>
             </div>`;
         });
     } catch (error) {
@@ -195,13 +194,12 @@ async function fetchYRenderizarMisTarjetas() {
     }
 }
 
-// --- MAGIA: INYECTAR TUS TARJETAS EN LOS MEDIOS DE PAGO ---
+// --- MAGIA: INYECTAR LAS TARJETAS EN LOS MEDIOS DE PAGO ---
 function actualizarMediosDePagoSelects() {
     const gastoMedio = document.getElementById("gastoMedio");
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     
-    // Las billeteras fijas que pediste
     const opcionesBase = `
         <option value="BNA">🏦 BNA</option>
         <option value="MERCADO_PAGO">📱 Mercado Pago</option>
@@ -217,7 +215,6 @@ function actualizarMediosDePagoSelects() {
         tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
     }
 
-    // Le agregamos a los desplegables las tarjetas que vos elegiste crear
     globalTarjetas.forEach(t => {
         const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
         if (gastoMedio) gastoMedio.innerHTML += opt;
@@ -265,7 +262,7 @@ async function refreshAll() {
   if(!user) return; 
   
   await fetchYRenderizarMisTarjetas();
-  actualizarMediosDePagoSelects(); // Actualiza los selects para que veas tus tarjetas al crear gastos
+  actualizarMediosDePagoSelects(); 
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -463,7 +460,7 @@ window.eliminarCategoria = async function(id) {
 };
 
 window.eliminarMiTarjeta = async function(id) {
-    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito de tu cuenta?")) {
+    if(confirm("¿Seguro que querés eliminar esta tarjeta de tu cuenta?")) {
         try {
             await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
             await refreshAll(); 
@@ -723,8 +720,8 @@ if (formNuevaTarjeta) {
         try {
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
-                diaCierre: parseInt(document.getElementById("nuevaTarjetaCierre").value),
-                diaVencimiento: parseInt(document.getElementById("nuevaTarjetaVto").value),
+                diaCierre: 1, // Le mandamos un 1 fijo y escondido para que Java no se rompa
+                diaVencimiento: 1, // Lo mismo aca
                 color: document.getElementById("nuevaTarjetaColor").value,
                 usuarioId: user.id
             };
@@ -735,15 +732,15 @@ if (formNuevaTarjeta) {
 
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
-            alert("¡Tarjeta guardada con éxito!");
+            alert("¡Billetera/Tarjeta guardada con éxito!");
             await refreshAll();
 
         } catch (error) {
             console.error(error);
-            alert("Hubo un error al guardar la tarjeta. Revisá la conexión.");
+            alert("Hubo un error al guardar. Revisá la conexión.");
         } finally {
             btnSubmit.disabled = false;
-            btnSubmit.textContent = "Guardar Tarjeta";
+            btnSubmit.textContent = "Guardar";
         }
     };
 }
@@ -798,12 +795,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     fabContainer.style.display = 'flex';
                     if (sectionId === 'tarjetas') {
-                        // Si estás en la pestaña Tarjetas, SOLO podés agregar tarjetas
                         btnIngreso.style.display = 'none';
                         btnGasto.style.display = 'none';
                         btnTarjeta.style.display = 'flex';
                     } else {
-                        // En las demás pestañas, sale el (+) con TODAS las opciones para que elijas
                         btnIngreso.style.display = 'flex';
                         btnGasto.style.display = 'flex';
                         btnTarjeta.style.display = 'flex'; 
