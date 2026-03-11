@@ -11,6 +11,7 @@ let user = null;
 let miGrafico = null; 
 let globalGastos = [];
 let globalIngresos = [];
+let gastoEnEdicion = null; // Memoria para saber qué estamos editando
 
 function authHeaders() {
   return { 
@@ -318,7 +319,7 @@ async function refreshAll() {
   renderConsumosCuotas(gFiltrados); 
 }
 
-// DIBUJAR TABLA DE GASTOS FIJOS (AHORA CON LAPICITO ✏️)
+// DIBUJAR TABLAS
 function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
@@ -349,7 +350,6 @@ function renderGastosFijos(lista) {
   }
 }
 
-// DIBUJAR TABLA DE GASTOS VARIABLES (AHORA CON LAPICITO ✏️)
 function renderGastosVariables(lista) {
   const tbody = document.querySelector("#tablaGastosVariables tbody");
   if (!tbody) return; 
@@ -400,21 +400,17 @@ function renderConsumosCuotas(lista) {
     });
 }
 
-// --- OPERACIONES CRUD GLOBALES (WINDOW) ---
-
+// --- ELIMINAR INTELIGENTE (Modo Calendario) ---
 window.eliminarGasto = async function(id) { 
     const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
 
-    // 1. Primera pregunta general
     if (!confirm(`¿Seguro que querés eliminar el gasto "${gasto.descripcion}"?`)) return;
 
-    // 2. Si es un gasto FIJO, le damos la opción de borrar el futuro
     if (gasto.esFijo) {
-        const borrarFuturos = confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de los meses SIGUIENTES?\n\n👉 ACEPTAR: Borra este mes y todos los que siguen.\n👉 CANCELAR: Borra SOLO este mes.");
+        const borrarFuturos = confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de TODOS los meses SIGUIENTES?\n\n👉 ACEPTAR: Borra este y todos los futuros.\n👉 CANCELAR: Borra SOLO este mes.");
 
         if (borrarFuturos) {
-            // Buscamos todos los gastos futuros que se llamen igual
             const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
             const todosLosGastos = await res.json();
             
@@ -424,43 +420,40 @@ window.eliminarGasto = async function(id) {
                 g.fecha >= gasto.fecha
             );
 
-            // Los borramos uno por uno como una ametralladora
-            for (const g of gastosABorrar) {
-                await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
-            }
+            // MODO TURBO DE BORRADO
+            const promesas = gastosABorrar.map(g => fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() }));
+            await Promise.all(promesas);
+            
             alert("¡Se eliminó este gasto y todas sus repeticiones futuras!");
         } else {
-            // Solo borramos el de este mes
             await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
         }
     } else {
-        // Si es un gasto variable normal, lo borramos de una
         await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
     }
     
     await refreshAll(); 
 };
-// --- MAGIA NUEVA: EDITAR GASTOS CON EL LAPICITO ✏️ ---
-window.editarGasto = function(id) {
-    const gasto = globalGastos.find(g => g.id === id);
-    if (!gasto) return;
 
-    // Llenamos el formulario con los datos viejos
-    document.getElementById("gastoId").value = gasto.id; // GUARDAMOS EL ID OCULTO
-    document.getElementById("gastoDescripcion").value = gasto.descripcion;
-    document.getElementById("gastoMonto").value = gasto.monto;
-    document.getElementById("gastoFecha").value = gasto.fecha;
-    document.getElementById("gastoMedio").value = gasto.medioPago;
-    document.getElementById("gastoCategoria").value = gasto.categoriaId || "";
+// --- EDITAR INTELIGENTE (Poniendo los datos en memoria) ---
+window.editarGasto = function(id) {
+    gastoEnEdicion = globalGastos.find(g => g.id === id);
+    if (!gastoEnEdicion) return;
+
+    document.getElementById("gastoId").value = gastoEnEdicion.id; 
+    document.getElementById("gastoDescripcion").value = gastoEnEdicion.descripcion;
+    document.getElementById("gastoMonto").value = gastoEnEdicion.monto;
+    document.getElementById("gastoFecha").value = gastoEnEdicion.fecha;
+    document.getElementById("gastoMedio").value = gastoEnEdicion.medioPago;
+    document.getElementById("gastoCategoria").value = gastoEnEdicion.categoriaId || "";
     
     const chkFijo = document.getElementById("gastoEsFijo");
     if (chkFijo) {
-        chkFijo.checked = gasto.esFijo;
+        chkFijo.checked = gastoEnEdicion.esFijo;
         const camposFijos = document.getElementById('camposFijos');
-        if (camposFijos) camposFijos.style.display = gasto.esFijo ? 'block' : 'none';
+        if (camposFijos) camposFijos.style.display = gastoEnEdicion.esFijo ? 'block' : 'none';
     }
 
-    // Abrimos el modal para que edite
     document.getElementById("modalGasto").style.display = "flex";
 };
 
@@ -515,7 +508,7 @@ window.crearCategoria = async function() {
     }
 };
 
-// --- ENVÍO DE FORMULARIOS (SUBMITS) ---
+// --- ENVÍO DE FORMULARIOS (CREAR Y EDITAR CON MODO TURBO) ---
 
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
@@ -523,6 +516,7 @@ if (formGasto) {
         e.preventDefault(); 
         const btnSubmit = document.querySelector("#formGasto button[type='submit']");
         btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
 
         try {
             const idAEditar = document.getElementById("gastoId").value;
@@ -534,28 +528,61 @@ if (formGasto) {
             const categoriaId = document.getElementById("gastoCategoria").value || null;
 
             if (idAEditar) {
-                // MODO EDICIÓN: Borramos el original y creamos el nuevo actualizado
-                await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                
-                const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
-                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                alert("¡Gasto actualizado con éxito!");
+                // --- MODO EDICIÓN ---
+                if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
+                    const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?\n\n👉 ACEPTAR: Cambia este mes y los futuros.\n👉 CANCELAR: Cambia SOLO este mes.");
+                    
+                    if (aplicarFuturo) {
+                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+                        const todos = await res.json();
+                        
+                        const futuros = todos.filter(g => 
+                            g.esFijo === true && 
+                            g.descripcion === gastoEnEdicion.descripcion && 
+                            g.fecha >= gastoEnEdicion.fecha
+                        );
+
+                        // Borra y recrea en MODO TURBO
+                        const promesas = futuros.map(async (g) => {
+                            await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+                            const body = { descripcion, monto, medioPago, fecha: g.fecha, esFijo: true, usuarioId: user.id, categoriaId };
+                            return fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        });
+                        
+                        await Promise.all(promesas);
+                        alert("¡Gasto actualizado para este mes y todos los siguientes!");
+                    } else {
+                        // Edita solo este mes
+                        await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
+                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        alert("¡Gasto actualizado SOLO para este mes!");
+                    }
+                } else {
+                    // Edición normal
+                    await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
+                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                }
             } else {
-                // MODO CREACIÓN NUEVO
+                // --- MODO CREACIÓN DESDE CERO ---
                 if (esFijo) {
                     const [year, month, day] = fechaBase.split('-');
                     let currentYear = parseInt(year);
                     let currentMonth = parseInt(month);
                     let safeDay = parseInt(day) > 28 ? "28" : day;
 
+                    const promesas = [];
                     for (let i = 0; i < 12; i++) {
                         let m = currentMonth + i;
                         let y = currentYear;
                         if (m > 12) { m -= 12; y += 1; }
                         const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
                         const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
-                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        promesas.push(fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) }));
                     }
+                    // MODO TURBO: Espera que las 12 se guarden al mismo tiempo
+                    await Promise.all(promesas);
                     alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                 } else {
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId };
@@ -565,13 +592,15 @@ if (formGasto) {
 
             document.getElementById("modalGasto").style.display = "none"; 
             formGasto.reset(); 
-            document.getElementById('gastoId').value = ""; // Limpiamos la memoria
+            document.getElementById('gastoId').value = ""; 
+            gastoEnEdicion = null;
             document.getElementById('camposFijos').style.display = 'none'; 
             await refreshAll(); 
         } catch (error) {
             alert("Hubo un error al guardar el gasto.");
         } finally {
             btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar";
         }
     };
 }
@@ -612,23 +641,24 @@ if (formTarjeta) {
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
 
+            const promesasCuotas = [];
             for (let i = 1; i <= cuotas; i++) {
                 const yyyy = fechaActual.getFullYear();
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-                await fetch(`${API}/gastos`, {
-                    method: "POST",
-                    headers: authHeaders(),
-                    body: JSON.stringify({
-                        descripcion: `${descripcion} (Cuota ${i}/${cuotas}) - ${tarjetaTipo}`,
-                        monto: montoPorCuota,
-                        medioPago: "EFECTIVO", 
-                        fecha: `${yyyy}-${mm}-10`,
-                        esFijo: false, 
-                        usuarioId: user.id
-                    })
-                });
+                
+                const body = {
+                    descripcion: `${descripcion} (Cuota ${i}/${cuotas}) - ${tarjetaTipo}`,
+                    monto: montoPorCuota,
+                    medioPago: "EFECTIVO", 
+                    fecha: `${yyyy}-${mm}-10`,
+                    esFijo: false, 
+                    usuarioId: user.id
+                };
+                promesasCuotas.push(fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) }));
                 fechaActual.setMonth(fechaActual.getMonth() + 1);
             }
+            await Promise.all(promesasCuotas);
+
             document.getElementById("modalTarjeta").style.display = "none";
             formTarjeta.reset();
             await refreshAll();
@@ -833,11 +863,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // LIMPIAMOS LOS MODALES AL ABRIRLOS PARA QUE NO SE CRUCEN DATOS AL EDITAR/CREAR
+    // LIMPIAMOS LA MEMORIA AL TOCAR "+" PARA CREAR ALGO NUEVO
     const btnFabGasto = document.getElementById('btnFabGasto');
     if (btnFabGasto) btnFabGasto.onclick = () => { 
         document.getElementById('formGasto').reset(); 
-        document.getElementById('gastoId').value = ""; // Vaciamos la memoria
+        document.getElementById('gastoId').value = ""; 
+        gastoEnEdicion = null; // Vaciamos el cerebro del JS
         document.getElementById('modalGasto').style.display = 'flex'; 
     };
     
