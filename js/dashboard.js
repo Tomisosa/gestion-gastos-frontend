@@ -72,65 +72,22 @@ function generarGrafico(gastos) {
   });
 }
 
-// --- MAGIA NUEVA: CALCULAR BILLETERAS Y TARJETAS DINÁMICAMENTE ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
   const saldos = { "BNA": 0, "MERCADO_PAGO": 0, "EFECTIVO": 0 };
-
-  // 1. Inicializamos las tarjetas creadas en $0
-  globalTarjetas.forEach(t => {
-      saldos[t.nombre] = 0;
+  
+  ingresos.forEach(i => { 
+      const m = i.medioPago || "EFECTIVO"; 
+      if (saldos.hasOwnProperty(m)) saldos[m] += (Number(i.monto) || 0); 
   });
-
-  // 2. Sumamos la plata que entra (Ingresos)
-  ingresos.forEach(i => {
-      const m = i.medioPago || "EFECTIVO";
-      if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0);
+  
+  gastos.forEach(g => { 
+      const m = g.medioPago || "EFECTIVO"; 
+      if (saldos.hasOwnProperty(m)) saldos[m] -= (Number(g.monto) || 0); 
   });
-
-  // 3. Restamos la plata que sale (Gastos)
-  gastos.forEach(g => {
-      const m = g.medioPago || "EFECTIVO";
-      if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0);
-  });
-
-  // 4. Dibujamos TODAS las cajitas en el Inicio
-  const container = document.querySelector(".wallet-cards");
-  if (!container) return;
-
-  container.innerHTML = ""; // Limpiamos las estáticas del HTML
-
-  const walletStyles = {
-      "BNA": { icon: "🏦", color: "#2ac9bb", name: "BNA" },
-      "MERCADO_PAGO": { icon: "📱", color: "#00aae4", name: "Mercado Pago" },
-      "EFECTIVO": { icon: "💵", color: "#ffce56", name: "Efectivo" }
-  };
-
-  // Dibujamos las 3 cuentas fijas
-  ["BNA", "MERCADO_PAGO", "EFECTIVO"].forEach(key => {
-      const w = walletStyles[key];
-      container.innerHTML += `
-         <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid ${w.color};">
-           <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">${w.icon} ${w.name}</h4>
-           <p style="font-size: 1.3rem; font-weight: bold; color: ${w.color}; margin: 5px 0 0 0;">${formatoMoneda(saldos[key])}</p>
-         </div>
-      `;
-  });
-
-  // Dibujamos las tarjetas personalizadas a continuación
-  globalTarjetas.forEach(t => {
-      let badgeColor = "#cbd5e1"; // Gris por defecto
-      if (t.color === "naranja") badgeColor = "#f97316";
-      if (t.color === "azul") badgeColor = "#3b82f6";
-      if (t.color === "verde") badgeColor = "#22c55e";
-      if (t.color === "negro") badgeColor = "#ffffff";
-
-      container.innerHTML += `
-         <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid ${badgeColor};">
-           <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">💳 ${t.nombre}</h4>
-           <p style="font-size: 1.3rem; font-weight: bold; color: ${badgeColor}; margin: 5px 0 0 0;">${formatoMoneda(saldos[t.nombre])}</p>
-         </div>
-      `;
-  });
+  
+  if(document.getElementById("saldoBNA")) document.getElementById("saldoBNA").textContent = formatoMoneda(saldos["BNA"]);
+  if(document.getElementById("saldoMP")) document.getElementById("saldoMP").textContent = formatoMoneda(saldos["MERCADO_PAGO"]);
+  if(document.getElementById("saldoEfectivo")) document.getElementById("saldoEfectivo").textContent = formatoMoneda(saldos["EFECTIVO"]);
 }
 
 function cargarSelectorFechas() {
@@ -198,7 +155,7 @@ async function fetchIngresos() {
     return data; 
 }
 
-// --- TRAER Y DIBUJAR TARJETAS EN PESTAÑA TARJETAS ---
+// --- TRAER Y DIBUJAR TARJETAS REALES EN SU PESTAÑA ---
 async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
@@ -238,12 +195,13 @@ async function fetchYRenderizarMisTarjetas() {
     }
 }
 
-// --- INYECTAR LAS TARJETAS EN LOS MEDIOS DE PAGO ---
+// --- MAGIA: INYECTAR TUS TARJETAS EN LOS MEDIOS DE PAGO ---
 function actualizarMediosDePagoSelects() {
     const gastoMedio = document.getElementById("gastoMedio");
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     
+    // Las billeteras fijas que pediste
     const opcionesBase = `
         <option value="BNA">🏦 BNA</option>
         <option value="MERCADO_PAGO">📱 Mercado Pago</option>
@@ -259,6 +217,7 @@ function actualizarMediosDePagoSelects() {
         tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
     }
 
+    // Le agregamos a los desplegables las tarjetas que vos elegiste crear
     globalTarjetas.forEach(t => {
         const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
         if (gastoMedio) gastoMedio.innerHTML += opt;
@@ -305,11 +264,8 @@ async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
   
-  // 1. Cargamos y dibujamos las tarjetas en la pestaña tarjetas
   await fetchYRenderizarMisTarjetas();
-  
-  // 2. Cargamos las tarjetas en los desplegables de formularios
-  actualizarMediosDePagoSelects(); 
+  actualizarMediosDePagoSelects(); // Actualiza los selects para que veas tus tarjetas al crear gastos
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -354,10 +310,7 @@ async function refreshAll() {
   renderGastosVariables(gVariablesParaTabla); 
   renderGastosFijos(gFijosParaTabla); 
   renderIngresos(ingresosNormales); 
-  
-  // 3. Calculamos la plata sumando/restando de BNA, MP, Efectivo Y Tarjetas
   calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
-  
   generarGrafico(gFiltrados);
   renderConsumosCuotas(gFiltrados); 
 }
@@ -850,7 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         btnGasto.style.display = 'none';
                         btnTarjeta.style.display = 'flex';
                     } else {
-                        // En cualquier otro lado, podés agregar Gasto, Ingreso y Tarjeta
+                        // En las demás pestañas, sale el (+) con TODAS las opciones para que elijas
                         btnIngreso.style.display = 'flex';
                         btnGasto.style.display = 'flex';
                         btnTarjeta.style.display = 'flex'; 
