@@ -403,12 +403,43 @@ function renderConsumosCuotas(lista) {
 // --- OPERACIONES CRUD GLOBALES (WINDOW) ---
 
 window.eliminarGasto = async function(id) { 
-    if(confirm("¿Seguro que querés eliminar este registro?")) { 
-        await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() }); 
-        await refreshAll(); 
-    } 
-};
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
 
+    // 1. Primera pregunta general
+    if (!confirm(`¿Seguro que querés eliminar el gasto "${gasto.descripcion}"?`)) return;
+
+    // 2. Si es un gasto FIJO, le damos la opción de borrar el futuro
+    if (gasto.esFijo) {
+        const borrarFuturos = confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de los meses SIGUIENTES?\n\n👉 ACEPTAR: Borra este mes y todos los que siguen.\n👉 CANCELAR: Borra SOLO este mes.");
+
+        if (borrarFuturos) {
+            // Buscamos todos los gastos futuros que se llamen igual
+            const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+            const todosLosGastos = await res.json();
+            
+            const gastosABorrar = todosLosGastos.filter(g => 
+                g.esFijo === true && 
+                g.descripcion === gasto.descripcion && 
+                g.fecha >= gasto.fecha
+            );
+
+            // Los borramos uno por uno como una ametralladora
+            for (const g of gastosABorrar) {
+                await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+            }
+            alert("¡Se eliminó este gasto y todas sus repeticiones futuras!");
+        } else {
+            // Solo borramos el de este mes
+            await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
+        }
+    } else {
+        // Si es un gasto variable normal, lo borramos de una
+        await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
+    }
+    
+    await refreshAll(); 
+};
 // --- MAGIA NUEVA: EDITAR GASTOS CON EL LAPICITO ✏️ ---
 window.editarGasto = function(id) {
     const gasto = globalGastos.find(g => g.id === id);
