@@ -154,7 +154,7 @@ async function fetchIngresos() {
     return data; 
 }
 
-// --- MAGIA NUEVA: TRAER Y DIBUJAR TARJETAS REALES ---
+// --- TRAER Y DIBUJAR TARJETAS REALES ---
 async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
@@ -164,24 +164,20 @@ async function fetchYRenderizarMisTarjetas() {
         const contenedor = document.getElementById("contenedorMisTarjetas");
         if (!contenedor) return;
         
-        contenedor.innerHTML = ""; // Limpiamos el contenedor
+        contenedor.innerHTML = ""; 
         
-        // Si el usuario no tiene tarjetas, le mostramos un mensaje lindo
         if (misTarjetasReales.length === 0) {
             contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
             return;
         }
         
-        // Si tiene, las dibujamos una por una
         misTarjetasReales.forEach(t => {
-            // Decidimos el color de fondo dependiendo de lo que guardó
-            let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; // Gris por defecto
+            let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; 
             if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
             if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
             if (t.color === "verde") bgGradient = "linear-gradient(135deg, #166534 0%, #064e3b 100%)";
             if (t.color === "negro") bgGradient = "linear-gradient(135deg, #262626 0%, #000000 100%)";
 
-            // Armamos el HTML de la tarjeta con su botón de eliminar 🗑️
             contenedor.innerHTML += `
             <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden;">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
@@ -198,13 +194,37 @@ async function fetchYRenderizarMisTarjetas() {
                 </div>
             </div>`;
         });
-        
     } catch (error) {
         console.error("No se pudieron cargar las tarjetas de la base de datos.", error);
     }
 }
-// ---------------------------------------------------
 
+// --- CARGAR MIS TARJETAS REALES EN EL SELECTOR DE CUOTAS ---
+async function actualizarSelectorTarjetasParaCuotas() {
+    try {
+        const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
+        const misTarjetas = await res.json();
+        
+        const select = document.getElementById("tarjetaTipo");
+        if (!select) return;
+
+        select.innerHTML = "";
+
+        if (misTarjetas.length === 0) {
+            select.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
+            return;
+        }
+
+        misTarjetas.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t.nombre; 
+            opt.textContent = t.nombre;
+            select.appendChild(opt);
+        });
+    } catch (error) {
+        console.error("Error al actualizar el selector de cuotas", error);
+    }
+}
 
 function renderCategorias(categorias) {
   const gSelect = document.getElementById("gastoCategoria");
@@ -244,8 +264,8 @@ async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
   
-  // Llamamos a nuestra función nueva para que actualice las tarjetas visuales
   await fetchYRenderizarMisTarjetas();
+  await actualizarSelectorTarjetasParaCuotas();
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -286,21 +306,59 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
+  // SEPARAMOS LOS GASTOS
   const gVariablesParaTabla = gFiltrados.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
+  const gFijosParaTabla = gFiltrados.filter(g => g.esFijo); 
   
   renderGastosVariables(gVariablesParaTabla); 
+  renderGastosFijos(gFijosParaTabla); 
   renderIngresos(ingresosNormales); 
   calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
   generarGrafico(gFiltrados);
   renderConsumosCuotas(gFiltrados); 
 }
 
+// DIBUJAR TABLA DE GASTOS FIJOS (AHORA CON LAPICITO ✏️)
+function renderGastosFijos(lista) {
+  const tbody = document.querySelector("#tablaGastosFijos tbody");
+  if (!tbody) return; 
+  tbody.innerHTML = "";
+  let total = 0;
+
+  lista.forEach(g => {
+    total += Number(g.monto);
+    const acciones = `
+        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+    `;
+    
+    tbody.innerHTML += `<tr>
+        <td>${g.descripcion||"-"}</td>
+        <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
+        <td>-</td>
+        <td>${g.categoriaNombre||"-"}</td>
+        <td>✅ Sí</td>
+        <td>${g.fecha}</td>
+        <td>${g.medioPago||"EFECTIVO"}</td>
+        <td>${acciones}</td>
+    </tr>`;
+  });
+
+  if (document.getElementById("totalFijos")) {
+      document.getElementById("totalFijos").textContent = formatoMoneda(total);
+  }
+}
+
+// DIBUJAR TABLA DE GASTOS VARIABLES (AHORA CON LAPICITO ✏️)
 function renderGastosVariables(lista) {
   const tbody = document.querySelector("#tablaGastosVariables tbody");
   if (!tbody) return; 
   tbody.innerHTML = "";
   lista.forEach(g => {
-    const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete">🗑️</button>`;
+    const acciones = `
+        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+    `;
     tbody.innerHTML += `<tr><td>${g.fecha}</td><td>${g.descripcion||"-"}</td><td>${g.categoriaNombre||"-"}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${formatoMoneda(g.monto)}</td><td>${acciones}</td></tr>`;
   });
 }
@@ -345,11 +403,36 @@ function renderConsumosCuotas(lista) {
 // --- OPERACIONES CRUD GLOBALES (WINDOW) ---
 
 window.eliminarGasto = async function(id) { 
-    if(confirm("¿Eliminar este registro?")) { 
+    if(confirm("¿Seguro que querés eliminar este registro?")) { 
         await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() }); 
         await refreshAll(); 
     } 
 };
+
+// --- MAGIA NUEVA: EDITAR GASTOS CON EL LAPICITO ✏️ ---
+window.editarGasto = function(id) {
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
+
+    // Llenamos el formulario con los datos viejos
+    document.getElementById("gastoId").value = gasto.id; // GUARDAMOS EL ID OCULTO
+    document.getElementById("gastoDescripcion").value = gasto.descripcion;
+    document.getElementById("gastoMonto").value = gasto.monto;
+    document.getElementById("gastoFecha").value = gasto.fecha;
+    document.getElementById("gastoMedio").value = gasto.medioPago;
+    document.getElementById("gastoCategoria").value = gasto.categoriaId || "";
+    
+    const chkFijo = document.getElementById("gastoEsFijo");
+    if (chkFijo) {
+        chkFijo.checked = gasto.esFijo;
+        const camposFijos = document.getElementById('camposFijos');
+        if (camposFijos) camposFijos.style.display = gasto.esFijo ? 'block' : 'none';
+    }
+
+    // Abrimos el modal para que edite
+    document.getElementById("modalGasto").style.display = "flex";
+};
+
 
 window.eliminarIngreso = async function(id) { 
     if(confirm("¿Eliminar ingreso?")) { 
@@ -369,19 +452,16 @@ window.eliminarCategoria = async function(id) {
     } 
 };
 
-// --- MAGIA NUEVA: ELIMINAR TARJETAS REALES ---
 window.eliminarMiTarjeta = async function(id) {
     if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito de tu cuenta?")) {
         try {
             await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
-            await refreshAll(); // Actualizamos la pantalla para que desaparezca al instante
+            await refreshAll(); 
         } catch(e) {
             alert("Error al intentar eliminar la tarjeta.");
         }
     }
 };
-// ---------------------------------------------
-
 
 window.crearCategoria = async function() {
     const inputCat = document.getElementById("nuevaCategoriaInput");
@@ -410,19 +490,58 @@ const formGasto = document.getElementById("formGasto");
 if (formGasto) {
     formGasto.onsubmit = async (e) => { 
         e.preventDefault(); 
-        const body = { 
-            descripcion: document.getElementById("gastoDescripcion").value, 
-            monto: document.getElementById("gastoMonto").value, 
-            medioPago: document.getElementById("gastoMedio").value, 
-            fecha: document.getElementById("gastoFecha").value, 
-            esFijo: document.getElementById("gastoEsFijo").checked, 
-            usuarioId: user.id, 
-            categoriaId: document.getElementById("gastoCategoria").value || null 
-        };
-        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-        document.getElementById("modalGasto").style.display = "none"; 
-        formGasto.reset(); 
-        await refreshAll(); 
+        const btnSubmit = document.querySelector("#formGasto button[type='submit']");
+        btnSubmit.disabled = true;
+
+        try {
+            const idAEditar = document.getElementById("gastoId").value;
+            const descripcion = document.getElementById("gastoDescripcion").value;
+            const monto = document.getElementById("gastoMonto").value;
+            const medioPago = document.getElementById("gastoMedio").value;
+            const fechaBase = document.getElementById("gastoFecha").value;
+            const esFijo = document.getElementById("gastoEsFijo").checked;
+            const categoriaId = document.getElementById("gastoCategoria").value || null;
+
+            if (idAEditar) {
+                // MODO EDICIÓN: Borramos el original y creamos el nuevo actualizado
+                await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
+                
+                const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
+                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                alert("¡Gasto actualizado con éxito!");
+            } else {
+                // MODO CREACIÓN NUEVO
+                if (esFijo) {
+                    const [year, month, day] = fechaBase.split('-');
+                    let currentYear = parseInt(year);
+                    let currentMonth = parseInt(month);
+                    let safeDay = parseInt(day) > 28 ? "28" : day;
+
+                    for (let i = 0; i < 12; i++) {
+                        let m = currentMonth + i;
+                        let y = currentYear;
+                        if (m > 12) { m -= 12; y += 1; }
+                        const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
+                        const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
+                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    }
+                    alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
+                } else {
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId };
+                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                }
+            }
+
+            document.getElementById("modalGasto").style.display = "none"; 
+            formGasto.reset(); 
+            document.getElementById('gastoId').value = ""; // Limpiamos la memoria
+            document.getElementById('camposFijos').style.display = 'none'; 
+            await refreshAll(); 
+        } catch (error) {
+            alert("Hubo un error al guardar el gasto.");
+        } finally {
+            btnSubmit.disabled = false;
+        }
     };
 }
 
@@ -456,8 +575,8 @@ if (formTarjeta) {
             const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
-            const tarjetaTipo = document.getElementById("tarjetaTipo").value;
-            const medioPagoBackend = tarjetaTipo === "VISA_BNA" ? "BNA" : "MERCADO_PAGO";
+            const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            
             const montoPorCuota = (montoTotal / cuotas).toFixed(2);
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
@@ -469,9 +588,9 @@ if (formTarjeta) {
                     method: "POST",
                     headers: authHeaders(),
                     body: JSON.stringify({
-                        descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                        descripcion: `${descripcion} (Cuota ${i}/${cuotas}) - ${tarjetaTipo}`,
                         monto: montoPorCuota,
-                        medioPago: medioPagoBackend,
+                        medioPago: "EFECTIVO", 
                         fecha: `${yyyy}-${mm}-10`,
                         esFijo: false, 
                         usuarioId: user.id
@@ -563,19 +682,16 @@ if (formCambiarPass) {
     };
 }
 
-// --- GUARDAR NUEVA TARJETA EN LA BASE DE DATOS ---
 const formNuevaTarjeta = document.getElementById("formNuevaTarjeta");
 if (formNuevaTarjeta) {
     formNuevaTarjeta.onsubmit = async (e) => {
         e.preventDefault();
         
-        // Agarramos el botón para deshabilitarlo mientras carga
         const btnSubmit = document.querySelector("#formNuevaTarjeta button[type='submit']");
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Guardando...";
 
         try {
-            // Juntamos los datos que escribió el usuario
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
                 diaCierre: parseInt(document.getElementById("nuevaTarjetaCierre").value),
@@ -584,7 +700,6 @@ if (formNuevaTarjeta) {
                 usuarioId: user.id
             };
 
-            // Se los mandamos al "mozo" de Java
             const res = await fetch(`${API}/tarjetas`, { 
                 method: "POST", 
                 headers: authHeaders(), 
@@ -593,25 +708,21 @@ if (formNuevaTarjeta) {
 
             if (!res.ok) throw new Error("Error al guardar la tarjeta");
 
-            // Si salió todo bien: escondemos la ventanita, vaciamos el formulario y avisamos
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
             alert("¡Tarjeta guardada con éxito!");
             
-            // Recargamos los datos para que todo esté actualizado
             await refreshAll();
 
         } catch (error) {
             console.error(error);
             alert("Hubo un error al guardar la tarjeta. Revisá la conexión.");
         } finally {
-            // Volvemos el botón a la normalidad
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar Tarjeta";
         }
     };
 }
-
 
 // --- NAVEGACIÓN, MENÚ HAMBURGUESA Y MODALES ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -625,11 +736,9 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.onclick = () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); };
     }
     
-    // Navegación entre pestañas
     document.querySelectorAll('.nav-item').forEach(item => {
         item.onclick = () => {
             
-            // --- NUEVA LÓGICA PARA CERRAR SESIÓN ---
             if (item.id === "logoutBtn") {
                 localStorage.clear();
                 window.location.href = "login.html";
@@ -655,7 +764,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.classList.remove('active');
             }
 
-            // Magia del Botón FAB Contextual
             const btnIngreso = document.getElementById('btnFabIngreso');
             const btnGasto = document.getElementById('btnFabGasto');
             const btnTarjeta = document.getElementById('btnFabTarjeta');
@@ -680,7 +788,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     });
 
-    // Control del Botón Flotante (FAB)
     const fabMain = document.getElementById('fabMain');
     const fabOptions = document.getElementById('fabOptions');
     
@@ -695,12 +802,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // Abrir Modales
+    // LIMPIAMOS LOS MODALES AL ABRIRLOS PARA QUE NO SE CRUCEN DATOS AL EDITAR/CREAR
     const btnFabGasto = document.getElementById('btnFabGasto');
-    if (btnFabGasto) btnFabGasto.onclick = () => { document.getElementById('modalGasto').style.display = 'flex'; };
+    if (btnFabGasto) btnFabGasto.onclick = () => { 
+        document.getElementById('formGasto').reset(); 
+        document.getElementById('gastoId').value = ""; // Vaciamos la memoria
+        document.getElementById('modalGasto').style.display = 'flex'; 
+    };
     
     const btnFabIngreso = document.getElementById('btnFabIngreso');
-    if (btnFabIngreso) btnFabIngreso.onclick = () => { document.getElementById('modalIngreso').style.display = 'flex'; };
+    if (btnFabIngreso) btnFabIngreso.onclick = () => { 
+        document.getElementById('formIngreso').reset();
+        document.getElementById('ingresoId').value = "";
+        document.getElementById('modalIngreso').style.display = 'flex'; 
+    };
     
     const btnFabTarjeta = document.getElementById('btnFabTarjeta');
     if (btnFabTarjeta) btnFabTarjeta.onclick = () => { document.getElementById('modalNuevaTarjeta').style.display = 'flex'; };
@@ -708,12 +823,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGestionarCategorias = document.getElementById('btnGestionarCategorias');
     if (btnGestionarCategorias) btnGestionarCategorias.onclick = () => { document.getElementById('modalCategorias').style.display = 'flex'; };
 
-    // Cerrar Modales (las X)
     document.querySelectorAll('.close').forEach(btn => {
         btn.onclick = () => { btn.closest('.modal').style.display = 'none'; };
     });
 
-    // Mostrar/Ocultar campos de gasto fijo
     const chkFijo = document.getElementById('gastoEsFijo');
     const camposFijos = document.getElementById('camposFijos');
     if (chkFijo && camposFijos) {
@@ -723,7 +836,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- INICIO DE APLICACIÓN ---
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
     logoutBtn.onclick = () => { 
@@ -732,7 +844,6 @@ if (logoutBtn) {
     };
 }
 
-// Función auto-ejecutable al cargar
 (async function init() { 
     await fetchUserInfo(); 
     cargarSelectorFechas(); 
