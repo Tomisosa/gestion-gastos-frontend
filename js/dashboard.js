@@ -11,7 +11,7 @@ let user = null;
 let miGrafico = null; 
 let globalGastos = [];
 let globalIngresos = [];
-let gastoEnEdicion = null; // Memoria para saber qué estamos editando
+let gastoEnEdicion = null; 
 
 function authHeaders() {
   return { 
@@ -20,7 +20,6 @@ function authHeaders() {
   };
 }
 
-// --- MANEJO DE ERRORES DE SESIÓN ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("token"); 
@@ -50,7 +49,8 @@ function generarGrafico(gastos) {
   
   gastos.forEach(g => {
     const cat = g.categoriaNombre || "Sin categoría";
-    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + Number(g.monto);
+    // ESCUDO PROTECTOR PARA NAN
+    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
   });
 
   miGrafico = new Chart(ctx, {
@@ -77,12 +77,12 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
   
   ingresos.forEach(i => { 
       const m = i.medioPago || "EFECTIVO"; 
-      if (saldos.hasOwnProperty(m)) saldos[m] += Number(i.monto); 
+      if (saldos.hasOwnProperty(m)) saldos[m] += (Number(i.monto) || 0); 
   });
   
   gastos.forEach(g => { 
       const m = g.medioPago || "EFECTIVO"; 
-      if (saldos.hasOwnProperty(m)) saldos[m] -= Number(g.monto); 
+      if (saldos.hasOwnProperty(m)) saldos[m] -= (Number(g.monto) || 0); 
   });
   
   if(document.getElementById("saldoBNA")) document.getElementById("saldoBNA").textContent = formatoMoneda(saldos["BNA"]);
@@ -182,13 +182,8 @@ async function fetchYRenderizarMisTarjetas() {
             contenedor.innerHTML += `
             <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden;">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                
                 <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
-                
-                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px;">
-                    ${t.nombre}
-                </h3>
-                
+                <h3 style="color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px;">${t.nombre}</h3>
                 <div style="display: flex; justify-content: space-between; margin-top: 35px; font-size: 0.85rem; color: #cbd5e1; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
                     <span><strong>Cierre:</strong> ${t.diaCierre} del mes</span>
                     <span><strong>Vto:</strong> ${t.diaVencimiento} del mes</span>
@@ -196,35 +191,28 @@ async function fetchYRenderizarMisTarjetas() {
             </div>`;
         });
     } catch (error) {
-        console.error("No se pudieron cargar las tarjetas de la base de datos.", error);
+        console.error("Error cargando tarjetas", error);
     }
 }
 
-// --- CARGAR MIS TARJETAS REALES EN EL SELECTOR DE CUOTAS ---
 async function actualizarSelectorTarjetasParaCuotas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
         const misTarjetas = await res.json();
-        
         const select = document.getElementById("tarjetaTipo");
         if (!select) return;
-
         select.innerHTML = "";
-
         if (misTarjetas.length === 0) {
             select.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
             return;
         }
-
         misTarjetas.forEach(t => {
             const opt = document.createElement("option");
             opt.value = t.nombre; 
             opt.textContent = t.nombre;
             select.appendChild(opt);
         });
-    } catch (error) {
-        console.error("Error al actualizar el selector de cuotas", error);
-    }
+    } catch (error) {}
 }
 
 function renderCategorias(categorias) {
@@ -277,14 +265,13 @@ async function refreshAll() {
   const gFiltrados = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
   const iFiltrados = iTodos.filter(i => i.fecha.startsWith(mesSeleccionado));
 
-  // Lógica Ahorros e Inversiones
   const inversiones = iTodos.filter(i => i.descripcion && i.descripcion.includes("INV:"));
   const ingresosNormales = iFiltrados.filter(i => !i.descripcion.includes("INV:"));
 
   let totalUSD = 0;
   let totalARS_Inv = 0;
   inversiones.forEach(inv => {
-      const monto = Number(inv.monto);
+      const monto = Number(inv.monto) || 0;
       if (inv.descripcion.includes("(USD)")) totalUSD += monto;
       else totalARS_Inv += monto;
   });
@@ -294,9 +281,9 @@ async function refreshAll() {
   if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
   if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
   
-  // Lógica Balances
-  const totalG = gFiltrados.reduce((s,x) => s + Number(x.monto), 0);
-  const totalI = ingresosNormales.reduce((s,x) => s + Number(x.monto), 0);
+  // ESCUDO PROTECTOR PARA TOTALES
+  const totalG = gFiltrados.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+  const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   
   if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
   
@@ -307,7 +294,6 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
-  // SEPARAMOS LOS GASTOS
   const gVariablesParaTabla = gFiltrados.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
   const gFijosParaTabla = gFiltrados.filter(g => g.esFijo); 
   
@@ -319,7 +305,6 @@ async function refreshAll() {
   renderConsumosCuotas(gFiltrados); 
 }
 
-// DIBUJAR TABLAS
 function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
@@ -327,12 +312,11 @@ function renderGastosFijos(lista) {
   let total = 0;
 
   lista.forEach(g => {
-    total += Number(g.monto);
+    total += (Number(g.monto) || 0);
     const acciones = `
         <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
         <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
     `;
-    
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
         <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
@@ -382,7 +366,6 @@ function renderConsumosCuotas(lista) {
     
     consumosTarjeta.forEach(g => {
       const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
-      
       let desc = g.descripcion || "-";
       let badgeCuota = "";
       if (desc.includes("(Cuota")) {
@@ -392,15 +375,12 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-      let tarjetaBadge = g.medioPago === "BNA" 
-          ? `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">VISA</span>` 
-          : `<span style="color: #009ee3; font-weight: bold; font-size: 0.8rem;">M. PAGO</span>`;
-          
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">TARJETA</span>`;
       tbody.innerHTML += `<tr><td>${g.fecha} <br> ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td style="display: flex; justify-content: space-between; align-items: center;">${formatoMoneda(g.monto)} ${acciones}</td></tr>`;
     });
 }
 
-// --- ELIMINAR INTELIGENTE (Modo Calendario) ---
+// --- ELIMINAR INTELIGENTE (Uno por uno para no saturar Aiven) ---
 window.eliminarGasto = async function(id) { 
     const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
@@ -420,10 +400,10 @@ window.eliminarGasto = async function(id) {
                 g.fecha >= gasto.fecha
             );
 
-            // MODO TURBO DE BORRADO
-            const promesas = gastosABorrar.map(g => fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() }));
-            await Promise.all(promesas);
-            
+            // Los borramos de a uno para no romper la base de datos gratuita
+            for (const g of gastosABorrar) {
+                await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+            }
             alert("¡Se eliminó este gasto y todas sus repeticiones futuras!");
         } else {
             await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
@@ -435,7 +415,7 @@ window.eliminarGasto = async function(id) {
     await refreshAll(); 
 };
 
-// --- EDITAR INTELIGENTE (Poniendo los datos en memoria) ---
+// --- EDITAR INTELIGENTE ---
 window.editarGasto = function(id) {
     gastoEnEdicion = globalGastos.find(g => g.id === id);
     if (!gastoEnEdicion) return;
@@ -456,7 +436,6 @@ window.editarGasto = function(id) {
 
     document.getElementById("modalGasto").style.display = "flex";
 };
-
 
 window.eliminarIngreso = async function(id) { 
     if(confirm("¿Eliminar ingreso?")) { 
@@ -508,15 +487,14 @@ window.crearCategoria = async function() {
     }
 };
 
-// --- ENVÍO DE FORMULARIOS (CREAR Y EDITAR CON MODO TURBO) ---
-
+// --- ENVÍO DE FORMULARIOS (CREAR Y EDITAR EN FILA, SIN TURBO) ---
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
     formGasto.onsubmit = async (e) => { 
         e.preventDefault(); 
         const btnSubmit = document.querySelector("#formGasto button[type='submit']");
         btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando...";
+        btnSubmit.textContent = "Guardando... paciencia";
 
         try {
             const idAEditar = document.getElementById("gastoId").value;
@@ -530,7 +508,7 @@ if (formGasto) {
             if (idAEditar) {
                 // --- MODO EDICIÓN ---
                 if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
-                    const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?\n\n👉 ACEPTAR: Cambia este mes y los futuros.\n👉 CANCELAR: Cambia SOLO este mes.");
+                    const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
                     
                     if (aplicarFuturo) {
                         const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
@@ -542,24 +520,20 @@ if (formGasto) {
                             g.fecha >= gastoEnEdicion.fecha
                         );
 
-                        // Borra y recrea en MODO TURBO
-                        const promesas = futuros.map(async (g) => {
+                        // Uno por uno para cuidar la base de datos
+                        for (const g of futuros) {
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
                             const body = { descripcion, monto, medioPago, fecha: g.fecha, esFijo: true, usuarioId: user.id, categoriaId };
-                            return fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                        });
-                        
-                        await Promise.all(promesas);
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
-                        // Edita solo este mes
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
-                    // Edición normal
                     await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -572,17 +546,15 @@ if (formGasto) {
                     let currentMonth = parseInt(month);
                     let safeDay = parseInt(day) > 28 ? "28" : day;
 
-                    const promesas = [];
+                    // Creamos los 12 meses UNO POR UNO para no saturar Aiven
                     for (let i = 0; i < 12; i++) {
                         let m = currentMonth + i;
                         let y = currentYear;
                         if (m > 12) { m -= 12; y += 1; }
                         const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
                         const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
-                        promesas.push(fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) }));
+                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
-                    // MODO TURBO: Espera que las 12 se guarden al mismo tiempo
-                    await Promise.all(promesas);
                     alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                 } else {
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId };
@@ -641,7 +613,7 @@ if (formTarjeta) {
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
 
-            const promesasCuotas = [];
+            // Cargar cuotas de a una
             for (let i = 1; i <= cuotas; i++) {
                 const yyyy = fechaActual.getFullYear();
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
@@ -654,10 +626,9 @@ if (formTarjeta) {
                     esFijo: false, 
                     usuarioId: user.id
                 };
-                promesasCuotas.push(fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) }));
+                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 fechaActual.setMonth(fechaActual.getMonth() + 1);
             }
-            await Promise.all(promesasCuotas);
 
             document.getElementById("modalTarjeta").style.display = "none";
             formTarjeta.reset();
@@ -693,11 +664,7 @@ if (formInversion) {
                 categoriaId: null 
             };
 
-            await fetch(`${API}/ingresos`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
-            });
+            await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
 
             document.getElementById("modalInversion").style.display = "none";
             formInversion.reset();
@@ -761,18 +728,13 @@ if (formNuevaTarjeta) {
                 usuarioId: user.id
             };
 
-            const res = await fetch(`${API}/tarjetas`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
-            });
+            const res = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
 
             if (!res.ok) throw new Error("Error al guardar la tarjeta");
 
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
             alert("¡Tarjeta guardada con éxito!");
-            
             await refreshAll();
 
         } catch (error) {
@@ -799,7 +761,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.nav-item').forEach(item => {
         item.onclick = () => {
-            
             if (item.id === "logoutBtn") {
                 localStorage.clear();
                 window.location.href = "login.html";
@@ -863,12 +824,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // LIMPIAMOS LA MEMORIA AL TOCAR "+" PARA CREAR ALGO NUEVO
     const btnFabGasto = document.getElementById('btnFabGasto');
     if (btnFabGasto) btnFabGasto.onclick = () => { 
         document.getElementById('formGasto').reset(); 
         document.getElementById('gastoId').value = ""; 
-        gastoEnEdicion = null; // Vaciamos el cerebro del JS
+        gastoEnEdicion = null; 
         document.getElementById('modalGasto').style.display = 'flex'; 
     };
     
