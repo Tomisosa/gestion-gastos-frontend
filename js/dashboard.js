@@ -11,6 +11,7 @@ let user = null;
 let miGrafico = null; 
 let globalGastos = [];
 let globalIngresos = [];
+let globalTarjetas = []; 
 let gastoEnEdicion = null; 
 
 function authHeaders() {
@@ -49,7 +50,6 @@ function generarGrafico(gastos) {
   
   gastos.forEach(g => {
     const cat = g.categoriaNombre || "Sin categoría";
-    // ESCUDO PROTECTOR PARA NAN
     datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
   });
 
@@ -160,19 +160,19 @@ async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
-        const misTarjetasReales = await res.json();
+        globalTarjetas = await res.json();
         
         const contenedor = document.getElementById("contenedorMisTarjetas");
         if (!contenedor) return;
         
         contenedor.innerHTML = ""; 
         
-        if (misTarjetasReales.length === 0) {
+        if (globalTarjetas.length === 0) {
             contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
             return;
         }
         
-        misTarjetasReales.forEach(t => {
+        globalTarjetas.forEach(t => {
             let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; 
             if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
             if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
@@ -195,24 +195,85 @@ async function fetchYRenderizarMisTarjetas() {
     }
 }
 
-async function actualizarSelectorTarjetasParaCuotas() {
-    try {
-        const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
-        const misTarjetas = await res.json();
-        const select = document.getElementById("tarjetaTipo");
-        if (!select) return;
-        select.innerHTML = "";
-        if (misTarjetas.length === 0) {
-            select.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
-            return;
-        }
-        misTarjetas.forEach(t => {
-            const opt = document.createElement("option");
-            opt.value = t.nombre; 
-            opt.textContent = t.nombre;
-            select.appendChild(opt);
-        });
-    } catch (error) {}
+// --- MAGIA: INYECTAR LAS TARJETAS EN LOS MEDIOS DE PAGO ---
+function actualizarMediosDePagoSelects() {
+    const gastoMedio = document.getElementById("gastoMedio");
+    const ingresoMedio = document.getElementById("ingresoMedio");
+    const tarjetaTipo = document.getElementById("tarjetaTipo"); 
+    
+    const opcionesBase = `
+        <option value="BNA">🏦 BNA</option>
+        <option value="MERCADO_PAGO">📱 Mercado Pago</option>
+        <option value="EFECTIVO">💵 Efectivo</option>
+        <option value="CF">💳 CF</option>
+    `;
+    
+    if (gastoMedio) gastoMedio.innerHTML = opcionesBase;
+    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBase;
+    if (tarjetaTipo) tarjetaTipo.innerHTML = "";
+    
+    if (globalTarjetas.length === 0 && tarjetaTipo) {
+        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
+    }
+
+    globalTarjetas.forEach(t => {
+        const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
+        if (gastoMedio) gastoMedio.innerHTML += opt;
+        if (ingresoMedio) ingresoMedio.innerHTML += opt;
+        if (tarjetaTipo) tarjetaTipo.innerHTML += opt;
+    });
+}
+
+// --- MAGIA: TARJETAS EN EL INICIO ---
+function renderTarjetasEnInicio(gastosDelMes) {
+    let container = document.getElementById("tarjetasInicioContainer");
+    let title = document.getElementById("tarjetasInicioTitle");
+    
+    if (!container) {
+        const walletCards = document.querySelector(".wallet-cards");
+        if (!walletCards) return;
+        
+        title = document.createElement("h3");
+        title.id = "tarjetasInicioTitle";
+        title.textContent = "💳 A pagar en Tarjetas este mes";
+        title.style.width = "100%";
+        title.style.marginTop = "2rem";
+        title.style.marginBottom = "1rem";
+        title.style.color = "var(--texto-oscuro)";
+        walletCards.parentNode.insertBefore(title, walletCards.nextSibling);
+
+        container = document.createElement("div");
+        container.id = "tarjetasInicioContainer";
+        container.className = "cards";
+        container.style.gridTemplateColumns = "repeat(auto-fit, minmax(200px, 1fr))";
+        title.parentNode.insertBefore(container, title.nextSibling);
+    }
+    
+    container.innerHTML = "";
+    
+    if (globalTarjetas.length === 0) {
+        container.innerHTML = `<p style="color: #888;">No tenés tarjetas creadas todavía.</p>`;
+        return;
+    }
+
+    globalTarjetas.forEach(t => {
+        let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; 
+        if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
+        if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
+        if (t.color === "verde") bgGradient = "linear-gradient(135deg, #166534 0%, #064e3b 100%)";
+        if (t.color === "negro") bgGradient = "linear-gradient(135deg, #262626 0%, #000000 100%)";
+
+        const gastosTarjeta = gastosDelMes.filter(g => g.medioPago === t.nombre);
+        const total = gastosTarjeta.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+
+        container.innerHTML += `
+        <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden; padding: 15px;">
+            <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+            <h4 style="color: #cbd5e1; margin: 0; font-size: 1rem;">${t.nombre}</h4>
+            <div class="highlight" style="color: #ffffff; font-size: 1.5rem; margin-top: 5px;">${formatoMoneda(total)}</div>
+            <div style="margin-top: 5px; font-size: 0.8rem; color: #cbd5e1;">Vto: ${t.diaVencimiento} del mes</div>
+        </div>`;
+    });
 }
 
 function renderCategorias(categorias) {
@@ -254,7 +315,7 @@ async function refreshAll() {
   if(!user) return; 
   
   await fetchYRenderizarMisTarjetas();
-  await actualizarSelectorTarjetasParaCuotas();
+  actualizarMediosDePagoSelects(); 
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -281,7 +342,6 @@ async function refreshAll() {
   if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
   if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
   
-  // ESCUDO PROTECTOR PARA TOTALES
   const totalG = gFiltrados.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   
@@ -303,6 +363,8 @@ async function refreshAll() {
   calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
   generarGrafico(gFiltrados);
   renderConsumosCuotas(gFiltrados); 
+  
+  renderTarjetasEnInicio(gFiltrados);
 }
 
 function renderGastosFijos(lista) {
@@ -375,12 +437,11 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">TARJETA</span>`;
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">${g.medioPago}</span>`;
       tbody.innerHTML += `<tr><td>${g.fecha} <br> ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td style="display: flex; justify-content: space-between; align-items: center;">${formatoMoneda(g.monto)} ${acciones}</td></tr>`;
     });
 }
 
-// --- ELIMINAR INTELIGENTE (Uno por uno para no saturar Aiven) ---
 window.eliminarGasto = async function(id) { 
     const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
@@ -400,7 +461,6 @@ window.eliminarGasto = async function(id) {
                 g.fecha >= gasto.fecha
             );
 
-            // Los borramos de a uno para no romper la base de datos gratuita
             for (const g of gastosABorrar) {
                 await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
             }
@@ -415,7 +475,6 @@ window.eliminarGasto = async function(id) {
     await refreshAll(); 
 };
 
-// --- EDITAR INTELIGENTE ---
 window.editarGasto = function(id) {
     gastoEnEdicion = globalGastos.find(g => g.id === id);
     if (!gastoEnEdicion) return;
@@ -487,7 +546,6 @@ window.crearCategoria = async function() {
     }
 };
 
-// --- ENVÍO DE FORMULARIOS (CREAR Y EDITAR EN FILA, SIN TURBO) ---
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
     formGasto.onsubmit = async (e) => { 
@@ -506,7 +564,6 @@ if (formGasto) {
             const categoriaId = document.getElementById("gastoCategoria").value || null;
 
             if (idAEditar) {
-                // --- MODO EDICIÓN ---
                 if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
                     const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
                     
@@ -520,7 +577,6 @@ if (formGasto) {
                             g.fecha >= gastoEnEdicion.fecha
                         );
 
-                        // Uno por uno para cuidar la base de datos
                         for (const g of futuros) {
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
                             const body = { descripcion, monto, medioPago, fecha: g.fecha, esFijo: true, usuarioId: user.id, categoriaId };
@@ -539,14 +595,12 @@ if (formGasto) {
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             } else {
-                // --- MODO CREACIÓN DESDE CERO ---
                 if (esFijo) {
                     const [year, month, day] = fechaBase.split('-');
                     let currentYear = parseInt(year);
                     let currentMonth = parseInt(month);
                     let safeDay = parseInt(day) > 28 ? "28" : day;
 
-                    // Creamos los 12 meses UNO POR UNO para no saturar Aiven
                     for (let i = 0; i < 12; i++) {
                         let m = currentMonth + i;
                         let y = currentYear;
@@ -613,15 +667,14 @@ if (formTarjeta) {
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
 
-            // Cargar cuotas de a una
             for (let i = 1; i <= cuotas; i++) {
                 const yyyy = fechaActual.getFullYear();
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
                 
                 const body = {
-                    descripcion: `${descripcion} (Cuota ${i}/${cuotas}) - ${tarjetaTipo}`,
+                    descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
                     monto: montoPorCuota,
-                    medioPago: "EFECTIVO", 
+                    medioPago: tarjetaTipo, 
                     fecha: `${yyyy}-${mm}-10`,
                     esFijo: false, 
                     usuarioId: user.id
@@ -797,13 +850,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     fabContainer.style.display = 'flex';
                     if (sectionId === 'tarjetas') {
+                        // LA CORRECCIÓN DE LA MAGIA:
+                        // Si estamos en la pestaña Tarjetas, SOLO aparece el botón de Tarjetas
                         btnIngreso.style.display = 'none';
                         btnGasto.style.display = 'none';
                         btnTarjeta.style.display = 'flex';
                     } else {
+                        // Si estamos en cualquier otra pestaña, aparecen TODOS
                         btnIngreso.style.display = 'flex';
                         btnGasto.style.display = 'flex';
-                        btnTarjeta.style.display = 'none';
+                        btnTarjeta.style.display = 'flex'; 
                     }
                 }
             }
