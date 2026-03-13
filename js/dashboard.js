@@ -113,7 +113,7 @@ function cargarSelectorFechas() {
   selector.onchange = () => refreshAll();
 }
 
-/* --- LLAMADAS API --- */
+/* --- LLAMADAS API CON ESCUDOS FILTRADORES 🛡️ --- */
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
@@ -126,14 +126,12 @@ async function fetchUserInfo() {
   }
 }
 
-// --- MAGIA: EL ESCUDO DE CATEGORÍAS ---
 async function fetchCategorias() { 
     try { 
         const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
         handleAuthError(res);
         const todasLasCategorias = await res.json(); 
         
-        // Filtramos para que solo te muestre las tuyas
         const misCategorias = todasLasCategorias.filter(cat => 
             String(cat.usuarioId) === String(user.id) || 
             (cat.usuario && String(cat.usuario.id) === String(user.id))
@@ -149,25 +147,45 @@ async function fetchCategorias() {
 async function fetchGastos() { 
     const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
     handleAuthError(res);
-    const data = await res.json(); 
-    globalGastos = data; 
-    return data; 
+    const todosLosGastos = await res.json(); 
+    
+    // ESCUDO FILTRADOR PARA GASTOS: Nadie ve lo del otro
+    const misGastos = todosLosGastos.filter(g => 
+        String(g.usuarioId) === String(user.id) || 
+        (g.usuario && String(g.usuario.id) === String(user.id))
+    );
+
+    globalGastos = misGastos; 
+    return misGastos; 
 }
 
 async function fetchIngresos() { 
     const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
     handleAuthError(res);
-    const data = await res.json(); 
-    globalIngresos = data; 
-    return data; 
+    const todosLosIngresos = await res.json(); 
+    
+    // ESCUDO FILTRADOR PARA INGRESOS
+    const misIngresos = todosLosIngresos.filter(i => 
+        String(i.usuarioId) === String(user.id) || 
+        (i.usuario && String(i.usuario.id) === String(user.id))
+    );
+
+    globalIngresos = misIngresos; 
+    return misIngresos; 
 }
 
 async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
-        globalTarjetas = await res.json();
+        const todasLasTarjetas = await res.json();
         
+        // ESCUDO FILTRADOR PARA TARJETAS
+        globalTarjetas = todasLasTarjetas.filter(t => 
+            String(t.usuarioId) === String(user.id) || 
+            (t.usuario && String(t.usuario.id) === String(user.id))
+        );
+
         const contenedor = document.getElementById("contenedorMisTarjetas");
         if (!contenedor) return;
         
@@ -427,6 +445,7 @@ window.eliminarGasto = async function(id) {
             const todosLosGastos = await res.json();
             
             const gastosABorrar = todosLosGastos.filter(g => 
+                (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
                 g.esFijo === true && 
                 g.descripcion === gasto.descripcion && 
                 g.fecha >= gasto.fecha
@@ -543,6 +562,7 @@ if (formGasto) {
                         const todos = await res.json();
                         
                         const futuros = todos.filter(g => 
+                            (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
                             g.esFijo === true && 
                             g.descripcion === gastoEnEdicion.descripcion && 
                             g.fecha >= gastoEnEdicion.fecha
