@@ -1028,6 +1028,31 @@ window.eliminarIngreso = async function(id) {
     } 
 };
 
+window.crearCategoria = async function() {
+    const inputCat = document.getElementById("nuevaCategoriaInput");
+    if(!inputCat || !inputCat.value.trim()) { 
+        alert("El nombre no puede estar vacío."); 
+        return; 
+    }
+    try {
+        // ¡Magia aplicada! Ahora guarda la categoría con tu ID privado
+        const body = { 
+            nombre: inputCat.value.trim(), 
+            usuario: { id: user.id } 
+        };
+        const res = await fetch(`${API}/categorias`, { 
+            method: "POST", 
+            headers: authHeaders(), 
+            body: JSON.stringify(body) 
+        });
+        if (!res.ok) throw new Error("Error del servidor");
+        inputCat.value = ""; 
+        await refreshAll();
+    } catch (error) { 
+        alert("Error al crear la categoría."); 
+    }
+};
+
 window.eliminarCategoria = async function(id) { 
     if(confirm("¿Seguro que querés eliminar esta categoría?")) { 
         try {
