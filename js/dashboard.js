@@ -2,7 +2,6 @@
 const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 const token = localStorage.getItem("token");
 
-// Seguridad: Si no hay token, redirigir al login
 if (!token) {
     window.location.href = "login.html";
 }
@@ -59,7 +58,7 @@ function generarGrafico(gastos) {
       labels: Object.keys(datosAgrupados),
       datasets: [{
         data: Object.values(datosAgrupados),
-        backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff'],
+        backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff', '#f97316', '#8b5cf6', '#eab308'],
         borderWidth: 2, 
         borderColor: '#1a1a1a'
       }]
@@ -77,12 +76,12 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
   
   ingresos.forEach(i => { 
       const m = i.medioPago || "EFECTIVO"; 
-      if (saldos.hasOwnProperty(m)) saldos[m] += (Number(i.monto) || 0); 
+      if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
   });
   
   gastos.forEach(g => { 
       const m = g.medioPago || "EFECTIVO"; 
-      if (saldos.hasOwnProperty(m)) saldos[m] -= (Number(g.monto) || 0); 
+      if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
   });
   
   if(document.getElementById("saldoBNA")) document.getElementById("saldoBNA").textContent = formatoMoneda(saldos["BNA"]);
@@ -155,7 +154,6 @@ async function fetchIngresos() {
     return data; 
 }
 
-// --- TRAER Y DIBUJAR TARJETAS REALES ---
 async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
@@ -168,12 +166,13 @@ async function fetchYRenderizarMisTarjetas() {
         contenedor.innerHTML = ""; 
         
         if (globalTarjetas.length === 0) {
-            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas/billeteras guardadas. ¡Agregá una nueva para empezar!</p>`;
+            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
             return;
         }
         
         globalTarjetas.forEach(t => {
             let bgGradient = "linear-gradient(135deg, #333333 0%, #111111 100%)"; 
+            if (t.color === "bna") bgGradient = "linear-gradient(135deg, #2ac9bb 0%, #0f766e 100%)"; 
             if (t.color === "naranja") bgGradient = "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)";
             if (t.color === "azul") bgGradient = "linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)";
             if (t.color === "celeste") bgGradient = "linear-gradient(135deg, #009ee3 0%, #0284c7 100%)";
@@ -181,11 +180,10 @@ async function fetchYRenderizarMisTarjetas() {
             if (t.color === "verde") bgGradient = "linear-gradient(135deg, #166534 0%, #064e3b 100%)";
             if (t.color === "negro") bgGradient = "linear-gradient(135deg, #262626 0%, #000000 100%)";
 
-            // Se dibuja la cajita pintada sin las fechas
             contenedor.innerHTML += `
             <div class="card" style="background: ${bgGradient}; border: none; position: relative; overflow: hidden; padding-bottom: 25px;">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar">🗑️</button>
+                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
                 <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 15px;">${t.nombre}</h3>
             </div>`;
         });
@@ -194,7 +192,6 @@ async function fetchYRenderizarMisTarjetas() {
     }
 }
 
-// --- MAGIA: INYECTAR LAS TARJETAS EN LOS MEDIOS DE PAGO ---
 function actualizarMediosDePagoSelects() {
     const gastoMedio = document.getElementById("gastoMedio");
     const ingresoMedio = document.getElementById("ingresoMedio");
@@ -224,6 +221,15 @@ function actualizarMediosDePagoSelects() {
 }
 
 function renderCategorias(categorias) {
+  // 1. ORDEN ALFABÉTICO (Solución para tu hermana)
+  categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+  // 2. ACTUALIZAR EL CONTADOR (Solución para tu hermana)
+  const contadorEl = document.getElementById("countCategorias");
+  if (contadorEl) {
+      contadorEl.textContent = categorias.length;
+  }
+
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
   const filtroSel = document.getElementById("filtroCategoriaSelect");
@@ -242,6 +248,10 @@ function renderCategorias(categorias) {
       });
       if(valPrevio) select.value = valPrevio;
     });
+    
+    if (filtroSel) {
+        filtroSel.onchange = () => refreshAll();
+    }
   }
 
   if (listaCat) {
@@ -270,11 +280,18 @@ async function refreshAll() {
   const selector = document.getElementById("filtroFechaMes");
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
   
-  const gFiltrados = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
-  const iFiltrados = iTodos.filter(i => i.fecha.startsWith(mesSeleccionado));
+  const gFiltradosMes = gTodos.filter(g => (g.fecha||g.fechaVencimiento||"").startsWith(mesSeleccionado));
+  const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
+
+  const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
+  let gParaTablasYGrafico = [...gFiltradosMes]; 
+  
+  if (catFilter !== "all" && catFilter !== "") {
+      gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter));
+  }
 
   const inversiones = iTodos.filter(i => i.descripcion && i.descripcion.includes("INV:"));
-  const ingresosNormales = iFiltrados.filter(i => !i.descripcion.includes("INV:"));
+  const ingresosNormales = iFiltradosMes.filter(i => !i.descripcion.includes("INV:"));
 
   let totalUSD = 0;
   let totalARS_Inv = 0;
@@ -289,7 +306,7 @@ async function refreshAll() {
   if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
   if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
   
-  const totalG = gFiltrados.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+  const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   
   if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
@@ -301,15 +318,18 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
-  const gVariablesParaTabla = gFiltrados.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
-  const gFijosParaTabla = gFiltrados.filter(g => g.esFijo); 
+  const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
+  const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
   
   renderGastosVariables(gVariablesParaTabla); 
   renderGastosFijos(gFijosParaTabla); 
   renderIngresos(ingresosNormales); 
-  calcularSaldosPorCuenta(gFiltrados, ingresosNormales); 
-  generarGrafico(gFiltrados);
-  renderConsumosCuotas(gFiltrados); 
+  generarGrafico(gParaTablasYGrafico);
+  renderConsumosCuotas(gParaTablasYGrafico); 
+
+  const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
+  const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
+  calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
 }
 
 function renderGastosFijos(lista) {
@@ -460,7 +480,7 @@ window.eliminarCategoria = async function(id) {
 };
 
 window.eliminarMiTarjeta = async function(id) {
-    if(confirm("¿Seguro que querés eliminar esta tarjeta de tu cuenta?")) {
+    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito de tu cuenta?")) {
         try {
             await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
             await refreshAll(); 
@@ -540,21 +560,30 @@ if (formGasto) {
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             } else {
+                // --- 3. LA PREGUNTA DEL GASTO FIJO (Solución para tu hermana) ---
                 if (esFijo) {
-                    const [year, month, day] = fechaBase.split('-');
-                    let currentYear = parseInt(year);
-                    let currentMonth = parseInt(month);
-                    let safeDay = parseInt(day) > 28 ? "28" : day;
+                    const programarFuturos = confirm("¿Desea programar este gasto para los próximos meses?\n\n👉 ACEPTAR: Se guarda en este mes y se clona para los próximos 11 meses.\n👉 CANCELAR: Se guarda SOLO en este mes como gasto fijo.");
 
-                    for (let i = 0; i < 12; i++) {
-                        let m = currentMonth + i;
-                        let y = currentYear;
-                        if (m > 12) { m -= 12; y += 1; }
-                        const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
-                        const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
+                    if (programarFuturos) {
+                        const [year, month, day] = fechaBase.split('-');
+                        let currentYear = parseInt(year);
+                        let currentMonth = parseInt(month);
+                        let safeDay = parseInt(day) > 28 ? "28" : day;
+
+                        for (let i = 0; i < 12; i++) {
+                            let m = currentMonth + i;
+                            let y = currentYear;
+                            if (m > 12) { m -= 12; y += 1; }
+                            const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
+                            const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        }
+                        alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
+                    } else {
+                        // Si pone cancelar, solo lo guarda este mes
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
-                    alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                 } else {
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -720,8 +749,8 @@ if (formNuevaTarjeta) {
         try {
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
-                diaCierre: 1, // Le mandamos un 1 fijo y escondido para que Java no se rompa
-                diaVencimiento: 1, // Lo mismo aca
+                diaCierre: 1, 
+                diaVencimiento: 1, 
                 color: document.getElementById("nuevaTarjetaColor").value,
                 usuarioId: user.id
             };
