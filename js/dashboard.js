@@ -679,13 +679,13 @@ if (formNuevaTarjeta) {
         btnSubmit.textContent = "Guardando...";
 
         try {
-            // ¡ESTA ES LA CLAVE! Enviamos 'usuario' como un objeto, no como un número suelto.
+            // ¡VOLVEMOS AL OBJETO! Como tu Java tiene "private Usuario usuario", hay que mandarlo así:
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
                 diaCierre: 1, 
                 diaVencimiento: 1, 
                 color: document.getElementById("nuevaTarjetaColor").value,
-                usuario: { id: user.id } // <--- ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
+                usuario: { id: user.id } // <--- ¡ESTA ES LA ÚNICA LÍNEA QUE CAMBIA!
             };
 
             const res = await fetch(`${API}/tarjetas`, { 
