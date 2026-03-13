@@ -93,7 +93,6 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
       if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
   });
   
-  // Si un gasto NO ESTÁ PAGADO, no debe descontar saldo de la billetera
   gastos.forEach(g => { 
       if (g.pagado === false) return; 
       const m = g.medioPago || "EFECTIVO"; 
@@ -149,7 +148,6 @@ async function fetchUserInfo() {
   }
 }
 
-// --- MAGIA: CARGAR LOS NOMBRES DEL PRÉSTAMO POR USUARIO ---
 function cargarNombresPrestamo() {
     if (!user) return;
     const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
@@ -162,7 +160,6 @@ function cargarNombresPrestamo() {
     labels2.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
 }
 
-// ESTA FUNCIÓN SE EJECUTA AL TOCAR EL BOTÓN ⚙️ EN PRÉSTAMOS
 window.configurarNombresPrestamo = function() {
     const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
     const configActual = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
@@ -403,7 +400,6 @@ async function refreshAll() {
   const selector = document.getElementById("filtroFechaMes");
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
   
-  // Filtramos mes usando el vencimiento (o la fecha si no hay vencimiento)
   const gFiltradosMes = gTodos.filter(g => {
       const fechaComparar = g.fechaVencimiento ? g.fechaVencimiento : g.fecha;
       return (fechaComparar||"").startsWith(mesSeleccionado);
@@ -446,7 +442,6 @@ async function refreshAll() {
     elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
   }
   
-  // SEPARAMOS LOS GASTOS
   const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
   const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
   
@@ -457,10 +452,8 @@ async function refreshAll() {
   renderConsumosCuotas(gParaTablasYGrafico); 
   renderPrestamos(pTodos); 
 
-  // --- MAGIA DEL PANEL DE TARJETAS AGRUPADAS ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
   if (panelTarjetas) {
-      // Filtramos todo lo que no sea las billeteras base
       const baseMedios = ["BNA", "MERCADO_PAGO", "EFECTIVO", "CF"];
       const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes(g.medioPago));
       
@@ -491,16 +484,13 @@ async function refreshAll() {
       }
   }
 
-  // Calculamos los saldos históricos
   const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
   const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
   calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
   
-  // Dibujamos la proyección
   renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
 }
 
-// --- DIBUJAR TABLA DE PRÉSTAMOS ---
 function renderPrestamos(prestamos) {
     const tbody = document.querySelector("#tablaPrestamos tbody");
     if(!tbody) return;
@@ -532,7 +522,6 @@ function renderPrestamos(prestamos) {
     if(cardBelen) cardBelen.textContent = formatoMoneda(totalBelen);
 }
 
-// --- TABLA DE FIJOS ---
 function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
@@ -567,7 +556,6 @@ function renderGastosFijos(lista) {
   }
 }
 
-// --- TABLA DE VARIABLES ---
 function renderGastosVariables(lista) {
   const tbody = document.querySelector("#tablaGastosVariables tbody");
   if (!tbody) return; 
@@ -633,6 +621,7 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
+      // ACÁ SE ARREGLAN LAS LÍNEAS RARAS DE LA TABLA
       tbody.innerHTML += `
       <tr>
           <td>${g.fecha} ${tarjetaBadge}</td>
@@ -1118,17 +1107,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // NUEVO: Cerramos el menú lateral inmediatamente al tocar cualquier opción (para celulares)
-            if (sidebar && overlay) {
-                sidebar.classList.remove('active'); 
-                overlay.classList.remove('active');
-            }
-
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
 
             if (sectionId === "proyeccion") {
                 document.getElementById('modalProyeccion').style.display = 'flex';
+                // ACÁ ESTÁ EL ARREGLO DEL MENÚ LATERAL QUE NO SE CERRABA EN CELULARES
+                if (sidebar && overlay) {
+                    sidebar.classList.remove('active'); 
+                    overlay.classList.remove('active');
+                }
                 return;
             }
 
@@ -1138,9 +1126,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
 
+            // ACÁ ESTÁ EL ARREGLO DEL MENÚ LATERAL QUE NO SE CERRABA EN CELULARES
+            if (sidebar && overlay) {
+                sidebar.classList.remove('active'); 
+                overlay.classList.remove('active');
+            }
+
             const btnIngreso = document.getElementById('btnFabIngreso');
             const btnGasto = document.getElementById('btnFabGasto');
-            const btnTarjeta = document.getElementById('btnFabTarjeta');
+            const btnTarjeta = document.getElementById('btnFabTarjeta'); // Ojo, ahora se llama btnFabTarjeta pero abre Cargar Compra
             const fabContainer = document.querySelector('.fab-container'); 
 
             if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
@@ -1148,15 +1142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     fabContainer.style.display = 'none';
                 } else {
                     fabContainer.style.display = 'flex';
-                    if (sectionId === 'tarjetas') {
-                        btnIngreso.style.display = 'none';
-                        btnGasto.style.display = 'none';
-                        btnTarjeta.style.display = 'flex';
-                    } else {
-                        btnIngreso.style.display = 'flex';
-                        btnGasto.style.display = 'flex';
-                        btnTarjeta.style.display = 'flex'; 
-                    }
+                    // Dejamos que los 3 botones se vean siempre en las pantallas principales
+                    btnIngreso.style.display = 'flex';
+                    btnGasto.style.display = 'flex';
+                    btnTarjeta.style.display = 'flex'; 
                 }
             }
         };
@@ -1214,8 +1203,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalIngreso').style.display = 'flex'; 
     };
     
+    // ACÁ ESTÁ EL ARREGLO DE CARGAR COMPRA
     const btnFabTarjeta = document.getElementById('btnFabTarjeta');
-    if (btnFabTarjeta) btnFabTarjeta.onclick = () => { document.getElementById('modalNuevaTarjeta').style.display = 'flex'; };
+    if (btnFabTarjeta) btnFabTarjeta.onclick = () => { 
+        document.getElementById('formTarjeta').reset();
+        document.getElementById('modalTarjeta').style.display = 'flex'; 
+    };
 
     const btnGestionarCategorias = document.getElementById('btnGestionarCategorias');
     if (btnGestionarCategorias) btnGestionarCategorias.onclick = () => { document.getElementById('modalCategorias').style.display = 'flex'; };
