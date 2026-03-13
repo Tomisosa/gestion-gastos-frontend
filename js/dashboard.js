@@ -13,13 +13,15 @@ let globalIngresos = [];
 let globalTarjetas = []; 
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
+
+// Variable para guardar los saldos reales y pasarlos a la Proyección
 window.saldosActuales = {};
 
 function authHeaders() {
-    return { 
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${token}` 
-    };
+  return { 
+    "Content-Type": "application/json", 
+    "Authorization": `Bearer ${token}` 
+  };
 }
 
 function handleAuthError(res) {
@@ -31,76 +33,75 @@ function handleAuthError(res) {
 }
 
 function formatoMoneda(valor) {
-    return new Intl.NumberFormat('es-AR', { 
-        style: 'currency', 
-        currency: 'ARS', 
-        minimumFractionDigits: 2 
-    }).format(valor);
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2
+  }).format(valor);
 }
 
+// --- COLORES DE TARJETAS DE CRÉDITO ---
 function getBgColor(color) {
-    const m = { 
+    const m = {
         bna: "#2ac9bb, #0f766e", 
         naranja: "#f97316, #7c2d12", 
-        azul: "#1e3a5f, #0f172a", 
+        azul: "#1e3a5f, #0f172a",
         celeste: "#009ee3, #0284c7", 
         violeta: "#8b5cf6, #4c1d95", 
         verde: "#166534, #064e3b", 
-        negro: "#262626, #000000" 
+        negro: "#262626, #000000"
     };
     return `linear-gradient(135deg, ${m[color] || "#333333, #111111"})`;
 }
 
 /* --- GRÁFICOS --- */
 function generarGrafico(gastos) {
-    const canvas = document.getElementById('gastosChart');
-    if (!canvas) return;
-    if (miGrafico) { 
-        miGrafico.destroy(); 
-        miGrafico = null; 
-    }
-    const ctx = canvas.getContext('2d');
-    const datosAgrupados = {};
+  const canvas = document.getElementById('gastosChart');
+  if (!canvas) return;
+  if (miGrafico) { 
+      miGrafico.destroy(); 
+      miGrafico = null; 
+  }
+  const ctx = canvas.getContext('2d');
+  const datosAgrupados = {};
   
-    gastos.forEach(g => {
-        const cat = g.categoriaNombre || "Sin categoría";
-        datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
-    });
+  gastos.forEach(g => {
+    const cat = g.categoriaNombre || "Sin categoría";
+    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
+  });
 
-    miGrafico = new Chart(ctx, {
-        type: 'doughnut', 
-        data: {
-            labels: Object.keys(datosAgrupados),
-            datasets: [{ 
-                data: Object.values(datosAgrupados), 
-                backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff', '#f97316', '#8b5cf6', '#eab308'], 
-                borderWidth: 2, 
-                borderColor: '#1a1a1a' 
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { position: 'bottom', labels: { color: '#ffffff' } } 
-            } 
-        }
-    });
+  miGrafico = new Chart(ctx, {
+    type: 'doughnut', 
+    data: {
+      labels: Object.keys(datosAgrupados),
+      datasets: [{
+        data: Object.values(datosAgrupados),
+        backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff', '#f97316', '#8b5cf6', '#eab308'],
+        borderWidth: 2, 
+        borderColor: '#1a1a1a'
+      }]
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff' } } } 
+    }
+  });
 }
 
-/* --- SALDOS Y BILLETERAS --- */
+// CÁLCULO INTELIGENTE DE SALDOS
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    const billeterasNombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
+    const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
     
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
-        if (!billeterasNombres.includes(nom)) {
-            billeterasNombres.push(nom);
+        if (!nombres.includes(nom)) {
+            nombres.push(nom);
         }
     });
 
     const saldos = {};
-    billeterasNombres.forEach(b => saldos[b] = 0);
+    nombres.forEach(n => saldos[n] = 0);
 
     ingresos.forEach(i => { 
         let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
@@ -120,7 +121,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     const contenedor = document.getElementById("contenedorBilleteras");
     if (contenedor) {
         contenedor.innerHTML = "";
-        billeterasNombres.forEach(b => {
+        nombres.forEach(b => {
             let color = "#ffce56"; 
             if(b === "BNA") color = "#2ac9bb";
             if(b === "MERCADO PAGO") color = "#00aae4";
@@ -130,7 +131,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             let btnEliminar = '';
             
             if(customObj) {
-                btnEliminar = `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;" title="Eliminar cuenta">✖</button>`;
+                btnEliminar = `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;" title="Ocultar cuenta">✖</button>`;
             }
 
             contenedor.innerHTML += `
@@ -144,61 +145,74 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 }
 
 function cargarSelectorFechas() {
-    const selector = document.getElementById("filtroFechaMes");
-    if (!selector) return;
-    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    selector.innerHTML = "";
-    [2025, 2026, 2027, 2028].forEach(anio => {
-        meses.forEach((mes, index) => {
-            const option = document.createElement("option");
-            const mesNum = (index + 1).toString().padStart(2, '0');
-            option.value = `${anio}-${mesNum}`; 
-            option.textContent = `${mes} ${anio}`;
-            selector.appendChild(option);
-        });
+  const selector = document.getElementById("filtroFechaMes");
+  if (!selector) return;
+  
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const anios = [2025, 2026, 2027, 2028]; 
+  
+  selector.innerHTML = "";
+  anios.forEach(anio => {
+    meses.forEach((mes, index) => {
+      const option = document.createElement("option");
+      const mesNum = (index + 1).toString().padStart(2, '0');
+      option.value = `${anio}-${mesNum}`;
+      option.textContent = `${mes} ${anio}`;
+      selector.appendChild(option);
     });
-    const hoy = new Date();
-    selector.value = `${hoy.getFullYear()}-${(hoy.getMonth() + 1).toString().padStart(2, '0')}`;
-    selector.onchange = () => refreshAll();
+  });
+  
+  const hoy = new Date();
+  const mesActual = (hoy.getMonth() + 1).toString().padStart(2, '0');
+  selector.value = `${hoy.getFullYear()}-${mesActual}`;
+  selector.onchange = () => refreshAll();
 }
 
-/* --- API CALLS --- */
+/* --- LLAMADAS API --- */
 async function fetchUserInfo() {
-    try {
-        const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
-        handleAuthError(res);
-        user = await res.json();
-        const emailDiv = document.getElementById("userEmail");
-        if(emailDiv) { 
-            emailDiv.textContent = "👤 " + user.email; 
-            emailDiv.style.color = "#ffce56"; 
-            emailDiv.style.fontWeight = "bold"; 
-        }
-    } catch (e) { 
-        localStorage.removeItem("token"); 
-        window.location.href = "login.html"; 
+  try {
+    const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
+    handleAuthError(res);
+    user = await res.json();
+    
+    const emailDiv = document.getElementById("userEmail");
+    if(emailDiv) {
+        emailDiv.textContent = "👤 " + user.email;
+        emailDiv.style.color = "#ffce56"; 
+        emailDiv.style.fontWeight = "bold";
     }
+  } catch (e) { 
+    localStorage.removeItem("token");
+    window.location.href = "login.html"; 
+  }
 }
 
 function cargarNombresPrestamo() {
     if (!user) return;
     const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
     const config = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
-    ["labelTotal1", "labelTabla1", "labelModal1"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n1; });
-    ["labelTotal2", "labelTabla2", "labelModal2"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
+
+    const labels1 = ["labelTotal1", "labelTabla1", "labelModal1"];
+    const labels2 = ["labelTotal2", "labelTabla2", "labelModal2"];
+
+    labels1.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n1; });
+    labels2.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
 }
 
 window.configurarNombresPrestamo = function() {
     const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
     const configActual = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
-    const nombre1 = prompt("Ingresá el nombre de la 1° Persona:", configActual.n1);
+    
+    const nombre1 = prompt("Ingresá el nombre de la 1° Persona (Ej: Mamá, Juan):", configActual.n1);
     if (nombre1 === null) return; 
-    const nombre2 = prompt("Ingresá el nombre de la 2° Persona:", configActual.n2);
+    
+    const nombre2 = prompt("Ingresá el nombre de la 2° Persona (Ej: Belén, Pedro):", configActual.n2);
     if (nombre2 === null) return;
+
     if (nombre1.trim() !== "" && nombre2.trim() !== "") {
         localStorage.setItem(`nombres_prestamo_${user.id}`, JSON.stringify({ n1: nombre1.trim(), n2: nombre2.trim() }));
         cargarNombresPrestamo();
-        alert("¡Nombres actualizados!");
+        alert("¡Nombres actualizados con éxito!");
     }
 };
 
@@ -232,7 +246,7 @@ async function fetchIngresos() {
 async function fetchPrestamos() {
     try {
         const res = await fetch(`${API}/prestamos/usuario/${user.id}`, { headers: authHeaders() });
-        if(!res.ok) return []; 
+        if(!res.ok) return [];
         return await res.json();
     } catch(e) { return []; }
 }
@@ -240,7 +254,7 @@ async function fetchPrestamos() {
 async function fetchBilleteras() {
     try {
         const res = await fetch(`${API}/billeteras/usuario/${user.id}`, { headers: authHeaders() });
-        if(!res.ok) return []; 
+        if(!res.ok) return [];
         return await res.json();
     } catch(e) { return []; }
 }
@@ -250,10 +264,11 @@ async function fetchYRenderizarMisTarjetas() {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
         const todas = await res.json();
+        
         globalTarjetas = todas.filter(t => String(t.usuarioId) === String(user.id) || (t.usuario && String(t.usuario.id) === String(user.id)));
 
         const contenedor = document.getElementById("contenedorMisTarjetas");
-        if (!contenedor) return; 
+        if (!contenedor) return;
         contenedor.innerHTML = ""; 
         
         if (globalTarjetas.length === 0) {
@@ -265,11 +280,13 @@ async function fetchYRenderizarMisTarjetas() {
             contenedor.innerHTML += `
             <div class="card" style="background: ${getBgColor(t.color)}; border: none; position: relative; overflow: hidden; padding-bottom: 25px;">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;">🗑️</button>
+                <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
                 <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 15px;">${t.nombre}</h3>
             </div>`;
         });
-    } catch (error) {}
+    } catch (error) {
+        console.error("Error cargando tarjetas", error);
+    }
 }
 
 function actualizarMediosDePagoSelects() {
@@ -278,56 +295,61 @@ function actualizarMediosDePagoSelects() {
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     
     let opcionesBilleteras = `<option value="BNA">🏦 BNA</option><option value="MERCADO PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option>`;
-    globalBilleteras.forEach(b => { 
-        opcionesBilleteras += `<option value="${b.nombre.toUpperCase()}">🏦 ${b.nombre}</option>`; 
+    globalBilleteras.forEach(b => {
+        opcionesBilleteras += `<option value="${b.nombre.toUpperCase()}">🏦 ${b.nombre}</option>`;
     });
-
-    let opcionesCredito = "";
-    if (globalTarjetas.length === 0) { 
-        opcionesCredito = '<option value="">No tenés tarjetas de crédito creadas</option>'; 
-    } else { 
-        globalTarjetas.forEach(t => { 
-            opcionesCredito += `<option value="${t.nombre}">💳 ${t.nombre}</option>`; 
-        }); 
+    
+    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
+    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
+    
+    if (tarjetaTipo) tarjetaTipo.innerHTML = "";
+    if (globalTarjetas.length === 0 && tarjetaTipo) {
+        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
     }
 
-    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras + opcionesCredito;
-    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
-    if (tarjetaTipo) tarjetaTipo.innerHTML = opcionesCredito;
+    globalTarjetas.forEach(t => {
+        const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
+        if (gastoMedio) gastoMedio.innerHTML += opt;
+        if (tarjetaTipo) tarjetaTipo.innerHTML += opt;
+    });
 }
 
 function renderCategorias(categorias) {
-    categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    const contadorEl = document.getElementById("countCategorias");
-    if (contadorEl) contadorEl.textContent = categorias.length;
+  categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-    const gSelect = document.getElementById("gastoCategoria");
-    const iSelect = document.getElementById("ingresoCategoria");
-    const filtroSel = document.getElementById("filtroCategoriaSelect");
-    const listaCat = document.getElementById("listaCategoriasGestion");
+  const contadorEl = document.getElementById("countCategorias");
+  if (contadorEl) contadorEl.textContent = categorias.length;
+
+  const gSelect = document.getElementById("gastoCategoria");
+  const iSelect = document.getElementById("ingresoCategoria");
+  const filtroSel = document.getElementById("filtroCategoriaSelect");
+  const listaCat = document.getElementById("listaCategoriasGestion");
   
-    if (gSelect) {
-        [gSelect, iSelect, filtroSel].forEach(select => {
-            if (!select) return;
-            const valPrevio = select.value;
-            select.innerHTML = select === filtroSel ? '<option value="all">Mostrar todas</option>' : '<option value="">Sin categoría</option>';
-            categorias.forEach(cat => { 
-                const opt = document.createElement("option"); 
-                opt.value = cat.id; 
-                opt.textContent = cat.nombre; 
-                select.appendChild(opt); 
-            });
-            if(valPrevio) select.value = valPrevio;
-        });
-        if (filtroSel) filtroSel.onchange = () => refreshAll();
-    }
+  if (gSelect) {
+    [gSelect, iSelect, filtroSel].forEach(select => {
+      if (!select) return;
+      const valPrevio = select.value;
+      select.innerHTML = select === filtroSel ? '<option value="all">Mostrar todas</option>' : '<option value="">Sin categoría</option>';
+      categorias.forEach(cat => { 
+          const opt = document.createElement("option"); 
+          opt.value = cat.id; opt.textContent = cat.nombre; 
+          select.appendChild(opt); 
+      });
+      if(valPrevio) select.value = valPrevio;
+    });
+    if (filtroSel) filtroSel.onchange = () => refreshAll();
+  }
 
-    if (listaCat) {
-        listaCat.innerHTML = "";
-        categorias.forEach(cat => {
-            listaCat.innerHTML += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px;"><span>${cat.nombre}</span><button onclick="eliminarCategoria(${cat.id})" class="btn-delete" style="padding: 2px 6px; background: none; border: none; cursor: pointer; font-size: 1.2rem;">🗑️</button></div>`;
-        });
-    }
+  if (listaCat) {
+      listaCat.innerHTML = "";
+      categorias.forEach(cat => {
+          listaCat.innerHTML += `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 5px;">
+              <span>${cat.nombre}</span>
+              <button onclick="eliminarCategoria(${cat.id})" class="btn-delete" style="padding: 2px 6px; background: none; border: none; cursor: pointer; font-size: 1.2rem;">🗑️</button>
+          </div>`;
+      });
+  }
 }
 
 function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
@@ -352,187 +374,277 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     const contenedorSaldos = document.getElementById("resumenCuentasProyeccion");
     if(contenedorSaldos) {
         contenedorSaldos.innerHTML = `<h4 style="margin-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
-        const billeteras = ["BNA", "MERCADO PAGO", "EFECTIVO"];
-        globalBilleteras.forEach(b => { if(!billeteras.includes(b.nombre.toUpperCase())) billeteras.push(b.nombre.toUpperCase()); });
+        const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
+        globalBilleteras.forEach(b => { if(!nombres.includes(b.nombre.toUpperCase())) nombres.push(b.nombre.toUpperCase()); });
         const saldos = window.saldosActuales || {};
         
-        billeteras.forEach(b => {
-            contenedorSaldos.innerHTML += `<div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 ${b}:</span> <span style="font-weight: bold; color: #00aae4;">${formatoMoneda(saldos[b] || 0)}</span></div>`;
+        nombres.forEach(b => {
+            contenedorSaldos.innerHTML += `
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
+                <span>🏦 ${b}:</span> 
+                <span style="font-weight: bold; color: #00aae4;">${formatoMoneda(saldos[b] || 0)}</span>
+            </div>`;
         });
     }
 }
 
+// --- ACTUALIZACIÓN DE DATOS (REFRESH GENERAL) ---
 async function refreshAll() {
-    await fetchCategorias(); 
-    if(!user) return; 
+  await fetchCategorias(); 
+  if(!user) return; 
   
-    cargarNombresPrestamo(); 
-    globalBilleteras = await fetchBilleteras(); 
-    await fetchYRenderizarMisTarjetas(); 
+  cargarNombresPrestamo(); 
+  globalBilleteras = await fetchBilleteras();
+  await fetchYRenderizarMisTarjetas();
   
-    const gTodos = await fetchGastos(); 
-    const iTodos = await fetchIngresos();
-    const pTodos = await fetchPrestamos(); 
+  const gTodos = await fetchGastos(); 
+  const iTodos = await fetchIngresos();
+  const pTodos = await fetchPrestamos(); 
   
-    const selector = document.getElementById("filtroFechaMes");
-    const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+  const selector = document.getElementById("filtroFechaMes");
+  const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
   
-    const gFiltradosMes = gTodos.filter(g => { 
-        const fechaComparar = g.fechaVencimiento ? g.fechaVencimiento : g.fecha; 
-        return (fechaComparar||"").startsWith(mesSeleccionado); 
-    });
-    const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
+  const gFiltradosMes = gTodos.filter(g => {
+      const fechaComparar = g.fechaVencimiento ? g.fechaVencimiento : g.fecha;
+      return (fechaComparar||"").startsWith(mesSeleccionado);
+  });
+  
+  const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
 
-    const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
-    let gParaTablasYGrafico = [...gFiltradosMes]; 
-    if (catFilter !== "all" && catFilter !== "") gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter));
-
-    const inversiones = iTodos.filter(i => i.descripcion && i.descripcion.includes("INV:"));
-    const ingresosNormales = iFiltradosMes.filter(i => !i.descripcion.includes("INV:"));
-
-    let totalUSD = 0, totalARS_Inv = 0;
-    inversiones.forEach(inv => {
-        const monto = Number(inv.monto) || 0;
-        if (inv.descripcion.includes("(USD)")) totalUSD += monto; else totalARS_Inv += monto;
-    });
-
-    const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
-    const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
-    if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
-    if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
+  const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
+  let gParaTablasYGrafico = [...gFiltradosMes]; 
   
-    const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
-    const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
-    if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
-  
-    const elBal = document.getElementById("balanceTotal");
-    if(elBal) { 
-        const bal = totalI - totalG; 
-        elBal.textContent = formatoMoneda(bal); 
-        elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo"); 
-    }
-  
-    const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
-    const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
-  
-    renderGastosVariables(gVariablesParaTabla); 
-    renderGastosFijos(gFijosParaTabla); 
-    renderIngresos(ingresosNormales); 
-    generarGrafico(gParaTablasYGrafico);
-    renderConsumosCuotas(gParaTablasYGrafico); 
-    renderPrestamos(pTodos); 
+  if (catFilter !== "all" && catFilter !== "") {
+      gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter));
+  }
 
-    const panelTarjetas = document.getElementById("panelResumenTarjetas");
-    if (panelTarjetas) {
-        const baseNombres = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO"];
-        globalBilleteras.forEach(b => baseNombres.push(b.nombre.toUpperCase()));
-        const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseNombres.includes((g.medioPago||"").toUpperCase()));
+  const inversiones = iTodos.filter(i => i.descripcion && i.descripcion.includes("INV:"));
+  const ingresosNormales = iFiltradosMes.filter(i => !i.descripcion.includes("INV:"));
+
+  let totalUSD = 0;
+  let totalARS_Inv = 0;
+  inversiones.forEach(inv => {
+      const monto = Number(inv.monto) || 0;
+      if (inv.descripcion.includes("(USD)")) totalUSD += monto;
+      else totalARS_Inv += monto;
+  });
+
+  const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
+  const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
+  if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
+  if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
+  
+  const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+  const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+  
+  if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
+  
+  const elBal = document.getElementById("balanceTotal");
+  if(elBal) {
+    const bal = totalI - totalG;
+    elBal.textContent = formatoMoneda(bal);
+    elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
+  }
+  
+  const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
+  const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
+  
+  renderGastosVariables(gVariablesParaTabla); 
+  renderGastosFijos(gFijosParaTabla); 
+  renderIngresos(ingresosNormales); 
+  generarGrafico(gParaTablasYGrafico);
+  renderConsumosCuotas(gParaTablasYGrafico); 
+  renderPrestamos(pTodos); 
+
+  const panelTarjetas = document.getElementById("panelResumenTarjetas");
+  if (panelTarjetas) {
+      const baseMedios = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO"];
+      globalBilleteras.forEach(b => baseMedios.push(b.nombre.toUpperCase()));
+
+      const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes((g.medioPago||"").toUpperCase()));
       
-        const totalesTarjetas = {}; 
-        let sumaTotal = 0;
-        consumosTarjeta.forEach(g => {
-            const m = g.medioPago || "Tarjeta Desconocida"; 
-            const monto = Number(g.monto) || 0;
-            totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto; 
-            sumaTotal += monto;
-        });
+      const totalesTarjetas = {};
+      let sumaTotal = 0;
+      
+      consumosTarjeta.forEach(g => {
+          const m = g.medioPago || "Tarjeta Desconocida";
+          const monto = Number(g.monto) || 0;
+          totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
+          sumaTotal += monto;
+      });
 
-        document.getElementById("totalTarjetasMes").textContent = formatoMoneda(sumaTotal);
-        const divDetalle = document.getElementById("detalleTarjetasMes");
-        divDetalle.innerHTML = "";
-        if (Object.keys(totalesTarjetas).length === 0) { 
-            divDetalle.innerHTML = "<p style='color:#888; font-size: 0.9rem;'>No hay gastos de tarjeta programados.</p>"; 
-        } else {
-            for (const [tarjeta, total] of Object.entries(totalesTarjetas)) {
-                divDetalle.innerHTML += `<div style="background: #222; padding: 15px; border-radius: 8px; border-left: 4px solid #00aae4; display: flex; flex-direction: column; gap: 5px;"><strong style="color:#94a3b8; font-size: 0.85rem;">💳 ${tarjeta}</strong><span style="font-size: 1.3rem; color: #fff; font-weight: bold;">${formatoMoneda(total)}</span></div>`;
-            }
-        }
-    }
+      document.getElementById("totalTarjetasMes").textContent = formatoMoneda(sumaTotal);
+      const divDetalle = document.getElementById("detalleTarjetasMes");
+      divDetalle.innerHTML = "";
+      
+      if (Object.keys(totalesTarjetas).length === 0) {
+          divDetalle.innerHTML = "<p style='color:#888; font-size: 0.9rem;'>No hay gastos de tarjeta de crédito programados para este mes.</p>";
+      } else {
+          for (const [tarjeta, total] of Object.entries(totalesTarjetas)) {
+              divDetalle.innerHTML += `
+              <div style="background: #222; padding: 15px; border-radius: 8px; border-left: 4px solid #00aae4; display: flex; flex-direction: column; gap: 5px;">
+                  <strong style="color:#94a3b8; font-size: 0.85rem;">💳 ${tarjeta}</strong>
+                  <span style="font-size: 1.3rem; color: #fff; font-weight: bold;">${formatoMoneda(total)}</span>
+              </div>`;
+          }
+      }
+  }
 
-    const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
-    const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
-    calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
+  const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
+  const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
+  calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
   
-    actualizarMediosDePagoSelects();
-    renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
+  actualizarMediosDePagoSelects();
+  renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
 }
 
-/* --- RENDER TABLAS --- */
 function renderPrestamos(prestamos) {
     const tbody = document.querySelector("#tablaPrestamos tbody");
-    if(!tbody) return; 
+    if(!tbody) return;
     tbody.innerHTML = "";
-    let totalMama = 0, totalBelen = 0;
+
+    let totalMama = 0;
+    let totalBelen = 0;
+
     prestamos.forEach(p => {
-        const aMama = Number(p.aporteMama) || 0, aBelen = Number(p.aporteBelen) || 0, total = aMama + aBelen;
-        totalMama += aMama; totalBelen += aBelen;
-        tbody.innerHTML += `<tr><td>${p.mesCuota}</td><td>${formatoMoneda(aMama)}</td><td>${formatoMoneda(aBelen)}</td><td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(total)}</td><td><button onclick="eliminarPrestamo(${p.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button></td></tr>`;
+        const aMama = Number(p.aporteMama) || 0;
+        const aBelen = Number(p.aporteBelen) || 0;
+        const total = aMama + aBelen;
+
+        totalMama += aMama;
+        totalBelen += aBelen;
+
+        tbody.innerHTML += `<tr>
+            <td>${p.mesCuota}</td>
+            <td>${formatoMoneda(aMama)}</td>
+            <td>${formatoMoneda(aBelen)}</td>
+            <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(total)}</td>
+            <td><button onclick="eliminarPrestamo(${p.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" title="Eliminar Cuota">🗑️</button></td>
+        </tr>`;
     });
-    if(document.getElementById("totalAporteMama")) document.getElementById("totalAporteMama").textContent = formatoMoneda(totalMama);
-    if(document.getElementById("totalAporteBelen")) document.getElementById("totalAporteBelen").textContent = formatoMoneda(totalBelen);
+
+    const cardMama = document.getElementById("totalAporteMama");
+    const cardBelen = document.getElementById("totalAporteBelen");
+    if(cardMama) cardMama.textContent = formatoMoneda(totalMama);
+    if(cardBelen) cardBelen.textContent = formatoMoneda(totalBelen);
 }
 
 function renderGastosFijos(lista) {
-    const tbody = document.querySelector("#tablaGastosFijos tbody");
-    if (!tbody) return; 
-    tbody.innerHTML = ""; 
-    let total = 0;
-    lista.forEach(g => {
-        total += (Number(g.monto) || 0);
-        const acciones = `<button onclick="editarGasto(${g.id})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;margin-right:5px;">✏️</button><button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>`;
-        const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
-        const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
-        const fechaPagoReal = (g.pagado && g.fecha) ? g.fecha : "-";
-        tbody.innerHTML += `<tr><td>${g.descripcion||"-"}</td><td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td><td>${vto}</td><td>${g.categoriaNombre||"-"}</td><td>${estadoPagado}</td><td>${fechaPagoReal}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${acciones}</td></tr>`;
-    });
-    if (document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(total);
+  const tbody = document.querySelector("#tablaGastosFijos tbody");
+  if (!tbody) return; 
+  tbody.innerHTML = "";
+  let total = 0;
+
+  lista.forEach(g => {
+    total += (Number(g.monto) || 0);
+    const acciones = `
+        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+    `;
+
+    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+    const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
+    const fechaPagoReal = (g.pagado && g.fecha) ? g.fecha : "-";
+
+    tbody.innerHTML += `<tr>
+        <td>${g.descripcion||"-"}</td>
+        <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
+        <td>${vto}</td>
+        <td>${g.categoriaNombre||"-"}</td>
+        <td>${estadoPagado}</td>
+        <td>${fechaPagoReal}</td>
+        <td>${g.medioPago||"EFECTIVO"}</td>
+        <td>${acciones}</td>
+    </tr>`;
+  });
+
+  if (document.getElementById("totalFijos")) {
+      document.getElementById("totalFijos").textContent = formatoMoneda(total);
+  }
 }
 
 function renderGastosVariables(lista) {
-    const tbody = document.querySelector("#tablaGastosVariables tbody");
-    if (!tbody) return; 
-    tbody.innerHTML = ""; 
-    let total = 0;
-    lista.forEach(g => {
-        total += (Number(g.monto) || 0);
-        const acciones = `<button onclick="editarGasto(${g.id})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;margin-right:5px;">✏️</button><button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>`;
-        const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
-        const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
-        const fechaPagoReal = (g.pagado && g.fecha) ? g.fecha : "-";
-        tbody.innerHTML += `<tr><td>${g.descripcion||"-"}</td><td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(g.monto)}</td><td>${vto}</td><td>${g.categoriaNombre||"-"}</td><td>${estadoPagado}</td><td>${fechaPagoReal}</td><td>${g.medioPago||"EFECTIVO"}</td><td>${acciones}</td></tr>`;
-    });
-    if (document.getElementById("totalVariables")) document.getElementById("totalVariables").textContent = formatoMoneda(total);
+  const tbody = document.querySelector("#tablaGastosVariables tbody");
+  if (!tbody) return; 
+  tbody.innerHTML = "";
+  let total = 0;
+  
+  lista.forEach(g => {
+    total += (Number(g.monto) || 0);
+    const acciones = `
+        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+    `;
+    
+    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+    const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
+    const fechaPagoReal = (g.pagado && g.fecha) ? g.fecha : "-";
+
+    tbody.innerHTML += `<tr>
+        <td>${g.descripcion||"-"}</td>
+        <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(g.monto)}</td>
+        <td>${vto}</td>
+        <td>${g.categoriaNombre||"-"}</td>
+        <td>${estadoPagado}</td>
+        <td>${fechaPagoReal}</td>
+        <td>${g.medioPago||"EFECTIVO"}</td>
+        <td>${acciones}</td>
+    </tr>`;
+  });
+  
+  if (document.getElementById("totalVariables")) {
+      document.getElementById("totalVariables").textContent = formatoMoneda(total);
+  }
 }
 
 function renderIngresos(ingresos) {
-    const tbody = document.querySelector('#tablaIngresos tbody');
-    if (!tbody) return; 
-    tbody.innerHTML = '';
-    ingresos.forEach(i => {
-        const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>`;
-        tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td>${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
-    });
+  const tbody = document.querySelector('#tablaIngresos tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  ingresos.forEach(i => {
+    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+    tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td>${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
+  });
 }
 
 function renderConsumosCuotas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
-    if (!tbody) return; 
+    if (!tbody) return;
     tbody.innerHTML = "";
+    
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
+    
     consumosTarjeta.forEach(g => {
-        const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;">🗑️</button>`;
-        let desc = g.descripcion || "-", badgeCuota = "";
-        if (desc.includes("(Cuota")) {
-            const partes = desc.split("(Cuota"); 
-            desc = partes[0].trim();
-            badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">Cuota ${partes[1].replace(")", "")}</span>`;
-        }
-        let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
-        tbody.innerHTML += `<tr><td>${g.fecha} ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td><div style="display:flex; justify-content:space-between; align-items:center;"><span>${formatoMoneda(g.monto)}</span><span>${acciones}</span></div></td></tr>`;
+      const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+      let desc = g.descripcion || "-";
+      let badgeCuota = "";
+      
+      if (desc.includes("(Cuota")) {
+          const partes = desc.split("(Cuota");
+          desc = partes[0].trim();
+          const cuotaInfo = "Cuota " + partes[1].replace(")", "");
+          badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
+      }
+      
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
+      
+      tbody.innerHTML += `
+      <tr>
+          <td>${g.fecha} ${tarjetaBadge}</td>
+          <td>${desc}</td>
+          <td>${badgeCuota}</td>
+          <td>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>${formatoMoneda(g.monto)}</span>
+                  <span>${acciones}</span>
+              </div>
+          </td>
+      </tr>`;
     });
 }
 
-/* --- FORM SUBMITS (CORREGIDOS) --- */
+/* --- ACCIONES PARA GUARDAR NUEVOS ELEMENTOS (CON FORMATO JAVA) --- */
+
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
     formBilletera.onsubmit = async (e) => {
@@ -540,14 +652,23 @@ if (formBilletera) {
         const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            const body = { nombre: document.getElementById("billeteraNombre").value.trim(), usuario: { id: user.id } };
+            // ¡ESTA ES LA LÍNEA CLAVE! -> usuario: { id: user.id }
+            const body = { 
+                nombre: document.getElementById("billeteraNombre").value.trim(), 
+                usuario: { id: user.id } 
+            };
             const response = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            if(!response.ok) throw new Error("403");
+            
+            if(!response.ok) throw new Error("Error del servidor al guardar billetera");
+            
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { alert("El servidor rechazó la cuenta. Asegurate de que Railway terminó de cargar."); } 
-        finally { btnSubmit.disabled = false; }
+        } catch(err) { 
+            alert("Error al conectar con la base de datos. Asegurate de que Railway se haya actualizado."); 
+        } finally { 
+            btnSubmit.disabled = false; 
+        }
     };
 }
 
@@ -557,21 +678,33 @@ if (formNuevaTarjeta) {
         e.preventDefault();
         const btnSubmit = document.querySelector("#formNuevaTarjeta button[type='submit']");
         btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
+
         try {
-            // CORREGIDO: Enviamos usuario como objeto
-            const body = { 
-                nombre: document.getElementById("nuevaTarjetaNombre").value.trim(), 
-                diaCierre: 1, diaVencimiento: 1, 
+            // ¡ESTA ES LA LÍNEA CLAVE! -> usuario: { id: user.id }
+            const body = {
+                nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
+                diaCierre: 1, 
+                diaVencimiento: 1, 
                 color: document.getElementById("nuevaTarjetaColor").value,
-                usuario: { id: user.id } 
+                usuario: { id: user.id }
             };
-            const response = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            if(!response.ok) throw new Error("403");
+
+            const res = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+
+            if (!res.ok) throw new Error("Error al guardar la tarjeta");
+
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
+            alert("¡Tarjeta guardada con éxito!");
             await refreshAll();
-        } catch (error) { alert("El servidor rechazó la tarjeta. Revisá los permisos en Java."); } 
-        finally { btnSubmit.disabled = false; }
+
+        } catch (error) {
+            alert("El servidor rechazó la tarjeta. Asegurate de haber puesto el @JsonIgnore en Tarjeta.java.");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar Crédito";
+        }
     };
 }
 
@@ -582,90 +715,89 @@ if (formPrestamo) {
         const btnSubmit = document.querySelector("#formPrestamo button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            const body = { mesCuota: document.getElementById("prestamoMes").value, aporteMama: parseFloat(document.getElementById("prestamoMama").value), aporteBelen: parseFloat(document.getElementById("prestamoBelen").value), usuario: { id: user.id } };
-            const response = await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            if(!response.ok) throw new Error("403");
-            document.getElementById("modalPrestamo").style.display = "none"; formPrestamo.reset(); await refreshAll();
-        } catch(err) { alert("Error al crear préstamo."); } 
-        finally { btnSubmit.disabled = false; }
+            const body = {
+                mesCuota: document.getElementById("prestamoMes").value,
+                aporteMama: parseFloat(document.getElementById("prestamoMama").value),
+                aporteBelen: parseFloat(document.getElementById("prestamoBelen").value),
+                usuario: { id: user.id }
+            };
+            await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            document.getElementById("modalPrestamo").style.display = "none";
+            formPrestamo.reset();
+            await refreshAll();
+        } catch(err) {
+            alert("Error al guardar préstamo.");
+        } finally {
+            btnSubmit.disabled = false;
+        }
     };
 }
 
-/* --- ELIMINAR --- */
-window.eliminarBilletera = async function(id) {
-    if(confirm("¿Seguro que querés eliminar esta cuenta?")) {
-        await fetch(`${API}/billeteras/${id}`, { method: "DELETE", headers: authHeaders() });
-        await refreshAll();
-    }
-};
-
-window.eliminarMiTarjeta = async function(id) {
-    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito?")) {
-        await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
-        await refreshAll(); 
-    }
-};
-
-window.eliminarPrestamo = async function(id) {
-    if(confirm("¿Eliminar cuota?")) { await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() }); await refreshAll(); }
-};
-
-window.eliminarGasto = async function(id) { 
-    const gasto = globalGastos.find(g => g.id === id);
-    if (!gasto) return;
-    if (!confirm(`¿Eliminar gasto "${gasto.descripcion}"?`)) return;
-
-    if (gasto.esFijo) {
-        if (confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de TODOS los meses SIGUIENTES?")) {
-            const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
-            const todos = await res.json();
-            const gastosABorrar = todos.filter(g => (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) && g.esFijo === true && g.descripcion === gasto.descripcion && g.fecha >= gasto.fecha);
-            for (const g of gastosABorrar) await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
-            alert("¡Se eliminó este gasto y todas sus repeticiones futuras!");
-        } else { await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() }); }
-    } else { await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() }); }
-    await refreshAll(); 
-};
-
-/* --- OTROS FORMS --- */
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
     formGasto.onsubmit = async (e) => { 
         e.preventDefault(); 
         const btnSubmit = document.querySelector("#formGasto button[type='submit']");
-        btnSubmit.disabled = true; btnSubmit.textContent = "Guardando...";
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
 
         try {
-            const idAEditar = document.getElementById("gastoId").value, descripcion = document.getElementById("gastoDescripcion").value, monto = document.getElementById("gastoMonto").value, medioPago = document.getElementById("gastoMedio").value, esFijo = document.getElementById("gastoEsFijo").checked, categoriaId = document.getElementById("gastoCategoria").value || null;
-            const fechaVto = document.getElementById("gastoVencimiento").value, pagado = document.getElementById("gastoPagado").checked, fechaReal = document.getElementById("gastoFecha").value;
+            const idAEditar = document.getElementById("gastoId").value;
+            const descripcion = document.getElementById("gastoDescripcion").value;
+            const monto = document.getElementById("gastoMonto").value;
+            const medioPago = document.getElementById("gastoMedio").value;
+            const esFijo = document.getElementById("gastoEsFijo").checked;
+            const categoriaId = document.getElementById("gastoCategoria").value || null;
+            
+            const fechaVto = document.getElementById("gastoVencimiento").value;
+            const pagado = document.getElementById("gastoPagado").checked;
+            const fechaReal = document.getElementById("gastoFecha").value;
+            
             let fechaBase = pagado ? (fechaReal || fechaVto) : fechaVto;
 
             if (idAEditar) {
                 if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
-                    if (confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?")) {
-                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); const todos = await res.json();
-                        const futuros = todos.filter(g => (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) && g.esFijo === true && g.descripcion === gastoEnEdicion.descripcion && g.fecha >= gastoEnEdicion.fecha);
+                    const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
+                    
+                    if (aplicarFuturo) {
+                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+                        const todos = await res.json();
+                        
+                        const futuros = todos.filter(g => 
+                            (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
+                            g.esFijo === true && 
+                            g.descripcion === gastoEnEdicion.descripcion && 
+                            g.fecha >= gastoEnEdicion.fecha
+                        );
 
                         for (const g of futuros) {
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+                            
                             let vtoFuturo = null;
                             if (fechaVto) {
-                                const yDiff = parseInt(g.fecha.split('-')[0]) - parseInt(fechaVto.split('-')[0]), mDiff = parseInt(g.fecha.split('-')[1]) - parseInt(fechaVto.split('-')[1]);
+                                const yDiff = parseInt(g.fecha.split('-')[0]) - parseInt(fechaVto.split('-')[0]);
+                                const mDiff = parseInt(g.fecha.split('-')[1]) - parseInt(fechaVto.split('-')[1]);
                                 const totalMesesAdelante = (yDiff * 12) + mDiff;
+                                
                                 const [vYear, vMonth, vDay] = fechaVto.split('-');
-                                let nm = parseInt(vMonth) + totalMesesAdelante, ny = parseInt(vYear);
+                                let nm = parseInt(vMonth) + totalMesesAdelante;
+                                let ny = parseInt(vYear);
                                 while (nm > 12) { nm -= 12; ny += 1; }
                                 vtoFuturo = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
                             }
-                            let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false; let pFecha = (isPagado) ? fechaBase : vtoFuturo;
+                            
+                            let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false;
+                            let pFecha = (isPagado) ? fechaBase : vtoFuturo;
+
                             const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
-                        alert("¡Actualizado!");
+                        alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
                     await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
@@ -674,17 +806,26 @@ if (formGasto) {
                 }
             } else {
                 if (esFijo) {
-                    if (confirm("¿Programar para los próximos meses?")) {
+                    const programarFuturos = confirm("¿Desea programar este gasto para los próximos meses?\n\n👉 ACEPTAR: Se guarda en este mes y se clona para los próximos 11 meses.\n👉 CANCELAR: Se guarda SOLO en este mes como gasto fijo.");
+
+                    if (programarFuturos) {
                         const [year, month, day] = fechaVto.split('-');
+
                         for (let i = 0; i < 12; i++) {
-                            let m = parseInt(month) + i, y = parseInt(year);
+                            let m = parseInt(month) + i;
+                            let y = parseInt(year);
                             while (m > 12) { m -= 12; y += 1; }
-                            let safeDay = parseInt(day) > 28 ? "28" : day; let nuevoVto = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
-                            let isPagado = (i === 0) ? pagado : false; let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+                            
+                            let safeDay = parseInt(day) > 28 ? "28" : day;
+                            let nuevoVto = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
+                            
+                            let isPagado = (i === 0) ? pagado : false;
+                            let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+
                             const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
-                        alert("¡Gasto fijo programado!");
+                        alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -694,8 +835,19 @@ if (formGasto) {
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             }
-            document.getElementById("modalGasto").style.display = "none"; formGasto.reset(); await refreshAll(); 
-        } catch (error) { alert("Error al guardar."); } finally { btnSubmit.disabled = false; btnSubmit.textContent = "Guardar"; }
+
+            document.getElementById("modalGasto").style.display = "none"; 
+            formGasto.reset(); 
+            document.getElementById('gastoId').value = ""; 
+            gastoEnEdicion = null;
+            document.getElementById('camposFijos').style.display = 'none'; 
+            await refreshAll(); 
+        } catch (error) {
+            alert("Hubo un error de conexión al guardar el gasto.");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar";
+        }
     };
 }
 
@@ -704,10 +856,30 @@ if (formIngreso) {
     formIngreso.onsubmit = async (e) => { 
         e.preventDefault(); 
         try {
-            const body = { descripcion: document.getElementById("ingresoDescripcion").value, monto: document.getElementById("ingresoMonto").value, medioPago: document.getElementById("ingresoMedio").value, fecha: document.getElementById("ingresoFecha").value, usuarioId: user.id, categoriaId: document.getElementById("ingresoCategoria").value || null };
-            await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            document.getElementById("modalIngreso").style.display = "none"; formIngreso.reset(); await refreshAll(); 
-        } catch(error) { alert("Error."); }
+            const body = { 
+                descripcion: document.getElementById("ingresoDescripcion").value, 
+                monto: document.getElementById("ingresoMonto").value, 
+                medioPago: document.getElementById("ingresoMedio").value, 
+                fecha: document.getElementById("ingresoFecha").value, 
+                usuarioId: user.id, 
+                categoriaId: document.getElementById("ingresoCategoria").value || null 
+            };
+            
+            const res = await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            if (!res.ok) {
+                const err = await res.text();
+                alert("La base de datos rechazó el ingreso. Error: " + err);
+                return;
+            }
+
+            document.getElementById("modalIngreso").style.display = "none"; 
+            formIngreso.reset(); 
+            await refreshAll(); 
+            
+        } catch(error) {
+            alert("Error de conexión. Revisá tu internet y volvé a intentar.");
+        }
     };
 }
 
@@ -718,26 +890,167 @@ if (formTarjeta) {
         const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            const descripcion = document.getElementById("tarjetaDescripcion").value, montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value), cuotas = parseInt(document.getElementById("tarjetaCuotas").value), primeraCuota = document.getElementById("tarjetaPrimeraCuota").value, tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            const descripcion = document.getElementById("tarjetaDescripcion").value;
+            const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
+            const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
+            const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
+            const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            
             const montoPorCuota = (montoTotal / cuotas).toFixed(2);
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
 
             for (let i = 1; i <= cuotas; i++) {
-                const yyyy = fechaActual.getFullYear(), mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                const yyyy = fechaActual.getFullYear();
+                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                
                 const textoDesc = cuotas === 1 ? descripcion : `${descripcion} (Cuota ${i}/${cuotas})`;
-                const body = { descripcion: textoDesc, monto: montoPorCuota, medioPago: tarjetaTipo, fecha: `${yyyy}-${mm}-10`, esFijo: false, usuarioId: user.id, pagado: false };
+                
+                const body = {
+                    descripcion: textoDesc,
+                    monto: montoPorCuota,
+                    medioPago: tarjetaTipo, 
+                    fecha: `${yyyy}-${mm}-10`,
+                    esFijo: false, 
+                    usuarioId: user.id,
+                    pagado: false 
+                };
                 await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 fechaActual.setMonth(fechaActual.getMonth() + 1);
             }
-            document.getElementById("modalTarjeta").style.display = "none"; formTarjeta.reset(); await refreshAll();
-        } catch (error) { alert("Error."); } finally { btnSubmit.disabled = false; }
+
+            document.getElementById("modalTarjeta").style.display = "none";
+            formTarjeta.reset();
+            await refreshAll();
+            alert(cuotas === 1 ? "Compra en 1 pago guardada." : "Cuotas generadas con éxito.");
+        } catch (error) { 
+            alert("Error al guardar la compra."); 
+        } finally { 
+            btnSubmit.disabled = false; 
+        }
     };
 }
 
-/* --- DOMContentLoaded --- */
+const formInversion = document.getElementById("formInversion");
+if (formInversion) {
+    formInversion.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formInversion button[type='submit']");
+        btnSubmit.disabled = true;
+        try {
+            const lugar = document.getElementById("invLugar").value;
+            const instrumento = document.getElementById("invInstrumento").value;
+            const moneda = document.getElementById("invMoneda").value;
+            const monto = document.getElementById("invMonto").value;
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
+            const body = {
+                descripcion: `INV: ${lugar} - ${instrumento} (${moneda})`,
+                monto: monto,
+                medioPago: "EFECTIVO", 
+                fecha: fechaHoy,
+                usuarioId: user.id,
+                categoriaId: null 
+            };
+
+            await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+
+            document.getElementById("modalInversion").style.display = "none";
+            formInversion.reset();
+            await refreshAll();
+            alert("Inversión registrada con éxito.");
+        } catch (error) {
+            alert("Hubo un error al registrar la inversión.");
+        } finally {
+            btnSubmit.disabled = false;
+        }
+    };
+}
+
+/* --- ELIMINACIONES --- */
+window.eliminarBilletera = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta cuenta? No se borrarán los movimientos pasados.")) {
+        await fetch(`${API}/billeteras/${id}`, { method: "DELETE", headers: authHeaders() });
+        await refreshAll();
+    }
+};
+
+window.eliminarPrestamo = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta cuota del préstamo?")) {
+        await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() });
+        await refreshAll();
+    }
+};
+
+window.eliminarGasto = async function(id) { 
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
+
+    if (!confirm(`¿Seguro que querés eliminar el gasto "${gasto.descripcion}"?`)) return;
+
+    if (gasto.esFijo) {
+        const borrarFuturos = confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de TODOS los meses SIGUIENTES?\n\n👉 ACEPTAR: Borra este y todos los futuros.\n👉 CANCELAR: Borra SOLO este mes.");
+
+        if (borrarFuturos) {
+            const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+            const todosLosGastos = await res.json();
+            
+            const gastosABorrar = todosLosGastos.filter(g => 
+                (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
+                g.esFijo === true && 
+                g.descripcion === gasto.descripcion && 
+                g.fecha >= gasto.fecha
+            );
+
+            for (const g of gastosABorrar) {
+                await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+            }
+            alert("¡Se eliminó este gasto y todas sus repeticiones futuras!");
+        } else {
+            await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
+        }
+    } else {
+        await fetch(`${API}/gastos/${id}`, { method: "DELETE", headers: authHeaders() });
+    }
+    
+    await refreshAll(); 
+};
+
+window.eliminarIngreso = async function(id) { 
+    if(confirm("¿Eliminar ingreso?")) { 
+        await fetch(`${API}/ingresos/${id}`, { method: "DELETE", headers: authHeaders() }); 
+        await refreshAll(); 
+    } 
+};
+
+window.eliminarCategoria = async function(id) { 
+    if(confirm("¿Seguro que querés eliminar esta categoría?")) { 
+        try {
+            await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
+            await refreshAll(); 
+        } catch(e) {
+            alert("Error al eliminar la categoría.");
+        }
+    } 
+};
+
+window.eliminarMiTarjeta = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito de tu cuenta?")) {
+        try {
+            await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
+            await refreshAll(); 
+        } catch(e) {
+            alert("Error al intentar eliminar la tarjeta.");
+        }
+    }
+};
+
+/* --- INICIO Y DOMContentLoaded --- */
 document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.getElementById('menuToggle'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebarOverlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
     if (menuToggle && sidebar && overlay) {
         menuToggle.onclick = () => { sidebar.classList.add('active'); overlay.classList.add('active'); };
         overlay.onclick = () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); };
@@ -745,48 +1058,134 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.nav-item').forEach(item => {
         item.onclick = () => {
-            if (item.id === "logoutBtn") { localStorage.clear(); window.location.href = "login.html"; return; }
-            if (sidebar && overlay) { sidebar.classList.remove('active'); overlay.classList.remove('active'); }
+            if (item.id === "logoutBtn") {
+                localStorage.clear();
+                window.location.href = "login.html";
+                return;
+            }
+
+            if (sidebar && overlay) {
+                sidebar.classList.remove('active'); 
+                overlay.classList.remove('active');
+            }
+
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
-            if (sectionId === "proyeccion") { document.getElementById('modalProyeccion').style.display = 'flex'; return; }
+
+            if (sectionId === "proyeccion") {
+                document.getElementById('modalProyeccion').style.display = 'flex';
+                return;
+            }
 
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
+            
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
 
+            const btnIngreso = document.getElementById('btnFabIngreso');
+            const btnGasto = document.getElementById('btnFabGasto');
+            const btnTarjeta = document.getElementById('btnFabTarjeta'); 
             const fabContainer = document.querySelector('.fab-container'); 
-            if (fabContainer) {
-                if (['ahorros', 'perfil', 'prestamos'].includes(sectionId)) { fabContainer.style.display = 'none'; } 
-                else { fabContainer.style.display = 'flex'; }
+
+            if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
+                if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
+                    fabContainer.style.display = 'none';
+                } else {
+                    fabContainer.style.display = 'flex';
+                    btnIngreso.style.display = 'flex';
+                    btnGasto.style.display = 'flex';
+                    btnTarjeta.style.display = 'flex'; 
+                }
             }
         };
     });
 
-    const fabMain = document.getElementById('fabMain'), fabOptions = document.getElementById('fabOptions');
-    if (fabMain && fabOptions) { fabMain.onclick = (e) => { e.stopPropagation(); fabOptions.classList.toggle('show'); }; }
-    document.addEventListener('click', () => { if(fabOptions) fabOptions.classList.remove('show'); });
+    const fabMain = document.getElementById('fabMain');
+    const fabOptions = document.getElementById('fabOptions');
+    
+    if (fabMain && fabOptions) {
+        fabMain.onclick = (e) => { 
+            e.stopPropagation(); 
+            fabOptions.classList.toggle('show'); 
+        };
+    }
+    
+    document.addEventListener('click', () => {
+        if(fabOptions) fabOptions.classList.remove('show');
+    });
 
-    const chkPagado = document.getElementById('gastoPagado'), divFechaPagoReal = document.getElementById('divFechaPagoReal');
+    const chkPagado = document.getElementById('gastoPagado');
+    const divFechaPagoReal = document.getElementById('divFechaPagoReal');
+    
     if (chkPagado && divFechaPagoReal) {
         chkPagado.onchange = (e) => {
             divFechaPagoReal.style.display = e.target.checked ? 'block' : 'none';
-            if (e.target.checked && !document.getElementById('gastoFecha').value) document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0];
+            if (e.target.checked && !document.getElementById('gastoFecha').value) {
+                document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0];
+            }
         };
     }
 
     const btnFabGasto = document.getElementById('btnFabGasto');
-    if (btnFabGasto) btnFabGasto.onclick = () => { document.getElementById('formGasto').reset(); document.getElementById('gastoId').value = ""; gastoEnEdicion = null; document.getElementById('modalGasto').style.display = 'flex'; };
+    if (btnFabGasto) btnFabGasto.onclick = () => { 
+        document.getElementById('formGasto').reset(); 
+        document.getElementById('gastoId').value = ""; 
+        gastoEnEdicion = null; 
+        
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('gastoVencimiento').value = hoy;
+        
+        if(chkPagado) chkPagado.checked = false;
+        if(divFechaPagoReal) divFechaPagoReal.style.display = 'none';
+
+        document.getElementById('modalGasto').style.display = 'flex'; 
+    };
+    
     const btnFabIngreso = document.getElementById('btnFabIngreso');
-    if (btnFabIngreso) btnFabIngreso.onclick = () => { document.getElementById('formIngreso').reset(); document.getElementById('modalIngreso').style.display = 'flex'; };
+    if (btnFabIngreso) btnFabIngreso.onclick = () => { 
+        document.getElementById('formIngreso').reset();
+        document.getElementById('ingresoId').value = "";
+        
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('ingresoFecha').value = hoy;
+
+        document.getElementById('modalIngreso').style.display = 'flex'; 
+    };
+    
     const btnFabTarjeta = document.getElementById('btnFabTarjeta');
-    if (btnFabTarjeta) btnFabTarjeta.onclick = () => { document.getElementById('formTarjeta').reset(); document.getElementById('modalTarjeta').style.display = 'flex'; };
+    if (btnFabTarjeta) btnFabTarjeta.onclick = () => { 
+        document.getElementById('formTarjeta').reset();
+        document.getElementById('modalTarjeta').style.display = 'flex'; 
+    };
 
     const btnGestionarCategorias = document.getElementById('btnGestionarCategorias');
     if (btnGestionarCategorias) btnGestionarCategorias.onclick = () => { document.getElementById('modalCategorias').style.display = 'flex'; };
 
-    document.querySelectorAll('.close').forEach(btn => { btn.onclick = () => { btn.closest('.modal').style.display = 'none'; }; });
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.onclick = () => { btn.closest('.modal').style.display = 'none'; };
+    });
+
+    const chkFijo = document.getElementById('gastoEsFijo');
+    const camposFijos = document.getElementById('camposFijos');
+    if (chkFijo && camposFijos) {
+        chkFijo.onchange = (e) => {
+            camposFijos.style.display = e.target.checked ? 'block' : 'none';
+        };
+    }
 });
 
-(async function init() { await fetchUserInfo(); cargarSelectorFechas(); await refreshAll(); })();
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+    logoutBtn.onclick = () => { 
+        localStorage.clear(); 
+        window.location.href="login.html"; 
+    };
+}
+
+// ARRANQUE DE LA APP
+(async function init() { 
+    await fetchUserInfo(); 
+    cargarSelectorFechas(); 
+    await refreshAll(); 
+})();
