@@ -216,16 +216,17 @@ window.configurarNombresPrestamo = function() {
 
 async function fetchCategorias() { 
     try { 
-        const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
+        const res = await fetch(`${API}/categorias/usuario/${user.id}`, { headers: authHeaders() }); 
         handleAuthError(res);
-        const todas = await res.json(); 
-        
-        // ¡FILTRO ESTRICTO RESTAURADO! Solo vas a ver las que tengan tu ID exacto
-        const misCategorias = todas.filter(cat => String(cat.usuarioId) === String(user.id));
-        
+
+        const misCategorias = await res.json();
+
         renderCategorias(misCategorias); 
         return misCategorias; 
-    } catch (e) { return []; } 
+
+    } catch (e) { 
+        return []; 
+    } 
 }
 
 async function fetchGastos() { 
@@ -1030,30 +1031,36 @@ window.eliminarIngreso = async function(id) {
 };
 
 window.crearCategoria = async function() {
+
     const inputCat = document.getElementById("nuevaCategoriaInput");
+
     if(!inputCat || !inputCat.value.trim()) { 
         alert("El nombre no puede estar vacío."); 
         return; 
     }
+
     try {
-        // ¡Magia aplicada! Ahora guarda la categoría con tu ID privado
+
         const body = { 
-            nombre: inputCat.value.trim(), 
-            usuario: { id: user.id } 
+            nombre: inputCat.value.trim(),
+            usuarioId: user.id
         };
+
         const res = await fetch(`${API}/categorias`, { 
             method: "POST", 
             headers: authHeaders(), 
             body: JSON.stringify(body) 
         });
+
         if (!res.ok) throw new Error("Error del servidor");
+
         inputCat.value = ""; 
         await refreshAll();
+
     } catch (error) { 
         alert("Error al crear la categoría."); 
     }
 };
-
 window.eliminarCategoria = async function(id) { 
     if(confirm("¿Seguro que querés eliminar esta categoría?")) { 
         try {
