@@ -343,12 +343,55 @@ function renderCategorias(categorias) {
   }
 }
 
+// --- RENDERIZAR LA PROYECCIÓN ---
+function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
+    const tbody = document.getElementById("tablaProyeccionBody");
+    if (!tbody) return;
+
+    const totalIngreso = ingresos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realFijos = gastosFijos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realVariables = gastosVariables.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realAhorro = ahorros.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+
+    const topeFijos = totalIngreso * 0.50;
+    const topeVariables = totalIngreso * 0.30;
+    const topeAhorro = totalIngreso * 0.20;
+
+    tbody.innerHTML = `
+        <tr>
+            <td>Gastos Fijos</td>
+            <td>50%</td>
+            <td style="color: #94a3b8;">${formatoMoneda(topeFijos)}</td>
+            <td style="font-weight:bold; color: ${realFijos > topeFijos ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realFijos)}</td>
+            <td>${realFijos > topeFijos ? '🔴 Excedido' : '🟢 Al día'}</td>
+        </tr>
+        <tr>
+            <td>Gastos Variables</td>
+            <td>30%</td>
+            <td style="color: #94a3b8;">${formatoMoneda(topeVariables)}</td>
+            <td style="font-weight:bold; color: ${realVariables > topeVariables ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realVariables)}</td>
+            <td>${realVariables > topeVariables ? '🔴 Excedido' : '🟢 Al día'}</td>
+        </tr>
+        <tr>
+            <td>Ahorros / Inv.</td>
+            <td>20%</td>
+            <td style="color: #94a3b8;">${formatoMoneda(topeAhorro)}</td>
+            <td style="font-weight:bold; color: ${realAhorro < topeAhorro ? '#ffce56' : '#2ac9bb'}">${formatoMoneda(realAhorro)}</td>
+            <td>${realAhorro >= topeAhorro && topeAhorro > 0 ? '🟢 Meta lograda' : (topeAhorro === 0 ? '⚪ Sin ingresos' : '🟡 Falta ahorro')}</td>
+        </tr>
+    `;
+
+    if(document.getElementById("resumenBNA")) document.getElementById("resumenBNA").textContent = document.getElementById("saldoBNA").textContent;
+    if(document.getElementById("resumenMP")) document.getElementById("resumenMP").textContent = document.getElementById("saldoMP").textContent;
+    if(document.getElementById("resumenEfectivo")) document.getElementById("resumenEfectivo").textContent = document.getElementById("saldoEfectivo").textContent;
+}
+
 // --- ACTUALIZACIÓN DE DATOS (REFRESH GENERAL) ---
 async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
   
-  cargarNombresPrestamo(); // Actualiza los nombres de préstamos apenas entra
+  cargarNombresPrestamo(); 
 
   await fetchYRenderizarMisTarjetas();
   actualizarMediosDePagoSelects(); 
@@ -404,7 +447,7 @@ async function refreshAll() {
   }
   
   // SEPARAMOS LOS GASTOS
-  const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo);
+  const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
   const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
   
   renderGastosVariables(gVariablesParaTabla); 
@@ -417,7 +460,6 @@ async function refreshAll() {
   // --- MAGIA DEL PANEL DE TARJETAS AGRUPADAS ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
   if (panelTarjetas) {
-      // Filtramos todo lo que no sea las billeteras base
       const baseMedios = ["BNA", "MERCADO_PAGO", "EFECTIVO", "CF"];
       const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes(g.medioPago));
       
@@ -452,9 +494,11 @@ async function refreshAll() {
   const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
   const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
   calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
+  
+  // Dibujamos la proyección
+  renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
 }
 
-// --- DIBUJAR TABLA DE PRÉSTAMOS ---
 function renderPrestamos(prestamos) {
     const tbody = document.querySelector("#tablaPrestamos tbody");
     if(!tbody) return;
@@ -566,6 +610,7 @@ function renderIngresos(ingresos) {
   });
 }
 
+// CORRECCIÓN VISUAL DE LA TABLA TARJETAS
 function renderConsumosCuotas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
     if (!tbody) return;
@@ -574,9 +619,10 @@ function renderConsumosCuotas(lista) {
     const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
     
     consumosTarjeta.forEach(g => {
-      const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px;">🗑️</button>`;
+      const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
       let desc = g.descripcion || "-";
       let badgeCuota = "";
+      
       if (desc.includes("(Cuota")) {
           const partes = desc.split("(Cuota");
           desc = partes[0].trim();
@@ -584,8 +630,20 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem;">${g.medioPago}</span>`;
-      tbody.innerHTML += `<tr><td>${g.fecha} <br> ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td style="display: flex; justify-content: space-between; align-items: center;">${formatoMoneda(g.monto)} ${acciones}</td></tr>`;
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
+      
+      tbody.innerHTML += `
+      <tr>
+          <td>${g.fecha} ${tarjetaBadge}</td>
+          <td>${desc}</td>
+          <td>${badgeCuota}</td>
+          <td>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>${formatoMoneda(g.monto)}</span>
+                  <span>${acciones}</span>
+              </div>
+          </td>
+      </tr>`;
     });
 }
 
