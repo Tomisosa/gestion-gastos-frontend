@@ -90,10 +90,8 @@ function generarGrafico(gastos) {
 
 /* --- SALDOS Y BILLETERAS --- */
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    // Definimos las cuentas base
     const billeterasNombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
     
-    // Sumamos las que el usuario creó en la nube
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
         if (!billeterasNombres.includes(nom)) {
@@ -259,7 +257,7 @@ async function fetchYRenderizarMisTarjetas() {
         contenedor.innerHTML = ""; 
         
         if (globalTarjetas.length === 0) {
-            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No hay tarjetas de crédito guardadas.</p>`;
+            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas de crédito guardadas.</p>`;
             return;
         }
         
@@ -534,7 +532,7 @@ function renderConsumosCuotas(lista) {
     });
 }
 
-/* --- FORM SUBMITS (CORREGIDOS PARA JAVA) --- */
+/* --- FORM SUBMITS (CORREGIDOS) --- */
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
     formBilletera.onsubmit = async (e) => {
@@ -542,21 +540,37 @@ if (formBilletera) {
         const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            // CORRECCIÓN: Enviamos el usuario como objeto { id: ... }
-            const body = { 
-                nombre: document.getElementById("billeteraNombre").value.trim(), 
-                usuario: { id: user.id } 
-            };
-            const response = await fetch(`${API}/billeteras`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
-            });
-            if(!response.ok) throw new Error("Error servidor");
+            const body = { nombre: document.getElementById("billeteraNombre").value.trim(), usuario: { id: user.id } };
+            const response = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            if(!response.ok) throw new Error("403");
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { alert("Error al crear la cuenta."); } 
+        } catch(err) { alert("El servidor rechazó la cuenta. Asegurate de que Railway terminó de cargar."); } 
+        finally { btnSubmit.disabled = false; }
+    };
+}
+
+const formNuevaTarjeta = document.getElementById("formNuevaTarjeta");
+if (formNuevaTarjeta) {
+    formNuevaTarjeta.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formNuevaTarjeta button[type='submit']");
+        btnSubmit.disabled = true;
+        try {
+            // CORREGIDO: Enviamos usuario como objeto
+            const body = { 
+                nombre: document.getElementById("nuevaTarjetaNombre").value.trim(), 
+                diaCierre: 1, diaVencimiento: 1, 
+                color: document.getElementById("nuevaTarjetaColor").value,
+                usuario: { id: user.id } 
+            };
+            const response = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            if(!response.ok) throw new Error("403");
+            document.getElementById("modalNuevaTarjeta").style.display = "none";
+            formNuevaTarjeta.reset();
+            await refreshAll();
+        } catch (error) { alert("El servidor rechazó la tarjeta. Revisá los permisos en Java."); } 
         finally { btnSubmit.disabled = false; }
     };
 }
@@ -568,22 +582,10 @@ if (formPrestamo) {
         const btnSubmit = document.querySelector("#formPrestamo button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            // CORRECCIÓN: Enviamos el usuario como objeto { id: ... }
-            const body = { 
-                mesCuota: document.getElementById("prestamoMes").value, 
-                aporteMama: parseFloat(document.getElementById("prestamoMama").value), 
-                aporteBelen: parseFloat(document.getElementById("prestamoBelen").value), 
-                usuario: { id: user.id } 
-            };
-            const response = await fetch(`${API}/prestamos`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
-            });
-            if(!response.ok) throw new Error("Error servidor");
-            document.getElementById("modalPrestamo").style.display = "none"; 
-            formPrestamo.reset(); 
-            await refreshAll();
+            const body = { mesCuota: document.getElementById("prestamoMes").value, aporteMama: parseFloat(document.getElementById("prestamoMama").value), aporteBelen: parseFloat(document.getElementById("prestamoBelen").value), usuario: { id: user.id } };
+            const response = await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            if(!response.ok) throw new Error("403");
+            document.getElementById("modalPrestamo").style.display = "none"; formPrestamo.reset(); await refreshAll();
         } catch(err) { alert("Error al crear préstamo."); } 
         finally { btnSubmit.disabled = false; }
     };
@@ -597,11 +599,15 @@ window.eliminarBilletera = async function(id) {
     }
 };
 
-window.eliminarPrestamo = async function(id) {
-    if(confirm("¿Eliminar cuota?")) { 
-        await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() }); 
+window.eliminarMiTarjeta = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta tarjeta de crédito?")) {
+        await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
         await refreshAll(); 
     }
+};
+
+window.eliminarPrestamo = async function(id) {
+    if(confirm("¿Eliminar cuota?")) { await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() }); await refreshAll(); }
 };
 
 window.eliminarGasto = async function(id) { 
@@ -621,7 +627,115 @@ window.eliminarGasto = async function(id) {
     await refreshAll(); 
 };
 
-/* --- DOMContentLoaded y Navegación --- */
+/* --- OTROS FORMS --- */
+const formGasto = document.getElementById("formGasto");
+if (formGasto) {
+    formGasto.onsubmit = async (e) => { 
+        e.preventDefault(); 
+        const btnSubmit = document.querySelector("#formGasto button[type='submit']");
+        btnSubmit.disabled = true; btnSubmit.textContent = "Guardando...";
+
+        try {
+            const idAEditar = document.getElementById("gastoId").value, descripcion = document.getElementById("gastoDescripcion").value, monto = document.getElementById("gastoMonto").value, medioPago = document.getElementById("gastoMedio").value, esFijo = document.getElementById("gastoEsFijo").checked, categoriaId = document.getElementById("gastoCategoria").value || null;
+            const fechaVto = document.getElementById("gastoVencimiento").value, pagado = document.getElementById("gastoPagado").checked, fechaReal = document.getElementById("gastoFecha").value;
+            let fechaBase = pagado ? (fechaReal || fechaVto) : fechaVto;
+
+            if (idAEditar) {
+                if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
+                    if (confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?")) {
+                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); const todos = await res.json();
+                        const futuros = todos.filter(g => (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) && g.esFijo === true && g.descripcion === gastoEnEdicion.descripcion && g.fecha >= gastoEnEdicion.fecha);
+
+                        for (const g of futuros) {
+                            await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
+                            let vtoFuturo = null;
+                            if (fechaVto) {
+                                const yDiff = parseInt(g.fecha.split('-')[0]) - parseInt(fechaVto.split('-')[0]), mDiff = parseInt(g.fecha.split('-')[1]) - parseInt(fechaVto.split('-')[1]);
+                                const totalMesesAdelante = (yDiff * 12) + mDiff;
+                                const [vYear, vMonth, vDay] = fechaVto.split('-');
+                                let nm = parseInt(vMonth) + totalMesesAdelante, ny = parseInt(vYear);
+                                while (nm > 12) { nm -= 12; ny += 1; }
+                                vtoFuturo = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
+                            }
+                            let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false; let pFecha = (isPagado) ? fechaBase : vtoFuturo;
+                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        }
+                        alert("¡Actualizado!");
+                    } else {
+                        await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
+                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    }
+                } else {
+                    await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
+                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                }
+            } else {
+                if (esFijo) {
+                    if (confirm("¿Programar para los próximos meses?")) {
+                        const [year, month, day] = fechaVto.split('-');
+                        for (let i = 0; i < 12; i++) {
+                            let m = parseInt(month) + i, y = parseInt(year);
+                            while (m > 12) { m -= 12; y += 1; }
+                            let safeDay = parseInt(day) > 28 ? "28" : day; let nuevoVto = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
+                            let isPagado = (i === 0) ? pagado : false; let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        }
+                        alert("¡Gasto fijo programado!");
+                    } else {
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
+                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    }
+                } else {
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId, fechaVencimiento: fechaVto, pagado };
+                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                }
+            }
+            document.getElementById("modalGasto").style.display = "none"; formGasto.reset(); await refreshAll(); 
+        } catch (error) { alert("Error al guardar."); } finally { btnSubmit.disabled = false; btnSubmit.textContent = "Guardar"; }
+    };
+}
+
+const formIngreso = document.getElementById("formIngreso");
+if (formIngreso) {
+    formIngreso.onsubmit = async (e) => { 
+        e.preventDefault(); 
+        try {
+            const body = { descripcion: document.getElementById("ingresoDescripcion").value, monto: document.getElementById("ingresoMonto").value, medioPago: document.getElementById("ingresoMedio").value, fecha: document.getElementById("ingresoFecha").value, usuarioId: user.id, categoriaId: document.getElementById("ingresoCategoria").value || null };
+            await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            document.getElementById("modalIngreso").style.display = "none"; formIngreso.reset(); await refreshAll(); 
+        } catch(error) { alert("Error."); }
+    };
+}
+
+const formTarjeta = document.getElementById("formTarjeta");
+if (formTarjeta) {
+    formTarjeta.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
+        btnSubmit.disabled = true;
+        try {
+            const descripcion = document.getElementById("tarjetaDescripcion").value, montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value), cuotas = parseInt(document.getElementById("tarjetaCuotas").value), primeraCuota = document.getElementById("tarjetaPrimeraCuota").value, tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            const montoPorCuota = (montoTotal / cuotas).toFixed(2);
+            const [year, month] = primeraCuota.split('-');
+            let fechaActual = new Date(year, month - 1, 10); 
+
+            for (let i = 1; i <= cuotas; i++) {
+                const yyyy = fechaActual.getFullYear(), mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                const textoDesc = cuotas === 1 ? descripcion : `${descripcion} (Cuota ${i}/${cuotas})`;
+                const body = { descripcion: textoDesc, monto: montoPorCuota, medioPago: tarjetaTipo, fecha: `${yyyy}-${mm}-10`, esFijo: false, usuarioId: user.id, pagado: false };
+                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+            }
+            document.getElementById("modalTarjeta").style.display = "none"; formTarjeta.reset(); await refreshAll();
+        } catch (error) { alert("Error."); } finally { btnSubmit.disabled = false; }
+    };
+}
+
+/* --- DOMContentLoaded --- */
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebarOverlay');
     if (menuToggle && sidebar && overlay) {
@@ -644,11 +758,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const fabContainer = document.querySelector('.fab-container'); 
             if (fabContainer) {
-                if (['ahorros', 'perfil', 'prestamos'].includes(sectionId)) { 
-                    fabContainer.style.display = 'none'; 
-                } else { 
-                    fabContainer.style.display = 'flex'; 
-                }
+                if (['ahorros', 'perfil', 'prestamos'].includes(sectionId)) { fabContainer.style.display = 'none'; } 
+                else { fabContainer.style.display = 'flex'; }
             }
         };
     });
@@ -657,22 +768,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fabMain && fabOptions) { fabMain.onclick = (e) => { e.stopPropagation(); fabOptions.classList.toggle('show'); }; }
     document.addEventListener('click', () => { if(fabOptions) fabOptions.classList.remove('show'); });
 
-    // Cierre de modales
-    document.querySelectorAll('.close').forEach(btn => { 
-        btn.onclick = () => { btn.closest('.modal').style.display = 'none'; }; 
-    });
-
-    const chkFijo = document.getElementById('gastoEsFijo'), camposFijos = document.getElementById('camposFijos');
-    if (chkFijo && camposFijos) { 
-        chkFijo.onchange = (e) => { camposFijos.style.display = e.target.checked ? 'block' : 'none'; }; 
+    const chkPagado = document.getElementById('gastoPagado'), divFechaPagoReal = document.getElementById('divFechaPagoReal');
+    if (chkPagado && divFechaPagoReal) {
+        chkPagado.onchange = (e) => {
+            divFechaPagoReal.style.display = e.target.checked ? 'block' : 'none';
+            if (e.target.checked && !document.getElementById('gastoFecha').value) document.getElementById('gastoFecha').value = new Date().toISOString().split('T')[0];
+        };
     }
+
+    const btnFabGasto = document.getElementById('btnFabGasto');
+    if (btnFabGasto) btnFabGasto.onclick = () => { document.getElementById('formGasto').reset(); document.getElementById('gastoId').value = ""; gastoEnEdicion = null; document.getElementById('modalGasto').style.display = 'flex'; };
+    const btnFabIngreso = document.getElementById('btnFabIngreso');
+    if (btnFabIngreso) btnFabIngreso.onclick = () => { document.getElementById('formIngreso').reset(); document.getElementById('modalIngreso').style.display = 'flex'; };
+    const btnFabTarjeta = document.getElementById('btnFabTarjeta');
+    if (btnFabTarjeta) btnFabTarjeta.onclick = () => { document.getElementById('formTarjeta').reset(); document.getElementById('modalTarjeta').style.display = 'flex'; };
+
+    const btnGestionarCategorias = document.getElementById('btnGestionarCategorias');
+    if (btnGestionarCategorias) btnGestionarCategorias.onclick = () => { document.getElementById('modalCategorias').style.display = 'flex'; };
+
+    document.querySelectorAll('.close').forEach(btn => { btn.onclick = () => { btn.closest('.modal').style.display = 'none'; }; });
 });
 
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) logoutBtn.onclick = () => { localStorage.clear(); window.location.href="login.html"; };
-
-(async function init() { 
-    await fetchUserInfo(); 
-    cargarSelectorFechas(); 
-    await refreshAll(); 
-})();
+(async function init() { await fetchUserInfo(); cargarSelectorFechas(); await refreshAll(); })();
