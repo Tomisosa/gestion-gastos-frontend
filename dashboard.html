@@ -49,17 +49,13 @@
         </div>
 
         <div id="inicio" class="page visible">
-          <div class="wallet-cards" style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 10px;">
-             <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid #2ac9bb;">
-               <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">🏦 BNA</h4><p id="saldoBNA" style="font-size: 1.3rem; font-weight: bold; color: #2ac9bb; margin: 5px 0 0 0;">$0.00</p>
-             </div>
-             <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid #00aae4;">
-               <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">📱 Mercado Pago</h4><p id="saldoMP" style="font-size: 1.3rem; font-weight: bold; color: #00aae4; margin: 5px 0 0 0;">$0.00</p>
-             </div>
-             <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid #ffce56;">
-               <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">💵 Efectivo</h4><p id="saldoEfectivo" style="font-size: 1.3rem; font-weight: bold; color: #ffce56; margin: 5px 0 0 0;">$0.00</p>
-             </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="margin: 0;">Plata en Mano (Débito)</h3>
+              <button onclick="agregarBilletera()" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Añadir nueva billetera virtual o cuenta">🏦 + Nueva Cuenta</button>
           </div>
+          
+          <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 10px;">
+             </div>
           
           <div class="cards">
             <div class="card">
@@ -179,7 +175,7 @@
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h2 style="color: var(--color-primario); margin: 0;">Gestor de Tarjetas de Crédito</h2>
-                    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Crear nueva billetera o tarjeta">💳 + Nueva</button>
+                    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Crear nueva tarjeta de crédito">💳 + Nueva</button>
                 </div>
                 
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
@@ -275,7 +271,7 @@
                     </select></label>
                     <label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label>
                 </div>
-                <label>Seleccionar Tarjeta <select id="tarjetaTipo" required></select></label>
+                <label>Seleccionar Tarjeta de Crédito<select id="tarjetaTipo" required></select></label>
                 <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
             </form>
         </div></div>
@@ -292,7 +288,7 @@
         
         <div id="modalCategorias" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalCategorias').style.display = 'none'">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="nuevaCategoriaInput" placeholder="Nueva categoría" /><button onclick="crearCategoria()" class="btn">Crear</button></div><ul id="listaCategoriasGestion" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div></div>
 
-       <div id="modalNuevaTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span><h3>💳 Agregar Billetera / Tarjeta</h3><form id="formNuevaTarjeta" class="form"><label>Nombre (Ej: Ualá, Naranja) <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label><label>Color de fondo para la cajita <select id="nuevaTarjetaColor" required><option value="bna">Verde Agua (BNA+)</option><option value="naranja">Naranja (Naranja X)</option><option value="violeta">Violeta (Ualá)</option><option value="celeste">Celeste (Mercado Pago)</option><option value="azul">Azul Oscuro (Visa/Mastercard)</option><option value="verde">Verde</option><option value="negro">Negro</option></select></label><button type="submit" class="btn" style="margin-top: 20px;">Guardar</button></form></div></div>
+       <div id="modalNuevaTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span><h3>💳 Agregar Tarjeta de Crédito</h3><form id="formNuevaTarjeta" class="form"><label>Nombre (Ej: Visa, Mastercard) <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label><label>Color de fondo para la cajita <select id="nuevaTarjetaColor" required><option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option></select></label><button type="submit" class="btn" style="margin-top: 20px;">Guardar Crédito</button></form></div></div>
 
         <div id="modalInversion" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span><h3>📈 Nueva Inversión / Ahorro</h3><form id="formInversion" class="form"><label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label><label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label><div style="display: flex; gap: 15px;"><label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label><label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label></div><button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button></form></div></div>
 
@@ -304,11 +300,7 @@
                     <thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead>
                     <tbody id="tablaProyeccionBody"></tbody>
                 </table>
-                <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;">
-                    <h4 style="margin-bottom: 10px;">💳 Resumen</h4>
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 BNA:</span> <span id="resumenBNA" style="font-weight: bold; color: #2ac9bb;">$0.00</span></div>
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>📱 Mercado Pago:</span> <span id="resumenMP" style="font-weight: bold; color: #00aae4;">$0.00</span></div>
-                    <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>💵 Efectivo:</span> <span id="resumenEfectivo" style="font-weight: bold; color: #ffce56;">$0.00</span></div>
+                <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion">
                 </div>
             </div>
         </div>

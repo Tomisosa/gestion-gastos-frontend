@@ -13,6 +13,9 @@ let globalIngresos = [];
 let globalTarjetas = []; 
 let gastoEnEdicion = null; 
 
+// Variable para guardar los saldos reales y pasarlos a la Proyección
+window.saldosActuales = {};
+
 function authHeaders() {
   return { 
     "Content-Type": "application/json", 
@@ -36,7 +39,7 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-// --- COLORES DE TARJETAS ---
+// --- COLORES DE TARJETAS DE CRÉDITO ---
 function getBgColor(color) {
     const m = {
         bna: "#2ac9bb, #0f766e", 
@@ -85,23 +88,78 @@ function generarGrafico(gastos) {
   });
 }
 
+// --- MAGIA: GESTIÓN DE BILLETERAS (DÉBITO) ---
+function getBilleteras() {
+    if (!user) return ["BNA", "MERCADO PAGO", "EFECTIVO"];
+    const guardadas = localStorage.getItem(`billeteras_${user.id}`);
+    return guardadas ? JSON.parse(guardadas) : ["BNA", "MERCADO PAGO", "EFECTIVO"];
+}
+
+window.agregarBilletera = function() {
+    const nombre = prompt("¿Cómo se llama tu nueva cuenta o billetera virtual? (Ej: Ualá, Cuenta DNI)");
+    if (!nombre || nombre.trim() === "") return;
+    
+    const bill = getBilleteras();
+    const nombreFormateado = nombre.trim().toUpperCase();
+    
+    if (!bill.includes(nombreFormateado)) {
+        bill.push(nombreFormateado);
+        localStorage.setItem(`billeteras_${user.id}`, JSON.stringify(bill));
+        refreshAll();
+    } else {
+        alert("Esa cuenta ya existe.");
+    }
+};
+
+window.eliminarBilletera = function(nombre) {
+    if(["BNA", "MERCADO PAGO", "EFECTIVO"].includes(nombre)) {
+        alert("Las cuentas base no se pueden eliminar, pero podés dejarlas en $0 gastando su saldo.");
+        return;
+    }
+    if(confirm(`¿Seguro que querés ocultar la cuenta ${nombre}? No se borrarán tus movimientos, solo se ocultará la cajita de tu Inicio.`)) {
+        let bill = getBilleteras();
+        bill = bill.filter(b => b !== nombre);
+        localStorage.setItem(`billeteras_${user.id}`, JSON.stringify(bill));
+        refreshAll();
+    }
+};
+
+// CÁLCULO INTELIGENTE DE SALDOS
 function calcularSaldosPorCuenta(gastos, ingresos) {
-  const saldos = { "BNA": 0, "MERCADO_PAGO": 0, "EFECTIVO": 0 };
-  
-  ingresos.forEach(i => { 
-      const m = i.medioPago || "EFECTIVO"; 
-      if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
-  });
-  
-  gastos.forEach(g => { 
-      if (g.pagado === false) return; 
-      const m = g.medioPago || "EFECTIVO"; 
-      if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
-  });
-  
-  if(document.getElementById("saldoBNA")) document.getElementById("saldoBNA").textContent = formatoMoneda(saldos["BNA"]);
-  if(document.getElementById("saldoMP")) document.getElementById("saldoMP").textContent = formatoMoneda(saldos["MERCADO_PAGO"]);
-  if(document.getElementById("saldoEfectivo")) document.getElementById("saldoEfectivo").textContent = formatoMoneda(saldos["EFECTIVO"]);
+    const billeteras = getBilleteras();
+    const saldos = {};
+    billeteras.forEach(b => saldos[b] = 0);
+
+    ingresos.forEach(i => { 
+        const m = i.medioPago || "EFECTIVO"; 
+        if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
+    });
+    
+    gastos.forEach(g => { 
+        if (g.pagado === false) return; 
+        const m = g.medioPago || "EFECTIVO"; 
+        if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
+    });
+    
+    window.saldosActuales = saldos;
+
+    const contenedor = document.getElementById("contenedorBilleteras");
+    if (contenedor) {
+        contenedor.innerHTML = "";
+        billeteras.forEach(b => {
+            let color = "#ffce56"; 
+            if(b === "BNA") color = "#2ac9bb";
+            if(b === "MERCADO PAGO") color = "#00aae4";
+            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; // Violeta para las cuentas nuevas
+
+            contenedor.innerHTML += `
+            <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; position: relative;">
+                ${!["BNA", "MERCADO PAGO", "EFECTIVO"].includes(b) ? `<button onclick="eliminarBilletera('${b}')" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;" title="Ocultar cuenta">✖</button>` : ''}
+                <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">🏦 ${b}</h4>
+                <p style="font-size: 1.3rem; font-weight: bold; color: ${color}; margin: 5px 0 0 0;">${formatoMoneda(saldos[b])}</p>
+            </div>`;
+        });
+    }
 }
 
 function cargarSelectorFechas() {
@@ -251,7 +309,7 @@ async function fetchYRenderizarMisTarjetas() {
         contenedor.innerHTML = ""; 
         
         if (globalTarjetas.length === 0) {
-            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas guardadas. ¡Agregá una nueva para empezar!</p>`;
+            contenedor.innerHTML = `<p style="color: #888; text-align: center; width: 100%;">No tenés tarjetas de crédito guardadas.</p>`;
             return;
         }
         
@@ -273,26 +331,25 @@ function actualizarMediosDePagoSelects() {
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     
-    const opcionesBase = `
-        <option value="BNA">🏦 BNA</option>
-        <option value="MERCADO_PAGO">📱 Mercado Pago</option>
-        <option value="EFECTIVO">💵 Efectivo</option>
-        <option value="CF">💳 CF</option>
-    `;
+    const billeteras = getBilleteras();
+    let opcionesBilleteras = "";
+    billeteras.forEach(b => {
+        opcionesBilleteras += `<option value="${b}">🏦 ${b}</option>`;
+    });
     
-    if (gastoMedio) gastoMedio.innerHTML = opcionesBase;
-    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBase;
+    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
+    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
+    
     if (tarjetaTipo) tarjetaTipo.innerHTML = "";
-    
     if (globalTarjetas.length === 0 && tarjetaTipo) {
-        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas creadas</option>';
+        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
     }
 
     globalTarjetas.forEach(t => {
         const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
         if (gastoMedio) gastoMedio.innerHTML += opt;
-        if (ingresoMedio) ingresoMedio.innerHTML += opt;
-        if (tarjetaTipo) tarjetaTipo.innerHTML += opt;
+        if (ingresoMedio) ingresoMedio.innerHTML += opt; 
+        if (tarjetaTipo) tarjetaTipo.innerHTML += opt; // Solo las de crédito van al form de cuotas
     });
 }
 
@@ -378,9 +435,20 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
         </tr>
     `;
 
-    if(document.getElementById("resumenBNA")) document.getElementById("resumenBNA").textContent = document.getElementById("saldoBNA").textContent;
-    if(document.getElementById("resumenMP")) document.getElementById("resumenMP").textContent = document.getElementById("saldoMP").textContent;
-    if(document.getElementById("resumenEfectivo")) document.getElementById("resumenEfectivo").textContent = document.getElementById("saldoEfectivo").textContent;
+    const contenedorSaldos = document.getElementById("resumenCuentasProyeccion");
+    if(contenedorSaldos) {
+        contenedorSaldos.innerHTML = `<h4 style="margin-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
+        const billeteras = getBilleteras();
+        const saldos = window.saldosActuales || {};
+        
+        billeteras.forEach(b => {
+            contenedorSaldos.innerHTML += `
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
+                <span>🏦 ${b}:</span> 
+                <span style="font-weight: bold; color: #00aae4;">${formatoMoneda(saldos[b] || 0)}</span>
+            </div>`;
+        });
+    }
 }
 
 // --- ACTUALIZACIÓN DE DATOS (REFRESH GENERAL) ---
@@ -391,7 +459,6 @@ async function refreshAll() {
   cargarNombresPrestamo(); 
 
   await fetchYRenderizarMisTarjetas();
-  actualizarMediosDePagoSelects(); 
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
@@ -452,9 +519,11 @@ async function refreshAll() {
   renderConsumosCuotas(gParaTablasYGrafico); 
   renderPrestamos(pTodos); 
 
+  // --- MAGIA DEL PANEL DE TARJETAS DE CRÉDITO ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
   if (panelTarjetas) {
-      const baseMedios = ["BNA", "MERCADO_PAGO", "EFECTIVO", "CF"];
+      const baseMedios = getBilleteras(); // Todas las de débito
+      // Filtramos lo que NO sea débito (Es decir, es crédito)
       const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes(g.medioPago));
       
       const totalesTarjetas = {};
@@ -472,7 +541,7 @@ async function refreshAll() {
       divDetalle.innerHTML = "";
       
       if (Object.keys(totalesTarjetas).length === 0) {
-          divDetalle.innerHTML = "<p style='color:#888; font-size: 0.9rem;'>No hay gastos de tarjeta programados para este mes.</p>";
+          divDetalle.innerHTML = "<p style='color:#888; font-size: 0.9rem;'>No hay gastos de tarjeta de crédito programados para este mes.</p>";
       } else {
           for (const [tarjeta, total] of Object.entries(totalesTarjetas)) {
               divDetalle.innerHTML += `
@@ -488,6 +557,8 @@ async function refreshAll() {
   const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
   calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
   
+  // Actualizamos todo y dibujamos la proyección al final
+  actualizarMediosDePagoSelects();
   renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
 }
 
@@ -621,7 +692,6 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
-      // ACÁ SE ARREGLAN LAS LÍNEAS RARAS DE LA TABLA
       tbody.innerHTML += `
       <tr>
           <td>${g.fecha} ${tarjetaBadge}</td>
@@ -1076,7 +1146,7 @@ if (formNuevaTarjeta) {
 
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
-            alert("¡Billetera/Tarjeta guardada con éxito!");
+            alert("¡Billetera/Tarjeta de crédito guardada con éxito!");
             await refreshAll();
 
         } catch (error) {
@@ -1107,16 +1177,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (sidebar && overlay) {
+                sidebar.classList.remove('active'); 
+                overlay.classList.remove('active');
+            }
+
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
 
             if (sectionId === "proyeccion") {
                 document.getElementById('modalProyeccion').style.display = 'flex';
-                // ACÁ ESTÁ EL ARREGLO DEL MENÚ LATERAL QUE NO SE CERRABA EN CELULARES
-                if (sidebar && overlay) {
-                    sidebar.classList.remove('active'); 
-                    overlay.classList.remove('active');
-                }
                 return;
             }
 
@@ -1126,15 +1196,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
 
-            // ACÁ ESTÁ EL ARREGLO DEL MENÚ LATERAL QUE NO SE CERRABA EN CELULARES
-            if (sidebar && overlay) {
-                sidebar.classList.remove('active'); 
-                overlay.classList.remove('active');
-            }
-
             const btnIngreso = document.getElementById('btnFabIngreso');
             const btnGasto = document.getElementById('btnFabGasto');
-            const btnTarjeta = document.getElementById('btnFabTarjeta'); // Ojo, ahora se llama btnFabTarjeta pero abre Cargar Compra
+            const btnTarjeta = document.getElementById('btnFabTarjeta'); 
             const fabContainer = document.querySelector('.fab-container'); 
 
             if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
@@ -1142,7 +1206,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     fabContainer.style.display = 'none';
                 } else {
                     fabContainer.style.display = 'flex';
-                    // Dejamos que los 3 botones se vean siempre en las pantallas principales
                     btnIngreso.style.display = 'flex';
                     btnGasto.style.display = 'flex';
                     btnTarjeta.style.display = 'flex'; 
@@ -1203,7 +1266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalIngreso').style.display = 'flex'; 
     };
     
-    // ACÁ ESTÁ EL ARREGLO DE CARGAR COMPRA
     const btnFabTarjeta = document.getElementById('btnFabTarjeta');
     if (btnFabTarjeta) btnFabTarjeta.onclick = () => { 
         document.getElementById('formTarjeta').reset();
