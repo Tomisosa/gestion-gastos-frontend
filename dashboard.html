@@ -289,6 +289,23 @@
 
         <div id="modalInversion" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span><h3>📈 Nueva Inversión / Ahorro</h3><form id="formInversion" class="form"><label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label><label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label><div style="display: flex; gap: 15px;"><label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label><label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label></div><button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button></form></div></div>
 
+        <div id="modalProyeccion" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <span class="close" id="closeProyeccion" onclick="document.getElementById('modalProyeccion').style.display = 'none'">&times;</span>
+                <h3>🎯 Proyección Mensual</h3>
+                <table class="table" style="margin-bottom: 20px;">
+                    <thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead>
+                    <tbody id="tablaProyeccionBody"></tbody>
+                </table>
+                <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;">
+                    <h4 style="margin-bottom: 10px;">💳 Resumen</h4>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>🏦 BNA:</span> <span id="resumenBNA" style="font-weight: bold; color: #2ac9bb;">$0.00</span></div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;"><span>📱 Mercado Pago:</span> <span id="resumenMP" style="font-weight: bold; color: #00aae4;">$0.00</span></div>
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0;"><span>💵 Efectivo:</span> <span id="resumenEfectivo" style="font-weight: bold; color: #ffce56;">$0.00</span></div>
+                </div>
+            </div>
+        </div>
+
       <div id="message" class="toast"></div>
       </section>
     </main>
