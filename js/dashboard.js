@@ -460,6 +460,7 @@ async function refreshAll() {
   // --- MAGIA DEL PANEL DE TARJETAS AGRUPADAS ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
   if (panelTarjetas) {
+      // Filtramos todo lo que no sea las billeteras base
       const baseMedios = ["BNA", "MERCADO_PAGO", "EFECTIVO", "CF"];
       const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes(g.medioPago));
       
@@ -499,6 +500,7 @@ async function refreshAll() {
   renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
 }
 
+// --- DIBUJAR TABLA DE PRÉSTAMOS ---
 function renderPrestamos(prestamos) {
     const tbody = document.querySelector("#tablaPrestamos tbody");
     if(!tbody) return;
@@ -610,7 +612,6 @@ function renderIngresos(ingresos) {
   });
 }
 
-// CORRECCIÓN VISUAL DE LA TABLA TARJETAS
 function renderConsumosCuotas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
     if (!tbody) return;
@@ -1117,6 +1118,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // NUEVO: Cerramos el menú lateral inmediatamente al tocar cualquier opción (para celulares)
+            if (sidebar && overlay) {
+                sidebar.classList.remove('active'); 
+                overlay.classList.remove('active');
+            }
+
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
 
@@ -1130,11 +1137,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
-            
-            if (sidebar && overlay) {
-                sidebar.classList.remove('active'); 
-                overlay.classList.remove('active');
-            }
 
             const btnIngreso = document.getElementById('btnFabIngreso');
             const btnGasto = document.getElementById('btnFabGasto');
