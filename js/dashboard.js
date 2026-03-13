@@ -220,8 +220,9 @@ async function fetchCategorias() {
         handleAuthError(res);
         const todas = await res.json(); 
         
-        // Relajamos el filtro para que no te borre las categorías
-        const misCategorias = todas.filter(cat => !cat.usuario || String(cat.usuario.id) === String(user.id) || cat.usuarioId === undefined);
+        // ¡FILTRO ESTRICTO RESTAURADO! Solo vas a ver las que tengan tu ID exacto
+        const misCategorias = todas.filter(cat => String(cat.usuarioId) === String(user.id));
+        
         renderCategorias(misCategorias); 
         return misCategorias; 
     } catch (e) { return []; } 
