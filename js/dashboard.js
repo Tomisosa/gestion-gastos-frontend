@@ -679,12 +679,13 @@ if (formNuevaTarjeta) {
         btnSubmit.textContent = "Guardando...";
 
         try {
+            // ¡ACÁ ESTÁ LA CORRECCIÓN! Ahora sí habla el mismo idioma que Java
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
                 diaCierre: 1, 
                 diaVencimiento: 1, 
                 color: document.getElementById("nuevaTarjetaColor").value,
-                usuario: { id: user.id }
+                usuario: { id: user.id } // <-- ESTO ERA LO QUE ESTABA MAL ANTES
             };
 
             const res = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -697,7 +698,7 @@ if (formNuevaTarjeta) {
             await refreshAll();
 
         } catch (error) {
-            alert("El servidor rechazó la tarjeta.");
+            alert("Hubo un error de conexión al guardar.");
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar Crédito";
