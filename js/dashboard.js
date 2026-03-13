@@ -14,7 +14,6 @@ let globalTarjetas = [];
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
 
-// Variable para guardar los saldos reales y pasarlos a la Proyección
 window.saldosActuales = {};
 
 function authHeaders() {
@@ -40,7 +39,6 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-// --- COLORES DE TARJETAS DE CRÉDITO ---
 function getBgColor(color) {
     const m = {
         bna: "#2ac9bb, #0f766e", 
@@ -168,7 +166,7 @@ function cargarSelectorFechas() {
   selector.onchange = () => refreshAll();
 }
 
-/* --- LLAMADAS API --- */
+/* --- LLAMADAS API (¡ACÁ ESTÁ LA MAGIA QUE ARREGLA TODO!) --- */
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
@@ -221,7 +219,9 @@ async function fetchCategorias() {
         const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
         handleAuthError(res);
         const todas = await res.json(); 
-        const misCategorias = todas.filter(cat => String(cat.usuarioId) === String(user.id) || (cat.usuario && String(cat.usuario.id) === String(user.id)));
+        
+        // Relajamos el filtro para que no te borre las categorías
+        const misCategorias = todas.filter(cat => !cat.usuario || String(cat.usuario.id) === String(user.id) || cat.usuarioId === undefined);
         renderCategorias(misCategorias); 
         return misCategorias; 
     } catch (e) { return []; } 
@@ -230,16 +230,16 @@ async function fetchCategorias() {
 async function fetchGastos() { 
     const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
     handleAuthError(res);
-    const todos = await res.json(); 
-    globalGastos = todos.filter(g => String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id)));
+    // SIN FILTRO: La base de datos ya nos dio solo los tuyos
+    globalGastos = await res.json(); 
     return globalGastos; 
 }
 
 async function fetchIngresos() { 
     const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
     handleAuthError(res);
-    const todos = await res.json(); 
-    globalIngresos = todos.filter(i => String(i.usuarioId) === String(user.id) || (i.usuario && String(i.usuario.id) === String(user.id)));
+    // SIN FILTRO: La base de datos ya nos dio solo los tuyos
+    globalIngresos = await res.json(); 
     return globalIngresos; 
 }
 
@@ -263,9 +263,9 @@ async function fetchYRenderizarMisTarjetas() {
     try {
         const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
-        const todas = await res.json();
         
-        globalTarjetas = todas.filter(t => String(t.usuarioId) === String(user.id) || (t.usuario && String(t.usuario.id) === String(user.id)));
+        // SIN FILTRO: Ya vienen listas para usar
+        globalTarjetas = await res.json();
 
         const contenedor = document.getElementById("contenedorMisTarjetas");
         if (!contenedor) return;
@@ -388,7 +388,6 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     }
 }
 
-// --- ACTUALIZACIÓN DE DATOS (REFRESH GENERAL) ---
 async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
@@ -652,7 +651,6 @@ if (formBilletera) {
         const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            // ¡ESTA ES LA LÍNEA CLAVE! -> usuario: { id: user.id }
             const body = { 
                 nombre: document.getElementById("billeteraNombre").value.trim(), 
                 usuario: { id: user.id } 
@@ -665,7 +663,7 @@ if (formBilletera) {
             formBilletera.reset();
             await refreshAll();
         } catch(err) { 
-            alert("Error al conectar con la base de datos. Asegurate de que Railway se haya actualizado."); 
+            alert("Error al conectar con la base de datos."); 
         } finally { 
             btnSubmit.disabled = false; 
         }
@@ -681,7 +679,6 @@ if (formNuevaTarjeta) {
         btnSubmit.textContent = "Guardando...";
 
         try {
-            // ¡ESTA ES LA LÍNEA CLAVE! -> usuario: { id: user.id }
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
                 diaCierre: 1, 
@@ -700,7 +697,7 @@ if (formNuevaTarjeta) {
             await refreshAll();
 
         } catch (error) {
-            alert("El servidor rechazó la tarjeta. Asegurate de haber puesto el @JsonIgnore en Tarjeta.java.");
+            alert("El servidor rechazó la tarjeta.");
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar Crédito";
