@@ -113,13 +113,20 @@ function cargarSelectorFechas() {
   selector.onchange = () => refreshAll();
 }
 
-/* --- LLAMADAS API CON ESCUDOS FILTRADORES 🛡️ --- */
+/* --- LLAMADAS API CON ESCUDOS --- */
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
     handleAuthError(res);
     user = await res.json();
-    if(document.getElementById("userEmail")) document.getElementById("userEmail").textContent = user.email;
+    
+    const emailDiv = document.getElementById("userEmail");
+    if(emailDiv) {
+        emailDiv.textContent = "👤 " + user.email;
+        emailDiv.style.color = "#ffce56"; 
+        emailDiv.style.fontWeight = "bold";
+        emailDiv.style.fontSize = "0.9rem";
+    }
   } catch (e) { 
     localStorage.removeItem("token");
     window.location.href = "login.html"; 
@@ -149,7 +156,6 @@ async function fetchGastos() {
     handleAuthError(res);
     const todosLosGastos = await res.json(); 
     
-    // ESCUDO FILTRADOR PARA GASTOS: Nadie ve lo del otro
     const misGastos = todosLosGastos.filter(g => 
         String(g.usuarioId) === String(user.id) || 
         (g.usuario && String(g.usuario.id) === String(user.id))
@@ -164,7 +170,6 @@ async function fetchIngresos() {
     handleAuthError(res);
     const todosLosIngresos = await res.json(); 
     
-    // ESCUDO FILTRADOR PARA INGRESOS
     const misIngresos = todosLosIngresos.filter(i => 
         String(i.usuarioId) === String(user.id) || 
         (i.usuario && String(i.usuario.id) === String(user.id))
@@ -180,7 +185,6 @@ async function fetchYRenderizarMisTarjetas() {
         if (!res.ok) throw new Error("Error trayendo tarjetas");
         const todasLasTarjetas = await res.json();
         
-        // ESCUDO FILTRADOR PARA TARJETAS
         globalTarjetas = todasLasTarjetas.filter(t => 
             String(t.usuarioId) === String(user.id) || 
             (t.usuario && String(t.usuario.id) === String(user.id))
@@ -290,7 +294,6 @@ function renderCategorias(categorias) {
   }
 }
 
-// --- ACTUALIZACIÓN DE DATOS (REFRESH GENERAL) ---
 async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
@@ -356,6 +359,7 @@ async function refreshAll() {
   calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
 }
 
+// --- TABLA DE FIJOS CON VENCIMIENTO Y ESTADO REAL ---
 function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
@@ -368,12 +372,18 @@ function renderGastosFijos(lista) {
         <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
         <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
     `;
+
+    // Si tiene fecha de vencimiento guardada la mostramos, sino guión
+    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+    // Chequeamos si está pagado o no (Si es falso o null, no está pagado)
+    const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
+
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
         <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
-        <td>-</td>
+        <td>${vto}</td>
         <td>${g.categoriaNombre||"-"}</td>
-        <td>✅ Sí</td>
+        <td>${estadoPagado}</td>
         <td>${g.fecha}</td>
         <td>${g.medioPago||"EFECTIVO"}</td>
         <td>${acciones}</td>
@@ -476,6 +486,14 @@ window.editarGasto = function(id) {
     document.getElementById("gastoMedio").value = gastoEnEdicion.medioPago;
     document.getElementById("gastoCategoria").value = gastoEnEdicion.categoriaId || "";
     
+    // Carga los campos nuevos
+    if (document.getElementById("gastoVencimiento")) {
+        document.getElementById("gastoVencimiento").value = gastoEnEdicion.fechaVencimiento || "";
+    }
+    if (document.getElementById("gastoPagado")) {
+        document.getElementById("gastoPagado").checked = gastoEnEdicion.pagado || false;
+    }
+
     const chkFijo = document.getElementById("gastoEsFijo");
     if (chkFijo) {
         chkFijo.checked = gastoEnEdicion.esFijo;
@@ -552,6 +570,10 @@ if (formGasto) {
             const fechaBase = document.getElementById("gastoFecha").value;
             const esFijo = document.getElementById("gastoEsFijo").checked;
             const categoriaId = document.getElementById("gastoCategoria").value || null;
+            
+            // Levantamos los valores de Vencimiento y Pagado
+            const fechaVencimiento = document.getElementById("gastoVencimiento").value || null;
+            const pagado = document.getElementById("gastoPagado").checked;
 
             if (idAEditar) {
                 if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
@@ -570,19 +592,34 @@ if (formGasto) {
 
                         for (const g of futuros) {
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
-                            const body = { descripcion, monto, medioPago, fecha: g.fecha, esFijo: true, usuarioId: user.id, categoriaId };
+                            
+                            // Re-calculamos el vencimiento futuro si es que lo hay
+                            let vtoFuturo = null;
+                            if (fechaVencimiento) {
+                                const yDiff = parseInt(g.fecha.split('-')[0]) - parseInt(fechaBase.split('-')[0]);
+                                const mDiff = parseInt(g.fecha.split('-')[1]) - parseInt(fechaBase.split('-')[1]);
+                                const totalMesesAdelante = (yDiff * 12) + mDiff;
+                                
+                                const [vYear, vMonth, vDay] = fechaVencimiento.split('-');
+                                let nm = parseInt(vMonth) + totalMesesAdelante;
+                                let ny = parseInt(vYear);
+                                while (nm > 12) { nm -= 12; ny += 1; }
+                                vtoFuturo = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
+                            }
+                            
+                            const body = { descripcion, monto, medioPago, fecha: g.fecha, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: vtoFuturo, pagado: g.fecha === fechaBase ? pagado : false };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId, fechaVencimiento, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
                     await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId };
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId, fechaVencimiento, pagado };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             } else {
@@ -600,16 +637,30 @@ if (formGasto) {
                             let y = currentYear;
                             if (m > 12) { m -= 12; y += 1; }
                             const fechaCuota = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
-                            const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId };
+                            
+                            // Calcula el vencimiento de cada mes (Magia de fechas)
+                            let nuevoVto = null;
+                            if (fechaVencimiento) {
+                                const [vYear, vMonth, vDay] = fechaVencimiento.split('-');
+                                let nm = parseInt(vMonth) + i;
+                                let ny = parseInt(vYear);
+                                while (nm > 12) { nm -= 12; ny += 1; }
+                                nuevoVto = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
+                            }
+                            
+                            // Solo el primer mes guarda lo que pusiste, los meses futuros se ponen como "NO PAGADO"
+                            const cuotaPagada = (i === 0) ? pagado : false;
+
+                            const body = { descripcion, monto, medioPago, fecha: fechaCuota, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento: nuevoVto, pagado: cuotaPagada };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
                         alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId };
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId, fechaVencimiento, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
                 } else {
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId };
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId, fechaVencimiento: null, pagado: true };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             }
@@ -621,7 +672,7 @@ if (formGasto) {
             document.getElementById('camposFijos').style.display = 'none'; 
             await refreshAll(); 
         } catch (error) {
-            alert("Hubo un error al guardar el gasto.");
+            alert("Hubo un error de conexión al guardar el gasto.");
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar";
@@ -629,22 +680,37 @@ if (formGasto) {
     };
 }
 
+// --- DETECTOR DE ERRORES AL GUARDAR INGRESO ---
 const formIngreso = document.getElementById("formIngreso");
 if (formIngreso) {
     formIngreso.onsubmit = async (e) => { 
         e.preventDefault(); 
-        const body = { 
-            descripcion: document.getElementById("ingresoDescripcion").value, 
-            monto: document.getElementById("ingresoMonto").value, 
-            medioPago: document.getElementById("ingresoMedio").value, 
-            fecha: document.getElementById("ingresoFecha").value, 
-            usuarioId: user.id, 
-            categoriaId: document.getElementById("ingresoCategoria").value || null 
-        };
-        await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-        document.getElementById("modalIngreso").style.display = "none"; 
-        formIngreso.reset(); 
-        await refreshAll(); 
+        
+        try {
+            const body = { 
+                descripcion: document.getElementById("ingresoDescripcion").value, 
+                monto: document.getElementById("ingresoMonto").value, 
+                medioPago: document.getElementById("ingresoMedio").value, 
+                fecha: document.getElementById("ingresoFecha").value, 
+                usuarioId: user.id, 
+                categoriaId: document.getElementById("ingresoCategoria").value || null 
+            };
+            
+            const res = await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            if (!res.ok) {
+                const err = await res.text();
+                alert("La base de datos rechazó el ingreso. Error: " + err);
+                return;
+            }
+
+            document.getElementById("modalIngreso").style.display = "none"; 
+            formIngreso.reset(); 
+            await refreshAll(); 
+            
+        } catch(error) {
+            alert("Error de conexión. Revisá tu internet y volvé a intentar.");
+        }
     };
 }
 
@@ -875,11 +941,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
+    // MAGIA DE FECHAS: Cuando abrís el modal, se llena solo con la fecha de hoy
     const btnFabGasto = document.getElementById('btnFabGasto');
     if (btnFabGasto) btnFabGasto.onclick = () => { 
         document.getElementById('formGasto').reset(); 
         document.getElementById('gastoId').value = ""; 
         gastoEnEdicion = null; 
+        
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('gastoFecha').value = hoy;
+        if(document.getElementById('gastoVencimiento')) document.getElementById('gastoVencimiento').value = hoy;
+
         document.getElementById('modalGasto').style.display = 'flex'; 
     };
     
@@ -887,6 +959,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnFabIngreso) btnFabIngreso.onclick = () => { 
         document.getElementById('formIngreso').reset();
         document.getElementById('ingresoId').value = "";
+        
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('ingresoFecha').value = hoy;
+
         document.getElementById('modalIngreso').style.display = 'flex'; 
     };
     
