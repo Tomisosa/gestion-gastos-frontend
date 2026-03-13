@@ -126,13 +126,21 @@ async function fetchUserInfo() {
   }
 }
 
+// --- MAGIA: EL ESCUDO DE CATEGORÍAS ---
 async function fetchCategorias() { 
     try { 
         const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
         handleAuthError(res);
-        const data = await res.json(); 
-        renderCategorias(data); 
-        return data; 
+        const todasLasCategorias = await res.json(); 
+        
+        // Filtramos para que solo te muestre las tuyas
+        const misCategorias = todasLasCategorias.filter(cat => 
+            String(cat.usuarioId) === String(user.id) || 
+            (cat.usuario && String(cat.usuario.id) === String(user.id))
+        );
+
+        renderCategorias(misCategorias); 
+        return misCategorias; 
     } catch (e) { 
         return []; 
     } 
@@ -221,10 +229,8 @@ function actualizarMediosDePagoSelects() {
 }
 
 function renderCategorias(categorias) {
-  // 1. ORDEN ALFABÉTICO (Solución para tu hermana)
   categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-  // 2. ACTUALIZAR EL CONTADOR (Solución para tu hermana)
   const contadorEl = document.getElementById("countCategorias");
   if (contadorEl) {
       contadorEl.textContent = categorias.length;
@@ -560,7 +566,6 @@ if (formGasto) {
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             } else {
-                // --- 3. LA PREGUNTA DEL GASTO FIJO (Solución para tu hermana) ---
                 if (esFijo) {
                     const programarFuturos = confirm("¿Desea programar este gasto para los próximos meses?\n\n👉 ACEPTAR: Se guarda en este mes y se clona para los próximos 11 meses.\n👉 CANCELAR: Se guarda SOLO en este mes como gasto fijo.");
 
@@ -580,7 +585,6 @@ if (formGasto) {
                         }
                         alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
-                        // Si pone cancelar, solo lo guarda este mes
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
