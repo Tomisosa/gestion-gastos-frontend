@@ -679,18 +679,25 @@ if (formNuevaTarjeta) {
         btnSubmit.textContent = "Guardando...";
 
         try {
-            // ¡ACÁ ESTÁ LA CORRECCIÓN! Ahora sí habla el mismo idioma que Java
+            // ¡ESTA ES LA CLAVE! Enviamos 'usuario' como un objeto, no como un número suelto.
             const body = {
                 nombre: document.getElementById("nuevaTarjetaNombre").value.trim(),
                 diaCierre: 1, 
                 diaVencimiento: 1, 
                 color: document.getElementById("nuevaTarjetaColor").value,
-                usuario: { id: user.id } // <-- ESTO ERA LO QUE ESTABA MAL ANTES
+                usuario: { id: user.id } // <--- ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE!
             };
 
-            const res = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            const res = await fetch(`${API}/tarjetas`, { 
+                method: "POST", 
+                headers: authHeaders(), 
+                body: JSON.stringify(body) 
+            });
 
-            if (!res.ok) throw new Error("Error al guardar la tarjeta");
+            if (!res.ok) {
+                 const errorText = await res.text();
+                 throw new Error(errorText || "Error al guardar la tarjeta");
+            }
 
             document.getElementById("modalNuevaTarjeta").style.display = "none";
             formNuevaTarjeta.reset();
@@ -698,7 +705,7 @@ if (formNuevaTarjeta) {
             await refreshAll();
 
         } catch (error) {
-            alert("Hubo un error de conexión al guardar.");
+            alert(`Hubo un error al guardar: ${error.message}`);
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar Crédito";
