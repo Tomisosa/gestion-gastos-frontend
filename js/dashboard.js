@@ -149,6 +149,37 @@ async function fetchUserInfo() {
   }
 }
 
+// --- MAGIA: CARGAR LOS NOMBRES DEL PRÉSTAMO POR USUARIO ---
+function cargarNombresPrestamo() {
+    if (!user) return;
+    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
+    const config = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
+
+    const labels1 = ["labelTotal1", "labelTabla1", "labelModal1"];
+    const labels2 = ["labelTotal2", "labelTabla2", "labelModal2"];
+
+    labels1.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n1; });
+    labels2.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
+}
+
+// ESTA FUNCIÓN SE EJECUTA AL TOCAR EL BOTÓN ⚙️ EN PRÉSTAMOS
+window.configurarNombresPrestamo = function() {
+    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
+    const configActual = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
+    
+    const nombre1 = prompt("Ingresá el nombre de la 1° Persona (Ej: Mamá, Juan):", configActual.n1);
+    if (nombre1 === null) return; 
+    
+    const nombre2 = prompt("Ingresá el nombre de la 2° Persona (Ej: Belén, Pedro):", configActual.n2);
+    if (nombre2 === null) return;
+
+    if (nombre1.trim() !== "" && nombre2.trim() !== "") {
+        localStorage.setItem(`nombres_prestamo_${user.id}`, JSON.stringify({ n1: nombre1.trim(), n2: nombre2.trim() }));
+        cargarNombresPrestamo();
+        alert("¡Nombres actualizados con éxito! Sólo los verás en tu cuenta.");
+    }
+};
+
 async function fetchCategorias() { 
     try { 
         const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
@@ -195,7 +226,6 @@ async function fetchIngresos() {
     return misIngresos; 
 }
 
-// --- MAGIA NUEVA: TRAER PRÉSTAMOS ---
 async function fetchPrestamos() {
     try {
         const res = await fetch(`${API}/prestamos/usuario/${user.id}`, { headers: authHeaders() });
@@ -318,12 +348,14 @@ async function refreshAll() {
   await fetchCategorias(); 
   if(!user) return; 
   
+  cargarNombresPrestamo(); // Actualiza los nombres de préstamos apenas entra
+
   await fetchYRenderizarMisTarjetas();
   actualizarMediosDePagoSelects(); 
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
-  const pTodos = await fetchPrestamos(); // Traemos los préstamos de la DB
+  const pTodos = await fetchPrestamos(); 
   
   const selector = document.getElementById("filtroFechaMes");
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
@@ -380,7 +412,7 @@ async function refreshAll() {
   renderIngresos(ingresosNormales); 
   generarGrafico(gParaTablasYGrafico);
   renderConsumosCuotas(gParaTablasYGrafico); 
-  renderPrestamos(pTodos); // Renderizamos la pestaña préstamos
+  renderPrestamos(pTodos); 
 
   // --- MAGIA DEL PANEL DE TARJETAS AGRUPADAS ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
@@ -557,7 +589,6 @@ function renderConsumosCuotas(lista) {
     });
 }
 
-// --- BORRAR PRÉSTAMO ---
 window.eliminarPrestamo = async function(id) {
     if(confirm("¿Seguro que querés eliminar esta cuota del préstamo?")) {
         await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() });
@@ -609,7 +640,6 @@ window.editarGasto = function(id) {
     document.getElementById("gastoMedio").value = gastoEnEdicion.medioPago;
     document.getElementById("gastoCategoria").value = gastoEnEdicion.categoriaId || "";
     
-    // Carga los campos nuevos de Fecha
     document.getElementById("gastoVencimiento").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
     const isPagado = gastoEnEdicion.pagado || false;
     document.getElementById("gastoPagado").checked = isPagado;
@@ -683,7 +713,6 @@ window.crearCategoria = async function() {
     }
 };
 
-// --- GUARDAR NUEVO PRÉSTAMO ---
 const formPrestamo = document.getElementById("formPrestamo");
 if (formPrestamo) {
     formPrestamo.onsubmit = async (e) => {
@@ -709,7 +738,6 @@ if (formPrestamo) {
     };
 }
 
-// --- GUARDAR GASTO (LÓGICA FECHAS Y VENCIMIENTOS) ---
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
     formGasto.onsubmit = async (e) => { 
@@ -730,7 +758,6 @@ if (formGasto) {
             const pagado = document.getElementById("gastoPagado").checked;
             const fechaReal = document.getElementById("gastoFecha").value;
             
-            // Si está pagado usa la fecha real, sino usa el vencimiento de base
             let fechaBase = pagado ? (fechaReal || fechaVto) : fechaVto;
 
             if (idAEditar) {
@@ -861,7 +888,6 @@ if (formIngreso) {
     };
 }
 
-// --- GUARDAR TARJETA (INCLUYE 1 PAGO O MUCHOS) ---
 const formTarjeta = document.getElementById("formTarjeta");
 if (formTarjeta) {
     formTarjeta.onsubmit = async (e) => {
@@ -883,7 +909,6 @@ if (formTarjeta) {
                 const yyyy = fechaActual.getFullYear();
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
                 
-                // MAGIA 1 PAGO:
                 const textoDesc = cuotas === 1 ? descripcion : `${descripcion} (Cuota ${i}/${cuotas})`;
                 
                 const body = {
@@ -893,7 +918,7 @@ if (formTarjeta) {
                     fecha: `${yyyy}-${mm}-10`,
                     esFijo: false, 
                     usuarioId: user.id,
-                    pagado: false // Las cuotas a futuro siempre entran como No Pagadas
+                    pagado: false 
                 };
                 await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 fechaActual.setMonth(fechaActual.getMonth() + 1);
@@ -1016,9 +1041,7 @@ if (formNuevaTarjeta) {
     };
 }
 
-// --- NAVEGACIÓN Y BOTONES FLOTANTES ---
 document.addEventListener('DOMContentLoaded', () => {
-    
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -1061,7 +1084,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const fabContainer = document.querySelector('.fab-container'); 
 
             if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
-                // ACÁ SE OCULTA EL BOTÓN FLOTANTE EN PRÉSTAMOS
                 if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
                     fabContainer.style.display = 'none';
                 } else {
@@ -1094,7 +1116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(fabOptions) fabOptions.classList.remove('show');
     });
 
-    // MAGIA DE LA CASILLA "YA LO PAGUÉ"
     const chkPagado = document.getElementById('gastoPagado');
     const divFechaPagoReal = document.getElementById('divFechaPagoReal');
     
