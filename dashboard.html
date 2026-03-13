@@ -19,12 +19,13 @@
       <nav>
         <ul class="nav-list">
           <li class="nav-item active" data-section="inicio">🏠 Inicio</li>
-          <li class="nav-item" data-section="proyeccion">🎯 Proyección</li>
-          <li class="nav-item" data-section="ver-gastos">💸 Gastos</li>
           <li class="nav-item" data-section="ver-ingresos">💵 Ingresos</li>
-          <li class="nav-item" data-section="ahorros">🐷 Ahorros</li>
+          <li class="nav-item" data-section="ver-gastos">💸 Gastos</li>
+          <li class="nav-item" data-section="proyeccion">🎯 Proyección</li>
           <li class="nav-item" data-section="tarjetas">💳 Tarjetas</li>
-		  <li class="nav-item" data-section="perfil">⚙️ Mi Perfil</li>
+          <li class="nav-item" data-section="prestamos">🤝 Préstamos</li>
+          <li class="nav-item" data-section="ahorros">🐷 Ahorros</li>
+          <li class="nav-item" data-section="perfil">⚙️ Mi Perfil</li>
           <li class="nav-item logout" id="logoutBtn">🚪 Cerrar sesión</li>
         </ul>
       </nav>
@@ -90,7 +91,7 @@
                     <h3 id="totalTarjetasMes" style="color: #00aae4;">$0.00</h3>
                 </div>
                 <div id="detalleTarjetasMes" style="margin-top: 15px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
-                    </div>
+                </div>
             </div>
 
             <div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem;">
@@ -114,6 +115,42 @@
             <h3>Mis Ingresos</h3>
             <div class="table-wrapper"><table id="tablaIngresos" class="table"><thead><tr><th>Fecha</th><th>Descripción</th><th>Medio</th><th>Categoría</th><th>Monto</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
           </div>
+        </div>
+
+        <div id="prestamos" class="page">
+            <div class="panel">
+                <h2 style="color: var(--color-primario); margin-bottom: 10px;">🤝 Gestión de Préstamos</h2>
+                <p style="color: var(--texto-claro); margin-bottom: 25px;">Control de cuotas compartidas basado en tu Excel.</p>
+                
+                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+                    <div class="card" style="background: #222; border-left: 4px solid #ff6384;">
+                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total Aportado Mamá</h4>
+                        <p id="totalAporteMama" style="font-size: 1.5rem; font-weight: bold; color: #fff; margin: 5px 0 0 0;">$ 0.00</p>
+                    </div>
+                    <div class="card" style="background: #222; border-left: 4px solid #00bcd4;">
+                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total Aportado Belén</h4>
+                        <p id="totalAporteBelen" style="font-size: 1.5rem; font-weight: bold; color: #fff; margin: 5px 0 0 0;">$ 0.00</p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="table" id="tablaPrestamos">
+                        <thead>
+                            <tr>
+                                <th>Mes / Cuota</th>
+                                <th>Aporte Mamá</th>
+                                <th>Aporte Belén</th>
+                                <th>Total Pagado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalPrestamo').style.display = 'flex'">
+                    + Cargar Nuevo Mes de Préstamo
+                </button>
+            </div>
         </div>
 
         <div id="ahorros" class="page">
@@ -170,13 +207,13 @@
 
         <div class="fab-container" id="mainFabContainer">
             <div class="fab-options" id="fabOptions">
-                <div class="fab-label-container" id="btnFabTarjeta" style="display: none;">
-                    <span class="fab-label">Agregar Tarjeta</span>
-                    <button class="fab-mini-btn" style="color: #00bcd4;"><span class="material-icons">credit_card</span></button>
-                </div>
                 <div class="fab-label-container" id="btnFabIngreso">
                     <span class="fab-label">Agregar Ingreso</span>
                     <button class="fab-mini-btn" style="color: #2ac9bb;"><span class="material-icons">attach_money</span></button>
+                </div>
+                <div class="fab-label-container" id="btnFabTarjeta" style="display: none;">
+                    <span class="fab-label">Cargar Compra</span>
+                    <button class="fab-mini-btn" style="color: #00bcd4;"><span class="material-icons">credit_card</span></button>
                 </div>
                 <div class="fab-label-container" id="btnFabGasto">
                     <span class="fab-label">Agregar Gasto</span>
@@ -198,9 +235,7 @@
                 <label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label>
                 <label>Categoría <select id="gastoCategoria"></select></label>
                 <label>Medio de Pago <select id="gastoMedio" required></select></label>
-                
                 <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-                
                 <label>📅 Fecha de Vencimiento / Mes al que corresponde <input id="gastoVencimiento" type="date" required /></label>
                 <div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
                     <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer;">
@@ -211,7 +246,6 @@
                         <label style="margin:0; color: #2ac9bb;">📅 ¿Qué día lo pagaste realmente? <input id="gastoFecha" type="date" style="margin-top: 5px;" /></label>
                     </div>
                 </div>
-
                 <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
             </form>
         </div></div>
@@ -236,6 +270,16 @@
                 </div>
                 <label>Seleccionar Tarjeta <select id="tarjetaTipo" required></select></label>
                 <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
+            </form>
+        </div></div>
+
+        <div id="modalPrestamo" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
+            <h3>🤝 Cargar Cuota de Préstamo</h3>
+            <form id="formPrestamo" class="form">
+                <label>Mes / Cuota (Ej: Agosto 25 - 1/36) <input id="prestamoMes" type="text" required placeholder="¿Qué cuota es?" /></label>
+                <label>Aporte Mamá ($) <input id="prestamoMama" type="number" step="0.01" required placeholder="0.00" /></label>
+                <label>Aporte Belén ($) <input id="prestamoBelen" type="number" step="0.01" required placeholder="0.00" /></label>
+                <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cuota</button>
             </form>
         </div></div>
         

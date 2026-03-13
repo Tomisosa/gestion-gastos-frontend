@@ -93,9 +93,9 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
       if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
   });
   
-  // OJO ACÁ: Si un gasto NO ESTÁ PAGADO, no debe descontar saldo de la billetera todavía.
+  // Si un gasto NO ESTÁ PAGADO, no debe descontar saldo de la billetera
   gastos.forEach(g => { 
-      if (g.pagado === false) return; // Si no lo pagó, no descontamos de su plata real
+      if (g.pagado === false) return; 
       const m = g.medioPago || "EFECTIVO"; 
       if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
   });
@@ -193,6 +193,18 @@ async function fetchIngresos() {
 
     globalIngresos = misIngresos; 
     return misIngresos; 
+}
+
+// --- MAGIA NUEVA: TRAER PRÉSTAMOS ---
+async function fetchPrestamos() {
+    try {
+        const res = await fetch(`${API}/prestamos/usuario/${user.id}`, { headers: authHeaders() });
+        if(!res.ok) return [];
+        const data = await res.json();
+        return data;
+    } catch(e) { 
+        return []; 
+    }
 }
 
 async function fetchYRenderizarMisTarjetas() {
@@ -311,6 +323,7 @@ async function refreshAll() {
   
   const gTodos = await fetchGastos(); 
   const iTodos = await fetchIngresos();
+  const pTodos = await fetchPrestamos(); // Traemos los préstamos de la DB
   
   const selector = document.getElementById("filtroFechaMes");
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
@@ -367,11 +380,12 @@ async function refreshAll() {
   renderIngresos(ingresosNormales); 
   generarGrafico(gParaTablasYGrafico);
   renderConsumosCuotas(gParaTablasYGrafico); 
+  renderPrestamos(pTodos); // Renderizamos la pestaña préstamos
 
   // --- MAGIA DEL PANEL DE TARJETAS AGRUPADAS ---
   const panelTarjetas = document.getElementById("panelResumenTarjetas");
   if (panelTarjetas) {
-      // Filtramos todo lo que no sea las billeteras base (Es decir, filtramos TODAS las tarjetas de crédito)
+      // Filtramos todo lo que no sea las billeteras base
       const baseMedios = ["BNA", "MERCADO_PAGO", "EFECTIVO", "CF"];
       const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes(g.medioPago));
       
@@ -406,6 +420,38 @@ async function refreshAll() {
   const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
   const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
   calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
+}
+
+// --- DIBUJAR TABLA DE PRÉSTAMOS ---
+function renderPrestamos(prestamos) {
+    const tbody = document.querySelector("#tablaPrestamos tbody");
+    if(!tbody) return;
+    tbody.innerHTML = "";
+
+    let totalMama = 0;
+    let totalBelen = 0;
+
+    prestamos.forEach(p => {
+        const aMama = Number(p.aporteMama) || 0;
+        const aBelen = Number(p.aporteBelen) || 0;
+        const total = aMama + aBelen;
+
+        totalMama += aMama;
+        totalBelen += aBelen;
+
+        tbody.innerHTML += `<tr>
+            <td>${p.mesCuota}</td>
+            <td>${formatoMoneda(aMama)}</td>
+            <td>${formatoMoneda(aBelen)}</td>
+            <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(total)}</td>
+            <td><button onclick="eliminarPrestamo(${p.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" title="Eliminar Cuota">🗑️</button></td>
+        </tr>`;
+    });
+
+    const cardMama = document.getElementById("totalAporteMama");
+    const cardBelen = document.getElementById("totalAporteBelen");
+    if(cardMama) cardMama.textContent = formatoMoneda(totalMama);
+    if(cardBelen) cardBelen.textContent = formatoMoneda(totalBelen);
 }
 
 // --- TABLA DE FIJOS ---
@@ -510,6 +556,14 @@ function renderConsumosCuotas(lista) {
       tbody.innerHTML += `<tr><td>${g.fecha} <br> ${tarjetaBadge}</td><td>${desc}</td><td>${badgeCuota}</td><td style="display: flex; justify-content: space-between; align-items: center;">${formatoMoneda(g.monto)} ${acciones}</td></tr>`;
     });
 }
+
+// --- BORRAR PRÉSTAMO ---
+window.eliminarPrestamo = async function(id) {
+    if(confirm("¿Seguro que querés eliminar esta cuota del préstamo?")) {
+        await fetch(`${API}/prestamos/${id}`, { method: "DELETE", headers: authHeaders() });
+        await refreshAll();
+    }
+};
 
 window.eliminarGasto = async function(id) { 
     const gasto = globalGastos.find(g => g.id === id);
@@ -629,6 +683,32 @@ window.crearCategoria = async function() {
     }
 };
 
+// --- GUARDAR NUEVO PRÉSTAMO ---
+const formPrestamo = document.getElementById("formPrestamo");
+if (formPrestamo) {
+    formPrestamo.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formPrestamo button[type='submit']");
+        btnSubmit.disabled = true;
+        try {
+            const body = {
+                mesCuota: document.getElementById("prestamoMes").value,
+                aporteMama: parseFloat(document.getElementById("prestamoMama").value),
+                aporteBelen: parseFloat(document.getElementById("prestamoBelen").value),
+                usuarioId: user.id
+            };
+            await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            document.getElementById("modalPrestamo").style.display = "none";
+            formPrestamo.reset();
+            await refreshAll();
+        } catch(err) {
+            alert("Asegurate de haber subido los archivos de Java a tu servidor primero.");
+        } finally {
+            btnSubmit.disabled = false;
+        }
+    };
+}
+
 // --- GUARDAR GASTO (LÓGICA FECHAS Y VENCIMIENTOS) ---
 const formGasto = document.getElementById("formGasto");
 if (formGasto) {
@@ -714,7 +794,6 @@ if (formGasto) {
                             let y = parseInt(year);
                             while (m > 12) { m -= 12; y += 1; }
                             
-                            // Si elijo dia 31 pero el mes tiene 28 (febrero), para evitar errores ponemos dia 28 a futuro
                             let safeDay = parseInt(day) > 28 ? "28" : day;
                             let nuevoVto = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
                             
@@ -982,7 +1061,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const fabContainer = document.querySelector('.fab-container'); 
 
             if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
-                if (sectionId === 'ahorros' || sectionId === 'perfil') {
+                // ACÁ SE OCULTA EL BOTÓN FLOTANTE EN PRÉSTAMOS
+                if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
                     fabContainer.style.display = 'none';
                 } else {
                     fabContainer.style.display = 'flex';
