@@ -774,10 +774,15 @@ if (formGasto) {
             const esFijo = document.getElementById("gastoEsFijo").checked;
             const categoriaId = document.getElementById("gastoCategoria").value || null;
             
-            const fechaVto = document.getElementById("gastoVencimiento").value; // Mes de impacto (Marzo)
-            const pagado = document.getElementById("gastoPagado").checked;
-            const fechaReal = document.getElementById("gastoFecha").value; // Pago real (Febrero)
-            
+			const fechaVto = document.getElementById("gastoVencimiento").value;
+			const pagado = document.getElementById("gastoPagado").checked;
+			const fechaReal = document.getElementById("gastoFecha").value;
+
+			console.log({
+			  fechaVto,
+			  fechaReal,
+			  pagado
+			});
             let fechaBase = pagado ? fechaReal : fechaVto;
 
             if (idAEditar) {
@@ -838,7 +843,7 @@ if (formGasto) {
 					  esFijo,
 					  usuarioId: user.id,
 					  categoriaId: categoriaId,
-					  fechaVencimiento: fechaVto,
+					  fechaVencimiento: fechaVto ? fechaVto : null,
 					  pagado
 					};
                     const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
