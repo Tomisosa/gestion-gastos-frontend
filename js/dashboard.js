@@ -769,9 +769,8 @@ if (formGasto) {
             const medioPago = document.getElementById("gastoMedio").value;
             const esFijo = document.getElementById("gastoEsFijo").checked;
             
-            // GASTOS REQUIEREN EL OBJETO EN JAVA
-            const catVal = document.getElementById("gastoCategoria").value;
-            const catObj = catVal ? { id: catVal } : null;
+            // VOLVEMOS A LOS NÚMEROS: Tu backend usa GastoRequest (DTO), así que espera números
+            const categoriaId = document.getElementById("gastoCategoria").value || null;
             
             const fechaVto = document.getElementById("gastoVencimiento").value;
             const pagado = document.getElementById("gastoPagado").checked;
@@ -788,7 +787,7 @@ if (formGasto) {
                         const todos = await res.json();
                         
                         const futuros = todos.filter(g => 
-                            (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
+                            (String(g.usuarioId) === String(user.id)) &&
                             g.esFijo === true && 
                             g.descripcion === gastoEnEdicion.descripcion && 
                             g.fecha >= gastoEnEdicion.fecha
@@ -813,19 +812,19 @@ if (formGasto) {
                             let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false;
                             let pFecha = (isPagado) ? fechaBase : vtoFuturo;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: vtoFuturo, pagado: isPagado };
+                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: fechaVto, pagado };
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
                     await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: fechaVto, pagado };
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             } else {
@@ -846,16 +845,16 @@ if (formGasto) {
                             let isPagado = (i === 0) ? pagado : false;
                             let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: nuevoVto, pagado: isPagado };
+                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                         }
                         alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: fechaVto, pagado };
+                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
                 } else {
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuario: { id: user.id }, categoria: catObj, fechaVencimiento: fechaVto, pagado };
+                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             }
