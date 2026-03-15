@@ -421,8 +421,13 @@ async function refreshAll() {
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
   
   const gFiltradosMes = gTodos.filter(g => {
-      const fechaComparar = g.fechaVencimiento ? g.fechaVencimiento : g.fecha;
-      return (fechaComparar||"").startsWith(mesSeleccionado);
+
+        // prioridad: mesImpacto → vencimiento → fecha
+        const fechaComparar = g.mesImpacto 
+            ? g.mesImpacto 
+            : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
+
+        return (fechaComparar || "").startsWith(mesSeleccionado);
   });
   
   const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
@@ -777,27 +782,24 @@ if (formGasto) {
 			const fechaVto = document.getElementById("gastoVencimiento").value;
 			const pagado = document.getElementById("gastoPagado").checked;
 			const fechaReal = document.getElementById("gastoFecha").value;
+			const mesImpacto = document.getElementById("gastoMesImpacto").value;
 
-			console.log({
-			  fechaVto,
-			  fechaReal,
-			  pagado
-			});
             let fechaBase = pagado ? fechaReal : fechaVto;
 
 			if (idAEditar) { 
 			    // --- MODO EDICIÓN (SIMPLIFICADO) ---
-			    const body = {
-			        descripcion,
-			        monto,
-			        medioPago,
-			        fecha: pagado ? fechaReal : fechaVto,
-			        esFijo,
-			        usuarioId: user.id,
-			        categoriaId: categoriaId,
-			        fechaVencimiento: fechaVto ? fechaVto : null,
-			        pagado
-			    };
+				const body = {
+				    descripcion,
+				    monto,
+				    medioPago,
+				    fecha: pagado ? fechaReal : fechaVto,
+				    esFijo,
+				    usuarioId: user.id,
+				    categoriaId: categoriaId,
+				    fechaVencimiento: fechaVto ? fechaVto : null,
+				    pagado,
+				    mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+				};
 
 			    const res = await fetch(`${API}/gastos/${idAEditar}`, {
 			        method: "PUT",
@@ -826,7 +828,18 @@ if (formGasto) {
                             let isPagado = (i === 0) ? pagado : false;
                             let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
 
-                            const bodyFijo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
+							const bodyFijo = { 
+							descripcion,
+							monto,
+							medioPago,
+							fecha: pFecha,
+							esFijo: true,
+							usuarioId: user.id,
+							categoriaId: categoriaId,
+							fechaVencimiento: nuevoVto,
+							pagado: isPagado,
+							mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+							};
                             await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
                         }
                         alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
@@ -835,7 +848,18 @@ if (formGasto) {
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                     }
                 } else {
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
+					const body = { 
+					    descripcion,
+					    monto,
+					    medioPago,
+					    fecha: fechaBase,
+					    esFijo: false,
+					    usuarioId: user.id,
+					    categoriaId: categoriaId,
+					    fechaVencimiento: fechaVto,
+					    pagado,
+					    mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+					};
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
             }
@@ -1039,6 +1063,12 @@ window.editarGasto = function(id) {
     document.getElementById("gastoCategoria").value = catId;
     
     document.getElementById("gastoVencimiento").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
+	
+	if(gastoEnEdicion.mesImpacto){
+	    document.getElementById("gastoMesImpacto").value = gastoEnEdicion.mesImpacto.slice(0,7);
+	}else{
+	    document.getElementById("gastoMesImpacto").value = "";
+	}
     
     const isPagado = gastoEnEdicion.pagado || false;
     document.getElementById("gastoPagado").checked = isPagado;
