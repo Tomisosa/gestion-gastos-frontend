@@ -785,71 +785,31 @@ if (formGasto) {
 			});
             let fechaBase = pagado ? fechaReal : fechaVto;
 
-            if (idAEditar) {
-                // --- MODO EDICIÓN ---
-                if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
-                    const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
-                    
-                    if (aplicarFuturo) {
-                        const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders(), cache: "no-store" });
-                        const todos = await res.json();
-                        
-						let futuros = todos.filter(g =>
-						  g.esFijo === true &&
-						  g.descripcion === gastoEnEdicion.descripcion &&
-						  g.usuarioId === user.id &&
-						  g.id !== gastoEnEdicion.id &&
-						  (g.fechaVencimiento || g.fecha) >= (gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha)
-						);
+			if (idAEditar) { 
+			    // --- MODO EDICIÓN (SIMPLIFICADO) ---
+			    const body = {
+			        descripcion,
+			        monto,
+			        medioPago,
+			        fecha: pagado ? fechaReal : fechaVto,
+			        esFijo,
+			        usuarioId: user.id,
+			        categoriaId: categoriaId,
+			        fechaVencimiento: fechaVto ? fechaVto : null,
+			        pagado
+			    };
 
-                        futuros.sort((a, b) => (a.fechaVencimiento || a.fecha).localeCompare(b.fechaVencimiento || b.fecha));
+			    const res = await fetch(`${API}/gastos/${idAEditar}`, {
+			        method: "PUT",
+			        headers: authHeaders(),
+			        body: JSON.stringify(body)
+			    });
 
-                        for (let i = 0; i < futuros.length; i++) {
-                            const g = futuros[i];
-                            
-                            let vtoFuturo = null;
-                            if (fechaVto) {
-                                const [vYear, vMonth, vDay] = fechaVto.split('-');
-                                let nm = parseInt(vMonth) + i; 
-                                let ny = parseInt(vYear);
-                                while (nm > 12) { nm -= 12; ny += 1; }
-                                vtoFuturo = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
-                            }
-                            
-                            // Si es el gasto exacto que tocaste, le clava el "Pagado". A los del futuro los deja sin pagar.
-                            let isPagado = (g.id === idAEditar) ? pagado : false;
-                            let pFecha = (isPagado) ? fechaBase : vtoFuturo;
+			    if (!res.ok) throw new Error("Error al guardar el gasto");
 
-                            const bodyFuturo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
-                            
-                            // ACUALIZAMOS (PUT) EN VEZ DE BORRAR
-                            await fetch(`${API}/gastos/${g.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(bodyFuturo) });
-                        }
-                        alert("¡Gasto actualizado para este mes y todos los siguientes!");
-                    } else {
-                        // ACTUALIZA SOLO ESTE MES
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                        const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
-                        if(!res.ok) throw new Error("Error al guardar el gasto");
-                        alert("¡Gasto actualizado SOLO para este mes!");
-                    }
-                } else {
-                    // ACTUALIZA VARIABLE
-					const body = {
-					  descripcion,
-					  monto,
-					  medioPago,
-					  fecha: pagado ? fechaReal : fechaVto,
-					  esFijo,
-					  usuarioId: user.id,
-					  categoriaId: categoriaId,
-					  fechaVencimiento: fechaVto ? fechaVto : null,
-					  pagado
-					};
-                    const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
-                    if(!res.ok) throw new Error("Error al guardar el gasto");
-                }
-            } else {
+			    alert("¡Gasto actualizado!");
+			    
+			} else {
                 // --- MODO CREACIÓN (NUEVO GASTO) ---
                 if (esFijo) {
                     const programarFuturos = confirm("¿Desea programar este gasto para los próximos meses?\n\n👉 ACEPTAR: Se guarda en este mes y se clona para los próximos 11 meses.\n👉 CANCELAR: Se guarda SOLO en este mes como gasto fijo.");
