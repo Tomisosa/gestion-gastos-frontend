@@ -633,7 +633,10 @@ function renderConsumosCuotas(lista) {
     if (!tbody) return;
     tbody.innerHTML = "";
     
-    const consumosTarjeta = lista.filter(g => g.descripcion && g.descripcion.includes("(Cuota"));
+	const consumosTarjeta = lista.filter(g => 
+	    g.medioPago && 
+	    !["BNA","MERCADO PAGO","MERCADO_PAGO","EFECTIVO"].includes(g.medioPago.toUpperCase())
+	);
     
     consumosTarjeta.forEach(g => {
       const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
@@ -993,7 +996,7 @@ if (formTarjeta) {
                 const yyyy = fechaActual.getFullYear();
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
                 
-                const textoDesc = cuotas === 1 ? descripcion : `${descripcion} (Cuota ${i}/${cuotas})`;
+                const textoDesc = `${descripcion} (Cuota ${i}/${cuotas})`;
                 
                 const body = {
                     descripcion: textoDesc,
