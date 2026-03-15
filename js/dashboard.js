@@ -1,23 +1,12 @@
-// --- CONFIGURACIÓN API ---
+// --- CONFIGURACIÓN DE PRODUCCIÓN ---
 const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
-
-// --- DATOS DE SESIÓN ---
 const token = localStorage.getItem("token");
-const userId = localStorage.getItem("userId");
-const userName = localStorage.getItem("userName");
 
-// Si no hay sesión → volver al login
-if (!token || !userId) {
+if (!token) {
     window.location.href = "login.html";
 }
 
-// Crear objeto usuario
-let user = {
-    id: Number(userId),
-    nombre: userName
-};
-
-// --- VARIABLES GLOBALES ---
+let user = null;
 let miGrafico = null; 
 let globalGastos = [];
 let globalIngresos = [];
@@ -27,7 +16,6 @@ let gastoEnEdicion = null;
 
 window.saldosActuales = {};
 
-// --- HEADERS PARA API ---
 function authHeaders() {
   return { 
     "Content-Type": "application/json", 
@@ -35,18 +23,14 @@ function authHeaders() {
   };
 }
 
-// --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("token"); 
-        localStorage.removeItem("userId"); 
-        localStorage.removeItem("userName"); 
         window.location.href = "login.html"; 
         throw new Error("Sesión expirada");
     }
 }
 
-// --- FORMATO MONEDA ---
 function formatoMoneda(valor) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -55,21 +39,19 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-// --- COLORES TARJETAS ---
 function getBgColor(color) {
-
     const m = {
-        bna: "#2ac9bb, #0f766e",
-        naranja: "#f97316, #7c2d12",
+        bna: "#2ac9bb, #0f766e", 
+        naranja: "#f97316, #7c2d12", 
         azul: "#1e3a5f, #0f172a",
-        celeste: "#009ee3, #0284c7",
-        violeta: "#8b5cf6, #4c1d95",
-        verde: "#166534, #064e3b",
+        celeste: "#009ee3, #0284c7", 
+        violeta: "#8b5cf6, #4c1d95", 
+        verde: "#166534, #064e3b", 
         negro: "#262626, #000000"
     };
-
     return `linear-gradient(135deg, ${m[color] || "#333333, #111111"})`;
 }
+
 /* --- GRÁFICOS --- */
 function generarGrafico(gastos) {
   const canvas = document.getElementById('gastosChart');
@@ -184,10 +166,10 @@ function cargarSelectorFechas() {
   selector.onchange = () => refreshAll();
 }
 
-/* --- LLAMADAS API --- */
+/* --- LLAMADAS API (ANTI-CACHÉ) --- */
 async function fetchUserInfo() {
   try {
-    const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
+    const res = await fetch(`${API}/usuarios/me?t=${Date.now()}`, { headers: authHeaders() });
     handleAuthError(res);
     user = await res.json();
     
@@ -234,36 +216,35 @@ window.configurarNombresPrestamo = function() {
 
 async function fetchCategorias() { 
     try { 
-        // ¡ACÁ ESTÁ EL ARREGLO! Le volvemos a pedir SOLO tus categorías a Java
-        const res = await fetch(`${API}/categorias/usuario/${user.id}`, { headers: authHeaders() }); 
+        const res = await fetch(`${API}/categorias/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() }); 
         handleAuthError(res);
-        
         const misCategorias = await res.json();
-        
         renderCategorias(misCategorias); 
         return misCategorias; 
-    } catch (e) { 
-        return []; 
-    } 
+    } catch (e) { return []; } 
 }
 
 async function fetchGastos() { 
-    const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() }); 
-    handleAuthError(res);
-    globalGastos = await res.json(); 
-    return globalGastos; 
+    try {
+        const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() }); 
+        handleAuthError(res);
+        globalGastos = await res.json(); 
+        return globalGastos; 
+    } catch(e) { return []; }
 }
 
 async function fetchIngresos() { 
-    const res = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() }); 
-    handleAuthError(res);
-    globalIngresos = await res.json(); 
-    return globalIngresos; 
+    try {
+        const res = await fetch(`${API}/ingresos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() }); 
+        handleAuthError(res);
+        globalIngresos = await res.json(); 
+        return globalIngresos; 
+    } catch(e) { return []; }
 }
 
 async function fetchPrestamos() {
     try {
-        const res = await fetch(`${API}/prestamos/usuario/${user.id}`, { headers: authHeaders() });
+        const res = await fetch(`${API}/prestamos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
         if(!res.ok) return [];
         return await res.json();
     } catch(e) { return []; }
@@ -271,7 +252,7 @@ async function fetchPrestamos() {
 
 async function fetchBilleteras() {
     try {
-        const res = await fetch(`${API}/billeteras/usuario/${user.id}`, { headers: authHeaders() });
+        const res = await fetch(`${API}/billeteras/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
         if(!res.ok) return [];
         return await res.json();
     } catch(e) { return []; }
@@ -279,7 +260,7 @@ async function fetchBilleteras() {
 
 async function fetchYRenderizarMisTarjetas() {
     try {
-        const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
+        const res = await fetch(`${API}/tarjetas/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
         
         globalTarjetas = await res.json();
@@ -766,6 +747,7 @@ if (formGasto) {
             const idAEditar = document.getElementById("gastoId").value;
             const descripcion = document.getElementById("gastoDescripcion").value;
             
+            // Protección contra comas en los montos
             const montoRaw = document.getElementById("gastoMonto").value;
             const monto = parseFloat(montoRaw.replace(',', '.')); 
             
@@ -779,12 +761,24 @@ if (formGasto) {
             
             let fechaBase = pagado ? (fechaReal || fechaVto) : fechaVto;
 
+            const body = { 
+                descripcion, 
+                monto, 
+                medioPago, 
+                fecha: fechaBase, 
+                esFijo, 
+                usuarioId: user.id, 
+                categoriaId: categoriaId, 
+                fechaVencimiento: fechaVto, 
+                pagado 
+            };
+
             if (idAEditar) {
                 if (esFijo && gastoEnEdicion && gastoEnEdicion.esFijo) {
                     const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
                     
                     if (aplicarFuturo) {
-                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+                        const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
                         const todos = await res.json();
                         
                         const futuros = todos.filter(g => 
@@ -814,24 +808,18 @@ if (formGasto) {
                             let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false;
                             let pFecha = (isPagado) ? fechaBase : vtoFuturo;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
-                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                            const bodyFuturo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFuturo) });
                         }
-                        alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
-                        // Volvemos a tu estrategia infalible: Borrar el viejo y cargar el nuevo con los cambios
-                        await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                        const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                        if(!res.ok) throw new Error("Java rechazó los datos del formulario.");
-                        alert("¡Gasto actualizado SOLO para este mes!");
+                        // ACTUALIZAR 1 SOLO MES FIJO (Alerta estricta)
+                        const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+                        if (!res.ok) throw new Error(await res.text() || "El servidor rechazó los datos del formulario.");
                     }
                 } else {
-                    // Volvemos a tu estrategia infalible
-                    await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                    const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                    if(!res.ok) throw new Error("Java rechazó los datos del formulario.");
+                    // ACTUALIZAR GASTO VARIABLE (Alerta estricta)
+                    const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+                    if (!res.ok) throw new Error(await res.text() || "El servidor rechazó los datos del formulario.");
                 }
             } else {
                 if (esFijo) {
@@ -851,17 +839,16 @@ if (formGasto) {
                             let isPagado = (i === 0) ? pagado : false;
                             let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
-                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                            const bodyFijo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
                         }
-                        alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        if (!res.ok) throw new Error(await res.text() || "El servidor rechazó los datos del formulario.");
                     }
                 } else {
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: false, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    if (!res.ok) throw new Error(await res.text() || "El servidor rechazó los datos del formulario.");
                 }
             }
 
@@ -874,9 +861,10 @@ if (formGasto) {
             if (divCamposFijos) divCamposFijos.style.display = 'none'; 
 
             await refreshAll(); 
+            
         } catch (error) {
-            console.error(error); 
-            alert("Ocurrió un error al guardar: " + error.message);
+            console.error("Detalle del error:", error); 
+            alert("❌ Ocurrió un error al guardar:\n" + error.message);
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar";
@@ -889,7 +877,6 @@ if (formIngreso) {
     formIngreso.onsubmit = async (e) => { 
         e.preventDefault(); 
         try {
-            // INGRESOS USAN DTO Y REQUIEREN NUMEROS SUELTOS
             const body = {
                 descripcion: document.getElementById("ingresoDescripcion").value || "Ingreso",
                 monto: document.getElementById("ingresoMonto").value,
@@ -946,7 +933,7 @@ if (formTarjeta) {
                     medioPago: tarjetaTipo, 
                     fecha: `${yyyy}-${mm}-10`,
                     esFijo: false, 
-                    usuario: { id: user.id },
+                    usuarioId: user.id,
                     pagado: false 
                 };
                 await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -978,7 +965,6 @@ if (formInversion) {
             const monto = document.getElementById("invMonto").value;
             const fechaHoy = new Date().toISOString().split('T')[0];
 
-            // INVERSIONES APUNTAN A INGRESOS (USAN NUMEROS SUELTOS)
             const body = {
                 descripcion: `INV: ${lugar} - ${instrumento} (${moneda})`,
                 monto: monto,
@@ -1027,7 +1013,7 @@ window.eliminarGasto = async function(id) {
         const borrarFuturos = confirm("Al ser un gasto fijo... ¿Querés eliminarlo también de TODOS los meses SIGUIENTES?\n\n👉 ACEPTAR: Borra este y todos los futuros.\n👉 CANCELAR: Borra SOLO este mes.");
 
         if (borrarFuturos) {
-            const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+            const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
             const todosLosGastos = await res.json();
             
             const gastosABorrar = todosLosGastos.filter(g => 
@@ -1051,7 +1037,6 @@ window.eliminarGasto = async function(id) {
     await refreshAll(); 
 };
 
-// ¡ESTA ES LA FUNCIÓN QUE SE HABÍA BORRADO!
 window.editarGasto = function(id) {
     gastoEnEdicion = globalGastos.find(g => g.id === id);
     if (!gastoEnEdicion) return;
@@ -1104,7 +1089,6 @@ window.crearCategoria = async function() {
     }
 
     try {
-        // CATEGORIAS USA EL OBJETO EN JAVA
         const body = { 
             nombre: inputCat.value.trim(),
             usuario: { id: user.id }
