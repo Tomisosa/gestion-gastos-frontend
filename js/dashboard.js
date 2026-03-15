@@ -760,127 +760,173 @@ if (formPrestamo) {
 }
 
 const formGasto = document.getElementById("formGasto");
+
 if (formGasto) {
-    formGasto.onsubmit = async (e) => { 
-        e.preventDefault(); 
-        const btnSubmit = document.querySelector("#formGasto button[type='submit']");
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando...";
 
-        try {
-            // Aseguramos que el ID sea un número perfecto para que no haya confusiones
-            const idAEditar = document.getElementById("gastoId").value ? parseInt(document.getElementById("gastoId").value) : null;
-            const descripcion = document.getElementById("gastoDescripcion").value;
-            
-            const montoRaw = document.getElementById("gastoMonto").value;
-            const monto = parseFloat(montoRaw.replace(',', '.')); 
-            
-            const medioPago = document.getElementById("gastoMedio").value;
-            const esFijo = document.getElementById("gastoEsFijo").checked;
-            const categoriaId = document.getElementById("gastoCategoria").value || null;
-            
-			const fechaVto = document.getElementById("gastoVencimiento").value;
-			const pagado = document.getElementById("gastoPagado").checked;
-			const fechaReal = document.getElementById("gastoFecha").value;
-			const mesImpacto = document.getElementById("gastoMesImpacto").value;
+formGasto.onsubmit = async (e) => { 
+e.preventDefault(); 
 
-            let fechaBase = pagado ? fechaReal : fechaVto;
+const btnSubmit = document.querySelector("#formGasto button[type='submit']");
+btnSubmit.disabled = true;
+btnSubmit.textContent = "Guardando...";
 
-			if (idAEditar) { 
-			    // --- MODO EDICIÓN (SIMPLIFICADO) ---
-				const body = {
-				    descripcion,
-				    monto,
-				    medioPago,
-				    fecha: pagado ? fechaReal : fechaVto,
-				    esFijo,
-				    usuarioId: user.id,
-				    categoriaId: categoriaId,
-				    fechaVencimiento: fechaVto ? fechaVto : null,
-				    pagado,
-				    mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-				};
+try {
 
-			    const res = await fetch(`${API}/gastos/${idAEditar}`, {
-			        method: "PUT",
-			        headers: authHeaders(),
-			        body: JSON.stringify(body)
-			    });
+const idAEditar = document.getElementById("gastoId").value 
+? parseInt(document.getElementById("gastoId").value) 
+: null;
 
-			    if (!res.ok) throw new Error("Error al guardar el gasto");
+const descripcion = document.getElementById("gastoDescripcion").value;
 
-			    alert("¡Gasto actualizado!");
-			    
-			} else {
-                // --- MODO CREACIÓN (NUEVO GASTO) ---
-                if (esFijo) {
-                    const programarFuturos = confirm("¿Desea programar este gasto para los próximos meses?\n\n👉 ACEPTAR: Se guarda en este mes y se clona para los próximos 11 meses.\n👉 CANCELAR: Se guarda SOLO en este mes como gasto fijo.");
+const montoRaw = document.getElementById("gastoMonto").value;
+const monto = parseFloat(montoRaw.replace(',', '.'));
 
-                    if (programarFuturos) {
-                        const [year, month, day] = fechaVto.split('-');
-                        for (let i = 0; i < 12; i++) {
-                            let m = parseInt(month) + i;
-                            let y = parseInt(year);
-                            while (m > 12) { m -= 12; y += 1; }
-                            let safeDay = parseInt(day) > 28 ? "28" : day;
-                            let nuevoVto = `${y}-${String(m).padStart(2, '0')}-${safeDay}`;
-                            
-                            let isPagado = (i === 0) ? pagado : false;
-                            let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+const medioPago = document.getElementById("gastoMedio").value;
 
-							const bodyFijo = { 
-							descripcion,
-							monto,
-							medioPago,
-							fecha: pFecha,
-							esFijo: true,
-							usuarioId: user.id,
-							categoriaId: categoriaId,
-							fechaVencimiento: nuevoVto,
-							pagado: isPagado,
-							mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-							};
-                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
-                        }
-                        alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
-                    } else {
-                        const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                    }
-                } else {
-					const body = { 
-					    descripcion,
-					    monto,
-					    medioPago,
-					    fecha: fechaBase,
-					    esFijo: false,
-					    usuarioId: user.id,
-					    categoriaId: categoriaId,
-					    fechaVencimiento: fechaVto,
-					    pagado,
-					    mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-					};
-                    await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                }
-            }
+const esFijo = document.getElementById("gastoEsFijo").checked;
+const repeticion = parseInt(document.getElementById("gastoRepeticion").value || 0);
 
-            document.getElementById("modalGasto").style.display = "none"; 
-            formGasto.reset(); 
-            document.getElementById('gastoId').value = ""; 
-            gastoEnEdicion = null;
-            
-            const divCamposFijos = document.getElementById('camposFijos');
-            if (divCamposFijos) divCamposFijos.style.display = 'none'; 
+const categoriaId = document.getElementById("gastoCategoria").value || null;
 
-            await refreshAll(); 
-        } catch (error) {
-            console.error("Detalle del error:", error); 
-            alert("❌ Ocurrió un error al guardar:\n" + error.message);
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Guardar";
-        }
-    };
+const fechaVto = document.getElementById("gastoVencimiento").value;
+const pagado = document.getElementById("gastoPagado").checked;
+const fechaReal = document.getElementById("gastoFecha").value;
+
+const mesImpacto = document.getElementById("gastoMesImpacto").value;
+
+let fechaBase = pagado ? fechaReal : fechaVto;
+
+
+if (idAEditar) {
+
+// EDITAR GASTO
+
+const body = {
+descripcion,
+monto,
+medioPago,
+fecha: pagado ? fechaReal : fechaVto,
+esFijo,
+usuarioId: user.id,
+categoriaId: categoriaId,
+fechaVencimiento: fechaVto || null,
+pagado,
+mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+};
+
+const res = await fetch(`${API}/gastos/${idAEditar}`, {
+method: "PUT",
+headers: authHeaders(),
+body: JSON.stringify(body)
+});
+
+if (!res.ok) throw new Error("Error al guardar el gasto");
+
+alert("¡Gasto actualizado!");
+
+} else {
+
+// CREAR GASTO
+
+if (esFijo && repeticion > 0) {
+
+const [year, month, day] = fechaVto.split('-');
+
+for (let i = 0; i < repeticion; i++) {
+
+let m = parseInt(month) + i;
+let y = parseInt(year);
+
+while (m > 12) {
+m -= 12;
+y += 1;
+}
+
+let safeDay = parseInt(day) > 28 ? "28" : day;
+let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
+
+let isPagado = (i === 0) ? pagado : false;
+let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+
+const bodyFijo = {
+descripcion,
+monto,
+medioPago,
+fecha: pFecha,
+esFijo: true,
+usuarioId: user.id,
+categoriaId: categoriaId,
+fechaVencimiento: nuevoVto,
+pagado: isPagado,
+mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+};
+
+await fetch(`${API}/gastos`, {
+method: "POST",
+headers: authHeaders(),
+body: JSON.stringify(bodyFijo)
+});
+
+}
+
+} else {
+
+const body = {
+descripcion,
+monto,
+medioPago,
+fecha: fechaBase,
+esFijo,
+usuarioId: user.id,
+categoriaId: categoriaId,
+fechaVencimiento: fechaVto,
+pagado,
+mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+};
+
+await fetch(`${API}/gastos`, {
+method: "POST",
+headers: authHeaders(),
+body: JSON.stringify(body)
+});
+
+}
+
+}
+
+
+// cerrar modal
+
+document.getElementById("modalGasto").style.display = "none";
+
+formGasto.reset();
+
+document.getElementById('gastoId').value = "";
+
+gastoEnEdicion = null;
+
+const divCamposFijos = document.getElementById('camposFijos');
+
+if (divCamposFijos) divCamposFijos.style.display = 'none';
+
+await refreshAll();
+
+} catch (error) {
+
+console.error(error);
+
+alert("❌ Error al guardar el gasto");
+
+} finally {
+
+btnSubmit.disabled = false;
+
+btnSubmit.textContent = "Guardar";
+
+}
+
+};
+
 }
 const formIngreso = document.getElementById("formIngreso");
 if (formIngreso) {
