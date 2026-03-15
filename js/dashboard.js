@@ -766,7 +766,6 @@ if (formGasto) {
             const idAEditar = document.getElementById("gastoId").value;
             const descripcion = document.getElementById("gastoDescripcion").value;
             
-            // FIX 1: Evitar que una coma (,) en el monto rompa el sistema
             const montoRaw = document.getElementById("gastoMonto").value;
             const monto = parseFloat(montoRaw.replace(',', '.')); 
             
@@ -798,7 +797,6 @@ if (formGasto) {
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
                             
                             let vtoFuturo = null;
-                            // FIX 2: Evitar que falle si g.fecha es null en la base de datos vieja
                             const fechaComparar = g.fechaVencimiento || g.fecha || fechaVto; 
 
                             if (fechaVto) {
@@ -821,7 +819,6 @@ if (formGasto) {
                         }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
-                        // Usamos el PUT (Actualizar) moderno que armaste en Java
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
                         alert("¡Gasto actualizado SOLO para este mes!");
@@ -866,10 +863,16 @@ if (formGasto) {
             formGasto.reset(); 
             document.getElementById('gastoId').value = ""; 
             gastoEnEdicion = null;
-            document.getElementById('camposFijos').style.display = 'none'; 
+            
+            // ¡ACÁ ESTÁ EL ARREGLO! Solo intenta ocultarlo si realmente existe.
+            const divCamposFijos = document.getElementById('camposFijos');
+            if (divCamposFijos) {
+                divCamposFijos.style.display = 'none'; 
+            }
+
             await refreshAll(); 
         } catch (error) {
-            console.error(error); // Por si queremos chusmear en la consola
+            console.error(error); 
             alert("Ocurrió un error al guardar: " + error.message);
         } finally {
             btnSubmit.disabled = false;
