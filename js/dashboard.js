@@ -985,31 +985,39 @@ if (formTarjeta) {
             const descripcion = document.getElementById("tarjetaDescripcion").value;
             const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
-            const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
-            const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
+			const diaCompra = parseInt(document.getElementById("tarjetaDia").value) || 10;            
+			const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
             
             const montoPorCuota = Number((montoTotal / cuotas).toFixed(2));
             const [year, month] = primeraCuota.split('-');
-            let fechaActual = new Date(year, month - 1, 10); 
+            let fechaActual = new Date(year, month - 1, diaCompra);
 
-            for (let i = 1; i <= cuotas; i++) {
-                const yyyy = fechaActual.getFullYear();
-                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-                
-                const textoDesc = `${descripcion} (Cuota ${i}/${cuotas})`;
-                
-                const body = {
-                    descripcion: textoDesc,
-                    monto: montoPorCuota,
-                    medioPago: tarjetaTipo, 
-                    fecha: `${yyyy}-${mm}-10`,
-                    esFijo: false, 
-                    usuarioId: user.id,
-                    pagado: false 
-                };
-                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                fechaActual.setMonth(fechaActual.getMonth() + 1);
-            }
+			for (let i = 1; i <= cuotas; i++) {
+			    const yyyy = fechaActual.getFullYear();
+			    const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+			    const dd = String(fechaActual.getDate()).padStart(2, '0');
+
+			    const textoDesc = `${descripcion} (Cuota ${i}/${cuotas})`;
+
+			    const body = {
+			        descripcion: textoDesc,
+			        monto: montoPorCuota,
+			        medioPago: tarjetaTipo,
+			        fecha: `${yyyy}-${mm}-${dd}`,
+			        esFijo: false,
+			        usuarioId: user.id,
+			        pagado: false
+			    };
+
+			    await fetch(`${API}/gastos`, {
+			        method: "POST",
+			        headers: authHeaders(),
+			        body: JSON.stringify(body)
+			    });
+
+			    fechaActual.setMonth(fechaActual.getMonth() + 1);
+			}
 
             document.getElementById("modalTarjeta").style.display = "none";
             formTarjeta.reset();
