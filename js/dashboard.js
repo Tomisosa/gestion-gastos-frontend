@@ -819,13 +819,19 @@ if (formGasto) {
                         }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
+                        // Volvemos a tu estrategia infalible: Borrar el viejo y cargar el nuevo con los cambios
+                        await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                        await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+                        const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                        if(!res.ok) throw new Error("Java rechazó los datos del formulario.");
                         alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
+                    // Volvemos a tu estrategia infalible
+                    await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
-                    await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+                    const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                    if(!res.ok) throw new Error("Java rechazó los datos del formulario.");
                 }
             } else {
                 if (esFijo) {
@@ -864,11 +870,8 @@ if (formGasto) {
             document.getElementById('gastoId').value = ""; 
             gastoEnEdicion = null;
             
-            // ¡ACÁ ESTÁ EL ARREGLO! Solo intenta ocultarlo si realmente existe.
             const divCamposFijos = document.getElementById('camposFijos');
-            if (divCamposFijos) {
-                divCamposFijos.style.display = 'none'; 
-            }
+            if (divCamposFijos) divCamposFijos.style.display = 'none'; 
 
             await refreshAll(); 
         } catch (error) {
