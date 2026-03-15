@@ -985,7 +985,7 @@ if (formTarjeta) {
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value; 
             const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
             
-            const montoPorCuota = (montoTotal / cuotas).toFixed(2);
+            const montoPorCuota = Number((montoTotal / cuotas).toFixed(2));
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, 10); 
 
@@ -1001,7 +1001,7 @@ if (formTarjeta) {
                     medioPago: tarjetaTipo, 
                     fecha: `${yyyy}-${mm}-10`,
                     esFijo: false, 
-                    usuario: { id: user.id },
+                    usuarioId: user.id,
                     pagado: false 
                 };
                 await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
