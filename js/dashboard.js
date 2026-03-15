@@ -789,12 +789,13 @@ if (formGasto) {
                         const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders(), cache: "no-store" });
                         const todos = await res.json();
                         
-                        let futuros = todos.filter(g => 
-                            (String(g.usuarioId) === String(user.id)) &&
-                            g.esFijo === true && 
-                            g.descripcion === gastoEnEdicion.descripcion &&
-                            (g.fechaVencimiento || g.fecha) >= (gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha)
-                        );
+						let futuros = todos.filter(g =>
+						  g.esFijo === true &&
+						  g.descripcion === gastoEnEdicion.descripcion &&
+						  g.usuarioId === user.id &&
+						  g.id !== gastoEnEdicion.id &&
+						  (g.fechaVencimiento || g.fecha) >= (gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha)
+						);
 
                         futuros.sort((a, b) => (a.fechaVencimiento || a.fecha).localeCompare(b.fechaVencimiento || b.fecha));
 
