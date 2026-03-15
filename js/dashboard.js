@@ -784,28 +784,30 @@ if (formGasto) {
                     const aplicarFuturo = confirm("Al ser un gasto fijo... ¿Querés guardar este cambio en TODOS los meses SIGUIENTES también?");
                     
                     if (aplicarFuturo) {
-                        const res = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+                        // 1. Buscamos todos los gastos frescos (sin caché)
+                        const res = await fetch(`${API}/gastos/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders(), cache: "no-store" });
                         const todos = await res.json();
                         
-                        const futuros = todos.filter(g => 
+                        // 2. Filtramos este gasto y los que le siguen
+                        let futuros = todos.filter(g => 
                             (String(g.usuarioId) === String(user.id)) &&
                             g.esFijo === true && 
-                            g.descripcion === gastoEnEdicion.descripcion
+                            g.descripcion === gastoEnEdicion.descripcion &&
+                            (g.fechaVencimiento || g.fecha) >= (gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha)
                         );
 
-                        for (const g of futuros) {
+                        // 3. Los ordenamos por fecha para que no haya errores
+                        futuros.sort((a, b) => (a.fechaVencimiento || a.fecha).localeCompare(b.fechaVencimiento || b.fecha));
+
+                        // 4. Matemática simple: al primero le sumo 0 meses, al segundo 1, etc.
+                        for (let i = 0; i < futuros.length; i++) {
+                            const g = futuros[i];
                             await fetch(`${API}/gastos/${g.id}`, { method: "DELETE", headers: authHeaders() });
                             
                             let vtoFuturo = null;
-                            const fechaComparar = g.fechaVencimiento || g.fecha || fechaVto; 
-
                             if (fechaVto) {
-                                const yDiff = parseInt(fechaComparar.split('-')[0]) - parseInt(fechaVto.split('-')[0]);
-                                const mDiff = parseInt(fechaComparar.split('-')[1]) - parseInt(fechaVto.split('-')[1]);
-                                const totalMesesAdelante = (yDiff * 12) + mDiff;
-                                
                                 const [vYear, vMonth, vDay] = fechaVto.split('-');
-                                let nm = parseInt(vMonth) + totalMesesAdelante;
+                                let nm = parseInt(vMonth) + i; // Acá le sumo los meses limpios
                                 let ny = parseInt(vYear);
                                 while (nm > 12) { nm -= 12; ny += 1; }
                                 vtoFuturo = `${ny}-${String(nm).padStart(2, '0')}-${vDay}`;
@@ -814,12 +816,12 @@ if (formGasto) {
                             let isPagado = (g.id === parseInt(idAEditar)) ? pagado : false;
                             let pFecha = (isPagado) ? fechaBase : vtoFuturo;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
-                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                            const bodyFuturo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: vtoFuturo, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFuturo) });
                         }
                         alert("¡Gasto actualizado para este mes y todos los siguientes!");
                     } else {
-                        // ACÁ ESTÁ LA VIEJA CONFIABLE (Borra y crea)
+                        // LA VIEJA CONFIABLE (Borra y crea solo para este mes)
                         await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                         const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                         const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -827,7 +829,7 @@ if (formGasto) {
                         alert("¡Gasto actualizado SOLO para este mes!");
                     }
                 } else {
-                    // ACÁ ESTÁ LA VIEJA CONFIABLE PARA VARIABLES (Borra y crea)
+                    // LA VIEJA CONFIABLE PARA VARIABLES
                     await fetch(`${API}/gastos/${idAEditar}`, { method: "DELETE", headers: authHeaders() });
                     const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
                     const res = await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -851,8 +853,8 @@ if (formGasto) {
                             let isPagado = (i === 0) ? pagado : false;
                             let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
 
-                            const body = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
-                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                            const bodyFijo = { descripcion, monto, medioPago, fecha: pFecha, esFijo: true, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: nuevoVto, pagado: isPagado };
+                            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
                         }
                         alert("¡Gasto Fijo programado automáticamente para los próximos 12 meses!");
                     } else {
@@ -875,8 +877,8 @@ if (formGasto) {
 
             await refreshAll(); 
         } catch (error) {
-            console.error(error); 
-            alert("Ocurrió un error al guardar: " + error.message);
+            console.error("Detalle del error:", error); 
+            alert("❌ Ocurrió un error al guardar:\n" + error.message);
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Guardar";
