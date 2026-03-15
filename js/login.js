@@ -1,4 +1,5 @@
 document.getElementById("btnLogin")?.addEventListener("click", () => {
+
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -7,37 +8,48 @@ document.getElementById("btnLogin")?.addEventListener("click", () => {
     return;
   }
 
-  // --- CONFIGURACIÓN DE PRODUCCIÓN (Railway) ---
   const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 
-  console.log("Intentando entrar con:", email); // Para ver si el mail está bien escrito
+  console.log("Intentando entrar con:", email);
 
   fetch(`${API}/usuarios/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ email, password })
   })
+
   .then(async response => {
+
     if (!response.ok) {
-        // Acá obligamos a Java a que nos diga POR QUÉ no nos deja entrar
-        const errorReal = await response.text();
-        console.error("El servidor respondió con error:", response.status, errorReal);
-        throw new Error(`Java dice que no: Error ${response.status}. Mirá la consola (F12).`);
+      const errorReal = await response.text();
+      console.error("Error del servidor:", response.status, errorReal);
+      throw new Error("Email o contraseña incorrectos");
     }
+
     return response.json();
   })
+
   .then(data => {
-    console.log("¡Éxito! Java nos dejó entrar", data);
-    // Guardamos los datos de sesión
+
+    console.log("Login exitoso:", data);
+
+    // Guardamos sesión
     localStorage.setItem("token", data.token);
     localStorage.setItem("userId", data.id);
     localStorage.setItem("userName", data.nombre);
-    
-    // Redirección limpia al dashboard
-    window.location.replace("dashboard.html");
+
+    console.log("Token guardado:", localStorage.getItem("token"));
+
+    // Ir al dashboard
+    window.location.href = "dashboard.html";
+
   })
+
   .catch(error => {
-    console.error("Error capturado:", error);
+    console.error("Error login:", error);
     alert(error.message);
   });
+
 });

@@ -1,12 +1,23 @@
-// --- CONFIGURACIÓN DE PRODUCCIÓN ---
+// --- CONFIGURACIÓN API ---
 const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
-const token = localStorage.getItem("token");
 
-if (!token) {
+// --- DATOS DE SESIÓN ---
+const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
+const userName = localStorage.getItem("userName");
+
+// Si no hay sesión → volver al login
+if (!token || !userId) {
     window.location.href = "login.html";
 }
 
-let user = null;
+// Crear objeto usuario
+let user = {
+    id: Number(userId),
+    nombre: userName
+};
+
+// --- VARIABLES GLOBALES ---
 let miGrafico = null; 
 let globalGastos = [];
 let globalIngresos = [];
@@ -16,6 +27,7 @@ let gastoEnEdicion = null;
 
 window.saldosActuales = {};
 
+// --- HEADERS PARA API ---
 function authHeaders() {
   return { 
     "Content-Type": "application/json", 
@@ -23,14 +35,18 @@ function authHeaders() {
   };
 }
 
+// --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
     if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("token"); 
+        localStorage.removeItem("userId"); 
+        localStorage.removeItem("userName"); 
         window.location.href = "login.html"; 
         throw new Error("Sesión expirada");
     }
 }
 
+// --- FORMATO MONEDA ---
 function formatoMoneda(valor) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -39,19 +55,21 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
+// --- COLORES TARJETAS ---
 function getBgColor(color) {
+
     const m = {
-        bna: "#2ac9bb, #0f766e", 
-        naranja: "#f97316, #7c2d12", 
+        bna: "#2ac9bb, #0f766e",
+        naranja: "#f97316, #7c2d12",
         azul: "#1e3a5f, #0f172a",
-        celeste: "#009ee3, #0284c7", 
-        violeta: "#8b5cf6, #4c1d95", 
-        verde: "#166534, #064e3b", 
+        celeste: "#009ee3, #0284c7",
+        violeta: "#8b5cf6, #4c1d95",
+        verde: "#166534, #064e3b",
         negro: "#262626, #000000"
     };
+
     return `linear-gradient(135deg, ${m[color] || "#333333, #111111"})`;
 }
-
 /* --- GRÁFICOS --- */
 function generarGrafico(gastos) {
   const canvas = document.getElementById('gastosChart');
