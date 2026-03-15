@@ -234,14 +234,17 @@ window.configurarNombresPrestamo = function() {
 
 async function fetchCategorias() { 
     try { 
-        const res = await fetch(`${API}/categorias`, { headers: authHeaders() }); 
+        // ¡ACÁ ESTÁ EL ARREGLO! Le volvemos a pedir SOLO tus categorías a Java
+        const res = await fetch(`${API}/categorias/usuario/${user.id}`, { headers: authHeaders() }); 
         handleAuthError(res);
-        const todas = await res.json(); 
-        // Filtro estricto restaurado
-        const misCategorias = todas.filter(cat => String(cat.usuarioId) === String(user.id));
+        
+        const misCategorias = await res.json();
+        
         renderCategorias(misCategorias); 
         return misCategorias; 
-    } catch (e) { return []; } 
+    } catch (e) { 
+        return []; 
+    } 
 }
 
 async function fetchGastos() { 
