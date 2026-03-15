@@ -778,7 +778,7 @@ if (formGasto) {
             const pagado = document.getElementById("gastoPagado").checked;
             const fechaReal = document.getElementById("gastoFecha").value; // Pago real (Febrero)
             
-            let fechaBase = pagado ? (fechaReal || fechaVto) : fechaVto;
+            let fechaBase = pagado ? fechaReal : fechaVto;
 
             if (idAEditar) {
                 // --- MODO EDICIÓN ---
@@ -829,7 +829,17 @@ if (formGasto) {
                     }
                 } else {
                     // ACTUALIZA VARIABLE
-                    const body = { descripcion, monto, medioPago, fecha: fechaBase, esFijo, usuarioId: user.id, categoriaId: categoriaId, fechaVencimiento: fechaVto, pagado };
+					const body = {
+					  descripcion,
+					  monto,
+					  medioPago,
+					  fecha: pagado ? fechaReal : fechaVto,
+					  esFijo,
+					  usuarioId: user.id,
+					  categoriaId: categoriaId,
+					  fechaVencimiento: fechaVto,
+					  pagado
+					};
                     const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
                     if(!res.ok) throw new Error("Error al guardar el gasto");
                 }
