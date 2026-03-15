@@ -832,9 +832,18 @@ if (esFijo && repeticion > 0) {
 
 const [year, month, day] = fechaVto.split('-');
 
+let saltoMes = 1;
+
+// tipo de repetición
+const tipoRepeticion = document.getElementById("tipoRepeticion").value;
+
+if(tipoRepeticion === "mensual") saltoMes = 1;
+if(tipoRepeticion === "3meses") saltoMes = 3;
+if(tipoRepeticion === "6meses") saltoMes = 6;
+
 for (let i = 0; i < repeticion; i++) {
 
-let m = parseInt(month) + i;
+let m = parseInt(month) + (i * saltoMes);
 let y = parseInt(year);
 
 while (m > 12) {
@@ -843,9 +852,11 @@ y += 1;
 }
 
 let safeDay = parseInt(day) > 28 ? "28" : day;
+
 let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
 
 let isPagado = (i === 0) ? pagado : false;
+
 let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
 
 const bodyFijo = {

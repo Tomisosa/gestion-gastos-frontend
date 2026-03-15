@@ -207,6 +207,23 @@
                     <input type="checkbox" id="gastoEsFijo" style="width: 20px; height: 20px; accent-color: #ffce56;">
                     <label for="gastoEsFijo" style="margin:0; cursor:pointer;">🔒 ¿Es Gasto FIJO?</label>
                 </div>
+				<div id="camposFijos" style="display:none; margin-top:10px; background:#222; padding:15px; border-radius:5px; border:1px solid #444;">
+
+				<label>🔁 Tipo de repetición</label>
+				<select id="tipoRepeticion">
+				  <option value="mensual">📅 Todos los meses</option>
+				  <option value="3meses">📆 Cada 3 meses</option>
+				  <option value="6meses">🗓 Cada 6 meses</option>
+				</select>
+
+				<label style="margin-top:10px;">Cantidad de repeticiones</label>
+				<input type="number" id="gastoRepeticion" min="1" max="60" value="12">
+
+				<p style="font-size:0.8rem; color:#888; margin-top:5px;">
+				Ejemplo: 12 = se crearán gastos durante 12 períodos
+				</p>
+
+				</div>
                 <label>Concepto <input id="gastoDescripcion" type="text" required /></label>
                 <label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label>
                 <label>Categoría <select id="gastoCategoria"></select></label>
