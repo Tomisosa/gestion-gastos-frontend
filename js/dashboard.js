@@ -511,9 +511,10 @@ async function refreshAll() {
       }
   }
 
-  const gHistoricos = gTodos.filter(g => (g.fecha||"").slice(0,7) <= mesSeleccionado);
-  const iHistoricos = iTodos.filter(i => (i.fecha||"").slice(0,7) <= mesSeleccionado);
-  calcularSaldosPorCuenta(gHistoricos, iHistoricos); 
+  const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
+  const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
+
+  calcularSaldosPorCuenta(gHistoricos, iHistoricos);
   
   actualizarMediosDePagoSelects();
   renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
