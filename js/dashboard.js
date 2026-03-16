@@ -268,7 +268,6 @@ window.configurarNombresPrestamo = function() {
 
 async function fetchCategorias() { 
     try { 
-        // ¡ACÁ ESTÁ EL ARREGLO! Le volvemos a pedir SOLO tus categorías a Java
         const res = await fetch(`${API}/categorias/usuario/${user.id}`, { headers: authHeaders() }); 
         handleAuthError(res);
         
@@ -311,9 +310,10 @@ async function fetchBilleteras() {
     } catch(e) { return []; }
 }
 
+// ACÁ SE INYECTÓ LA MEJORA PARA QUE MUESTRE LA PLATA ADENTRO
 async function fetchYRenderizarMisTarjetas() {
     try {
-        const res = await fetch(`${API}/tarjetas/usuario/${user.id}`, { headers: authHeaders() });
+        const res = await fetch(`${API}/tarjetas/usuario/${user.id}?t=${Date.now()}`, { headers: authHeaders() });
         if (!res.ok) throw new Error("Error trayendo tarjetas");
         
         globalTarjetas = await res.json();
@@ -329,10 +329,13 @@ async function fetchYRenderizarMisTarjetas() {
         
         globalTarjetas.forEach(t => {
             contenedor.innerHTML += `
-            <div class="card" style="background: ${getBgColor(t.color)}; border: none; position: relative; overflow: hidden; padding-bottom: 25px;">
+            <div class="card" style="background: ${getBgColor(t.color)}; border: none; position: relative; overflow: hidden; padding-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
                 <button onclick="eliminarMiTarjeta(${t.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.3); border: none; color: white; padding: 6px 8px; border-radius: 50%; cursor: pointer; font-size: 1rem;" title="Eliminar tarjeta">🗑️</button>
-                <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 15px;">${t.nombre}</h3>
+                <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 10px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">${t.nombre}</h3>
+                
+                <p style="color: rgba(255,255,255,0.7); margin: 15px 0 0 0; font-size: 0.85rem;">A pagar este mes:</p>
+                <h2 id="monto-tarjeta-${t.id}" style="color: #ffffff; margin: 2px 0 0 0; font-size: 1.8rem; font-weight: bold;">$0,00</h2>
             </div>`;
         });
     } catch (error) {
@@ -511,39 +514,27 @@ async function refreshAll() {
   renderConsumosCuotas(gParaTablasYGrafico); 
   renderPrestamos(pTodos); 
 
-  const panelTarjetas = document.getElementById("panelResumenTarjetas");
-  if (panelTarjetas) {
-      const baseMedios = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO"];
-      globalBilleteras.forEach(b => baseMedios.push(b.nombre.toUpperCase()));
+  // --- ACÁ EMPIEZA LA MAGIA DE INYECTAR LA PLATA EN LAS TARJETAS ---
+  const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO"];
+  globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
 
-      const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMedios.includes((g.medioPago||"").toUpperCase()));
-      
-      const totalesTarjetas = {};
-      let sumaTotal = 0;
-      
-      consumosTarjeta.forEach(g => {
-          const m = g.medioPago || "Tarjeta Desconocida";
-          const monto = Number(g.monto) || 0;
-          totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
-          sumaTotal += monto;
-      });
+  const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
+  
+  const totalesTarjetas = {};
+  consumosTarjeta.forEach(g => {
+      const m = g.medioPago || "Tarjeta Desconocida";
+      const monto = Number(g.monto) || 0;
+      totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
+  });
 
-      document.getElementById("totalTarjetasMes").textContent = formatoMoneda(sumaTotal);
-      const divDetalle = document.getElementById("detalleTarjetasMes");
-      divDetalle.innerHTML = "";
-      
-      if (Object.keys(totalesTarjetas).length === 0) {
-          divDetalle.innerHTML = "<p style='color:#888; font-size: 0.9rem;'>No hay gastos de tarjeta de crédito programados para este mes.</p>";
-      } else {
-          for (const [tarjeta, total] of Object.entries(totalesTarjetas)) {
-              divDetalle.innerHTML += `
-              <div style="background: #222; padding: 15px; border-radius: 8px; border-left: 4px solid #00aae4; display: flex; flex-direction: column; gap: 5px;">
-                  <strong style="color:#94a3b8; font-size: 0.85rem;">💳 ${tarjeta}</strong>
-                  <span style="font-size: 1.3rem; color: #fff; font-weight: bold;">${formatoMoneda(total)}</span>
-              </div>`;
-          }
-      }
-  }
+  // Buscamos cada tarjeta en la pantalla y le mandamos su saldo adentro
+  globalTarjetas.forEach(t => {
+      const idMonto = "monto-tarjeta-" + t.id;
+      const total = totalesTarjetas[t.nombre] || 0;
+      const el = document.getElementById(idMonto);
+      if (el) el.textContent = formatoMoneda(total);
+  });
+  // ------------------------------------------------------------------
 
   const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
   const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
