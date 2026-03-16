@@ -1411,6 +1411,7 @@ if (logoutBtn) {
     await refreshAll(); 
 })();
 
+//EDITAR CUOTA
 window.editarCuotaTarjeta = function(id) {
     const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
