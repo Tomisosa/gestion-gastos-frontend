@@ -81,6 +81,7 @@ function generarGrafico(gastos) {
   const ctx = canvas.getContext('2d');
   const datosAgrupados = {};
   
+  // Agrupar los gastos por categoría
   gastos.forEach(g => {
     const cat = g.categoriaNombre || "Sin categoría";
     datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
@@ -92,19 +93,52 @@ function generarGrafico(gastos) {
       labels: Object.keys(datosAgrupados),
       datasets: [{
         data: Object.values(datosAgrupados),
+        // Tu paleta de colores original, pero con bordes redondeados
         backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff', '#f97316', '#8b5cf6', '#eab308'],
         borderWidth: 2, 
-        borderColor: '#1a1a1a'
+        borderColor: '#1a1a1a', 
+        hoverOffset: 8, // Efecto 3D al pasar el mouse
+        borderRadius: 4 // Bordes un poco redondeados
       }]
     },
     options: { 
         responsive: true, 
-        maintainAspectRatio: false, 
-        plugins: { legend: { position: 'bottom', labels: { color: '#ffffff' } } } 
+        maintainAspectRatio: false,
+        cutout: '70%', // Hace que la dona sea más finita y moderna
+        plugins: { 
+            legend: { 
+                position: 'bottom', 
+                labels: { 
+                    color: '#cccccc', // Color gris para que las letras SÍ se vean
+                    padding: 20,
+                    usePointStyle: true, // Usa circulitos en vez de rectángulos
+                    pointStyle: 'circle',
+                    font: {
+                        size: 13,
+                        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                    }
+                } 
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', // Cartelito oscuro y moderno al pasar el mouse
+                titleFont: { size: 14 },
+                bodyFont: { size: 14, weight: 'bold' },
+                padding: 12,
+                cornerRadius: 8,
+                callbacks: {
+                    // Formatea el número para que se vea como plata real en el cartelito
+                    label: function(context) {
+                        let label = context.label || '';
+                        if (label) { label += ': '; }
+                        label += new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.raw);
+                        return label;
+                    }
+                }
+            }
+        } 
     }
   });
 }
-
 // CÁLCULO INTELIGENTE DE SALDOS
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
