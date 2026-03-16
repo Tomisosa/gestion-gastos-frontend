@@ -392,11 +392,12 @@ function renderCategorias(categorias) {
 
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
+  const tSelect = document.getElementById("tarjetaCategoria"); // <--- AGREGADO
   const filtroSel = document.getElementById("filtroCategoriaSelect");
   const listaCat = document.getElementById("listaCategoriasGestion");
   
   if (gSelect) {
-    [gSelect, iSelect, filtroSel].forEach(select => {
+    [gSelect, iSelect, tSelect, filtroSel].forEach(select => {
       if (!select) return;
       const valPrevio = select.value;
       select.innerHTML = select === filtroSel ? '<option value="all">Mostrar todas</option>' : '<option value="">Sin categoría</option>';
