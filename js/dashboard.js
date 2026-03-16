@@ -682,9 +682,14 @@ function renderConsumosCuotas(lista) {
 	);
     
     consumosTarjeta.forEach(g => {
-      const acciones = `<button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+      // 1. ACÁ AGREGAMOS EL LÁPIZ Y LA BASURA SEPARADOS
+      const acciones = `
+          <button onclick="editarCuotaTarjeta(${g.id})" class="btn-edit" style="padding: 2px 6px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Editar">✏️</button>
+          <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+      `;
+      
       let desc = g.descripcion || "-";
-      let badgeCuota = "";
+      let badgeCuota = "-";
       
       if (desc.includes("(Cuota")) {
           const partes = desc.split("(Cuota");
@@ -695,17 +700,15 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
+      // 2. ACÁ SEPARAMOS TODO EN 6 COLUMNAS PROLIJAS
       tbody.innerHTML += `
       <tr>
           <td>${g.fecha} ${tarjetaBadge}</td>
           <td>${desc}</td>
+          <td>${g.categoriaNombre || "-"}</td>
           <td>${badgeCuota}</td>
-          <td>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span>${formatoMoneda(g.monto)}</span>
-                  <span>${acciones}</span>
-              </div>
-          </td>
+          <td style="font-weight: bold;">${formatoMoneda(g.monto)}</td>
+          <td>${acciones}</td>
       </tr>`;
     });
 }
@@ -1407,3 +1410,79 @@ if (logoutBtn) {
     cargarSelectorFechas(); 
     await refreshAll(); 
 })();
+
+window.editarCuotaTarjeta = function(id) {
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
+
+    document.getElementById("editCuotaId").value = gasto.id;
+    document.getElementById("editCuotaMedio").value = gasto.medioPago; 
+    document.getElementById("editCuotaFecha").value = gasto.fecha || "";
+    document.getElementById("editCuotaMonto").value = gasto.monto;
+
+    let desc = gasto.descripcion || "";
+    let cuotaStr = "";
+    if (desc.includes("(Cuota")) {
+        const partes = desc.split("(Cuota");
+        desc = partes[0].trim();
+        cuotaStr = partes[1].replace(")", "").trim(); 
+    }
+    
+    document.getElementById("editCuotaDescripcion").value = desc;
+    document.getElementById("editCuotaInfo").value = cuotaStr;
+
+    const catId = gasto.categoria ? gasto.categoria.id : (gasto.categoriaId || "");
+    document.getElementById("editCuotaCategoria").value = catId;
+
+    document.getElementById("modalEditarCuota").style.display = "flex";
+};
+
+const formEditarCuota = document.getElementById("formEditarCuota");
+if (formEditarCuota) {
+    formEditarCuota.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formEditarCuota button[type='submit']");
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
+
+        try {
+            const id = document.getElementById("editCuotaId").value;
+            const descBase = document.getElementById("editCuotaDescripcion").value.trim();
+            const cuotaInfo = document.getElementById("editCuotaInfo").value.trim();
+            const descripcionFinal = cuotaInfo ? `${descBase} (Cuota ${cuotaInfo})` : descBase;
+
+            const body = {
+                descripcion: descripcionFinal,
+                monto: parseFloat(document.getElementById("editCuotaMonto").value),
+                medioPago: document.getElementById("editCuotaMedio").value,
+                fecha: document.getElementById("editCuotaFecha").value,
+                categoriaId: document.getElementById("editCuotaCategoria").value || null,
+                usuarioId: user.id,
+                esFijo: false
+            };
+
+            const originalGasto = globalGastos.find(g => g.id == id);
+            if (originalGasto) {
+                body.pagado = originalGasto.pagado;
+                body.fechaVencimiento = originalGasto.fechaVencimiento;
+                body.mesImpacto = originalGasto.mesImpacto;
+            }
+
+            const res = await fetch(`${API}/gastos/${id}`, {
+                method: "PUT",
+                headers: authHeaders(),
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) throw new Error("Error al actualizar la cuota");
+
+            document.getElementById("modalEditarCuota").style.display = "none";
+            await refreshAll();
+        } catch (error) {
+            alert("Error al guardar cambios");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar Cambios";
+        }
+    };
+}

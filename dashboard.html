@@ -273,6 +273,23 @@
         <div id="modalProyeccion" class="modal"><div class="modal-content" style="max-width: 600px;"><span class="close" id="closeProyeccion" onclick="document.getElementById('modalProyeccion').style.display = 'none'">&times;</span><h3>🎯 Proyección Mensual</h3><table class="table" style="margin-bottom: 20px;"><thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead><tbody id="tablaProyeccionBody"></tbody></table><div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion"></div></div></div>
 
       <div id="message" class="toast"></div>
+	  
+	  <div id="modalEditarCuota" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalEditarCuota').style.display = 'none'">&times;</span>
+	              <h3>✏️ Editar Cuota</h3>
+	              <form id="formEditarCuota" class="form">
+	                  <input type="hidden" id="editCuotaId">
+	                  <input type="hidden" id="editCuotaMedio">
+	                  <label>Fecha Compra <input id="editCuotaFecha" type="date" required /></label>
+	                  <label>Descripción <input id="editCuotaDescripcion" type="text" required /></label>
+	                  <label>Categoría <select id="editCuotaCategoria"></select></label>
+	                  <div style="display: flex; gap: 15px; margin-top: 10px;">
+	                      <label style="flex: 1;">Cuota Actual <input id="editCuotaInfo" type="text" required placeholder="Ej: 1/3" /></label>
+	                      <label style="flex: 1;">Monto Cuota <input id="editCuotaMonto" type="number" step="0.01" required /></label>
+	                  </div>
+	                  <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
+	              </form>
+	          </div></div>
+	  
       </section>
     </main>
   </div>
