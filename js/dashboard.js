@@ -87,51 +87,67 @@ function generarGrafico(gastos) {
     datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
   });
 
+  // Paleta Institucional / Financiera
+  const coloresFinancieros = [
+      '#1e3a8a', // Azul Marino (Blue chip)
+      '#0284c7', // Azul Claro
+      '#0f766e', // Verde Esmeralda
+      '#d97706', // Ámbar
+      '#64748b', // Gris Pizarra
+      '#b91c1c', // Rojo Oscuro
+      '#4338ca', // Teal oscuro
+      '#a16207'  // Bronce
+  ];
+
   miGrafico = new Chart(ctx, {
     type: 'doughnut', 
     data: {
       labels: Object.keys(datosAgrupados),
       datasets: [{
         data: Object.values(datosAgrupados),
-        // Tu paleta de colores original, pero con bordes redondeados
-        backgroundColor: ['#2ac9bb', '#ff6384', '#36a2eb', '#ffce56', '#9966ff', '#f97316', '#8b5cf6', '#eab308'],
+        backgroundColor: coloresFinancieros,
         borderWidth: 2, 
-        borderColor: '#1a1a1a', 
-        hoverOffset: 8, // Efecto 3D al pasar el mouse
-        borderRadius: 4 // Bordes un poco redondeados
+        borderColor: '#ffffff', 
+        hoverOffset: 8, // Salto sutil al pasar el mouse
+        borderRadius: 0 // Cortes rectos y duros, estilo financiero puro
       }]
     },
     options: { 
         responsive: true, 
         maintainAspectRatio: false,
-        cutout: '70%', // Hace que la dona sea más finita y moderna
+        layout: {
+            padding: 10 // Un poco de aire
+        },
+        cutout: '75%', // Dona fina y elegante
         plugins: { 
             legend: { 
-                position: 'bottom', 
+                position: 'right', // Leyenda a la derecha
                 labels: { 
-                    color: '#cccccc', // Color gris para que las letras SÍ se vean
-                    padding: 20,
-                    usePointStyle: true, // Usa circulitos en vez de rectángulos
-                    pointStyle: 'circle',
+                    color: '#334155', // Gris oscuro muy legible
+                    padding: 15,
+                    usePointStyle: true, 
+                    pointStyle: 'rect', // Cuadraditos prolijos
                     font: {
                         size: 13,
-                        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        family: "'Segoe UI', Arial, sans-serif",
+                        weight: 'bold'
                     }
                 } 
             },
             tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)', // Cartelito oscuro y moderno al pasar el mouse
-                titleFont: { size: 14 },
-                bodyFont: { size: 14, weight: 'bold' },
+                backgroundColor: '#1e293b', // Cartelito oscuro formal
+                titleColor: '#f8fafc',
+                bodyColor: '#f8fafc',
                 padding: 12,
-                cornerRadius: 8,
+                cornerRadius: 4, // Bordes un poquito redondeados en el tooltip
                 callbacks: {
-                    // Formatea el número para que se vea como plata real en el cartelito
+                    // Magia: Formatear moneda y calcular porcentaje
                     label: function(context) {
-                        let label = context.label || '';
-                        if (label) { label += ': '; }
-                        label += new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.raw);
-                        return label;
+                        let valor = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.raw);
+                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        let porcentaje = ((context.raw / total) * 100).toFixed(1); // Con 1 decimal
+                        
+                        return ` ${valor} (${porcentaje}%)`;
                     }
                 }
             }
