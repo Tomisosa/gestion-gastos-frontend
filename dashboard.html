@@ -81,14 +81,6 @@
                 <label>Filtrar por Categoría: <select id="filtroCategoriaSelect"><option value="all">Mostrar todas</option></select></label>
             </div>
 
-            <div class="panel" style="border-left: 5px solid #00aae4; margin-bottom: 2rem;" id="panelResumenTarjetas">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>💳 Resumen de Tarjetas</h3>
-                    <h3 id="totalTarjetasMes" style="color: #00aae4;">$0.00</h3>
-                </div>
-                <div id="detalleTarjetasMes" style="margin-top: 15px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));"></div>
-            </div>
-
             <div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>🔒 Gastos FIJOS</h3>
@@ -167,6 +159,14 @@
                     <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">💳 + Nueva</button>
                 </div>
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
+
+                <div style="border-left: 5px solid #00aae4; background: #1a1a1a; padding: 20px; border-radius: 8px; margin-top: 30px; margin-bottom: 10px;" id="panelResumenTarjetas">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin: 0; color: #fff;">💸 A Pagar este mes</h3>
+                        <h3 id="totalTarjetasMes" style="margin: 0; color: #00aae4; font-size: 1.5rem;">$0.00</h3>
+                    </div>
+                    <div id="detalleTarjetasMes" style="margin-top: 15px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));"></div>
+                </div>
                 <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
                 <div class="table-wrapper">
                     <table class="table" id="tablaTarjetas">
