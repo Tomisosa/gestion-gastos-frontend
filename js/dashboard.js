@@ -1181,7 +1181,7 @@ window.editarGasto = async function(id) {
     document.getElementById("gastoMonto").value = gastoEnEdicion.monto;
     document.getElementById("gastoMedio").value = gastoEnEdicion.medioPago || "EFECTIVO";
     
-    const catId = gastoEnEdicion.categoria ? gastoEnEdicion.categoria.id : (gastoEnEdicion.categoriaId || "");
+    const catId = gastoEnEdicion.categoriaId ?? gastoEnEdicion.categoria?.id ?? "";
 
     setTimeout(() => {
         const selectCat = document.getElementById("gastoCategoria");
