@@ -385,38 +385,49 @@ function actualizarMediosDePagoSelects() {
 }
 
 function renderCategorias(categorias) {
+  // 1. Ordenamos alfabéticamente
   categorias.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
+  // 2. Actualizamos el contador de la tarjeta de inicio
   const contadorEl = document.getElementById("countCategorias");
   if (contadorEl) contadorEl.textContent = categorias.length;
 
+  // 3. Capturamos todos los selectores (los 5 que usamos ahora)
   const gSelect = document.getElementById("gastoCategoria");
   const iSelect = document.getElementById("ingresoCategoria");
-  const tSelect = document.getElementById("tarjetaCategoria"); // <--- AGREGADO
+  const tSelect = document.getElementById("tarjetaCategoria"); 
+  const eSelect = document.getElementById("editCuotaCategoria"); 
   const filtroSel = document.getElementById("filtroCategoriaSelect");
   const listaCat = document.getElementById("listaCategoriasGestion");
   
-  [gSelect, iSelect, tSelect, filtroSel].forEach(select => {
+  // 4. Llenamos todos los selectores de una sola vez
+  [gSelect, iSelect, tSelect, eSelect, filtroSel].forEach(select => {
     if (!select) return;
-
+    
     const valPrevio = select.value;
 
-    select.innerHTML = select === filtroSel
-      ? '<option value="all">Mostrar todas</option>'
+    // Si es el filtro ponemos "Mostrar todas", si es formulario ponemos "Sin categoría"
+    select.innerHTML = select === filtroSel 
+      ? '<option value="all">Mostrar todas</option>' 
       : '<option value="">Sin categoría</option>';
 
-    categorias.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat.id;
-      opt.textContent = cat.nombre;
-      select.appendChild(opt);
+    categorias.forEach(cat => { 
+        const opt = document.createElement("option"); 
+        opt.value = cat.id; 
+        opt.textContent = cat.nombre; 
+        select.appendChild(opt); 
     });
 
-    if (valPrevio) select.value = valPrevio;
+    // Mantenemos lo que el usuario ya tenía seleccionado para que no se le borre
+    if(valPrevio) select.value = valPrevio;
   });
 
-  if (filtroSel) filtroSel.onchange = () => refreshAll();
+  // 5. Activamos el evento del filtro principal
+  if (filtroSel) {
+      filtroSel.onchange = () => refreshAll();
+  }
 
+  // 6. Dibujamos la lista con tachitos de basura en la configuración
   if (listaCat) {
       listaCat.innerHTML = "";
       categorias.forEach(cat => {
@@ -428,7 +439,6 @@ function renderCategorias(categorias) {
       });
   }
 }
-
 function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     const tbody = document.getElementById("tablaProyeccionBody");
     if (!tbody) return;
@@ -1038,48 +1048,41 @@ if (formTarjeta) {
             const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
-			const diaCompra = parseInt(document.getElementById("tarjetaDia").value) || 10;            
-			const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
-            
+            const diaCompra = parseInt(document.getElementById("tarjetaDia").value) || 10;            
+            const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
+            const categoriaId = document.getElementById("tarjetaCategoria").value || null; // <--- CAPTURAMOS LA CATEGORÍA
+
             const montoPorCuota = Number((montoTotal / cuotas).toFixed(2));
             const [year, month] = primeraCuota.split('-');
             let fechaActual = new Date(year, month - 1, diaCompra);
 
-			for (let i = 1; i <= cuotas; i++) {
-			    const yyyy = fechaActual.getFullYear();
-			    const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-			    const dd = String(fechaActual.getDate()).padStart(2, '0');
+            for (let i = 1; i <= cuotas; i++) {
+                const yyyy = fechaActual.getFullYear();
+                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                const dd = String(fechaActual.getDate()).padStart(2, '0');
 
-			    const textoDesc = `${descripcion} (Cuota ${i}/${cuotas})`;
+                const body = {
+                    descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                    monto: montoPorCuota,
+                    medioPago: tarjetaTipo,
+                    fecha: `${yyyy}-${mm}-${dd}`,
+                    esFijo: false,
+                    usuarioId: user.id,
+                    pagado: false,
+                    categoriaId: categoriaId // <--- AHORA SÍ SE ENVÍA A JAVA
+                };
 
-			    const body = {
-			        descripcion: textoDesc,
-			        monto: montoPorCuota,
-			        medioPago: tarjetaTipo,
-			        fecha: `${yyyy}-${mm}-${dd}`,
-			        esFijo: false,
-			        usuarioId: user.id,
-			        pagado: false
-			    };
-
-			    await fetch(`${API}/gastos`, {
-			        method: "POST",
-			        headers: authHeaders(),
-			        body: JSON.stringify(body)
-			    });
-
-			    fechaActual.setMonth(fechaActual.getMonth() + 1);
-			}
+                await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+            }
 
             document.getElementById("modalTarjeta").style.display = "none";
             formTarjeta.reset();
             await refreshAll();
-            alert(cuotas === 1 ? "Compra en 1 pago guardada." : "Cuotas generadas con éxito.");
+            alert("Compra cargada con éxito.");
         } catch (error) { 
             alert("Error al guardar la compra."); 
-        } finally { 
-            btnSubmit.disabled = false; 
-        }
+        } finally { btnSubmit.disabled = false; }
     };
 }
 
@@ -1423,10 +1426,14 @@ if (logoutBtn) {
 })();
 
 //EDITAR CUOTA
-window.editarCuotaTarjeta = function(id) {
+window.editarCuotaTarjeta = async function(id) {
+    // 1. Forzamos una actualización de categorías por si creaste una recién
+    await fetchCategorias(); 
+
     const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
 
+    // Llenamos los campos
     document.getElementById("editCuotaId").value = gasto.id;
     document.getElementById("editCuotaMedio").value = gasto.medioPago; 
     document.getElementById("editCuotaFecha").value = gasto.fecha || "";
@@ -1439,12 +1446,13 @@ window.editarCuotaTarjeta = function(id) {
         desc = partes[0].trim();
         cuotaStr = partes[1].replace(")", "").trim(); 
     }
-    
     document.getElementById("editCuotaDescripcion").value = desc;
     document.getElementById("editCuotaInfo").value = cuotaStr;
 
+    // 2. Seleccionamos la categoría correcta
+    const eSelect = document.getElementById("editCuotaCategoria");
     const catId = gasto.categoria ? gasto.categoria.id : (gasto.categoriaId || "");
-    document.getElementById("editCuotaCategoria").value = catId;
+    if(eSelect) eSelect.value = catId;
 
     document.getElementById("modalEditarCuota").style.display = "flex";
 };
