@@ -578,3 +578,20 @@ select:focus, #filtroFechaMes:focus {
 .modal-content label {
     color: var(--texto-oscuro) !important;
 }
+
+/* --- SCROLL INTERNO PARA LAS TABLAS DE GASTOS --- */
+.tabla-con-scroll {
+    max-height: 350px; /* Altura máxima de la caja (podés achicarla o agrandarla) */
+    overflow-y: auto;  /* Habilita la barrita de scroll vertical si hace falta */
+    display: block;    /* Necesario para que el div se comporte como bloque */
+    border-bottom: 1px solid #333; /* Una liniecita para cerrar la tabla abajo */
+}
+
+/* Para que la cabecera (Concepto, Monto, etc.) se quede quieta arriba mientras bajás */
+.tabla-con-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--bg-panel); /* Que tenga el mismo color que el panel de atrás */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+}
