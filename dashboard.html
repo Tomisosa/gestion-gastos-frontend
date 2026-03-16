@@ -163,11 +163,8 @@
                     <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">💳 + Nueva</button>
                 </div>
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
-
-				
                 <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
-                <div class="table-wrapper">
-                    <table class="table" id="tablaTarjetas">
+				<div class="table-wrapper tabla-con-scroll"><table class="table" id="tablaTarjetas">
                         <thead><tr><th>Fecha Compra</th><th>Descripción</th><th>Cuota Actual</th><th>Monto Cuota</th></tr></thead>
                         <tbody></tbody>
                     </table>
