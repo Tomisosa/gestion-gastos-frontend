@@ -396,20 +396,26 @@ function renderCategorias(categorias) {
   const filtroSel = document.getElementById("filtroCategoriaSelect");
   const listaCat = document.getElementById("listaCategoriasGestion");
   
-  if (gSelect) {
-    [gSelect, iSelect, tSelect, filtroSel].forEach(select => {
-      if (!select) return;
-      const valPrevio = select.value;
-      select.innerHTML = select === filtroSel ? '<option value="all">Mostrar todas</option>' : '<option value="">Sin categoría</option>';
-      categorias.forEach(cat => { 
-          const opt = document.createElement("option"); 
-          opt.value = cat.id; opt.textContent = cat.nombre; 
-          select.appendChild(opt); 
-      });
-      if(valPrevio) select.value = valPrevio;
+  [gSelect, iSelect, tSelect, filtroSel].forEach(select => {
+    if (!select) return;
+
+    const valPrevio = select.value;
+
+    select.innerHTML = select === filtroSel
+      ? '<option value="all">Mostrar todas</option>'
+      : '<option value="">Sin categoría</option>';
+
+    categorias.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat.id;
+      opt.textContent = cat.nombre;
+      select.appendChild(opt);
     });
-    if (filtroSel) filtroSel.onchange = () => refreshAll();
-  }
+
+    if (valPrevio) select.value = valPrevio;
+  });
+
+  if (filtroSel) filtroSel.onchange = () => refreshAll();
 
   if (listaCat) {
       listaCat.innerHTML = "";
