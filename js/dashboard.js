@@ -24,6 +24,7 @@ let globalIngresos = [];
 let globalTarjetas = []; 
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
+let saldosOcultos = true; // Por defecto arrancan tapados
 
 window.saldosActuales = {};
 
@@ -158,12 +159,9 @@ function generarGrafico(gastos) {
 // CÁLCULO INTELIGENTE DE SALDOS
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
-    
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
-        if (!nombres.includes(nom)) {
-            nombres.push(nom);
-        }
+        if (!nombres.includes(nom)) nombres.push(nom);
     });
 
     const saldos = {};
@@ -194,17 +192,16 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
 
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
-            let btnEliminar = '';
-            
-            if(customObj) {
-                btnEliminar = `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;" title="Ocultar cuenta">✖</button>`;
-            }
+            let btnEliminar = customObj ? `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;">✖</button>` : '';
+
+            // --- ACÁ ESTÁ LA MAGIA DEL OJO ---
+            const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
 
             contenedor.innerHTML += `
             <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; position: relative;">
                 ${btnEliminar}
                 <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">🏦 ${b}</h4>
-                <p style="font-size: 1.3rem; font-weight: bold; color: ${color}; margin: 5px 0 0 0;">${formatoMoneda(saldos[b])}</p>
+                <p style="font-size: 1.3rem; font-weight: bold; color: ${color}; margin: 5px 0 0 0;">${montoAMostrar}</p>
             </div>`;
         });
     }
@@ -1506,3 +1503,16 @@ if (formEditarCuota) {
         }
     };
 }
+
+window.toggleSaldos = function() {
+    saldosOcultos = !saldosOcultos; // Cambiamos el estado (si era true pasa a false y viceversa)
+    
+    // Cambiamos el icono
+    const icono = document.getElementById("iconoSaldos");
+    if(icono) {
+        icono.textContent = saldosOcultos ? "visibility_off" : "visibility";
+    }
+    
+    // Refrescamos los números
+    refreshAll();
+};
