@@ -1163,8 +1163,10 @@ window.eliminarGasto = async function(id) {
     await refreshAll(); 
 };
 
-// ¡ESTA ES LA FUNCIÓN QUE SE HABÍA BORRADO!
-window.editarGasto = function(id) {
+window.editarGasto = async function(id) {
+
+    await fetchCategorias();
+
     gastoEnEdicion = globalGastos.find(g => g.id === id);
     if (!gastoEnEdicion) return;
 
@@ -1174,19 +1176,23 @@ window.editarGasto = function(id) {
     document.getElementById("gastoMedio").value = gastoEnEdicion.medioPago || "EFECTIVO";
     
     const catId = gastoEnEdicion.categoria ? gastoEnEdicion.categoria.id : (gastoEnEdicion.categoriaId || "");
-    document.getElementById("gastoCategoria").value = catId;
+
+    setTimeout(() => {
+        const selectCat = document.getElementById("gastoCategoria");
+        if (selectCat) selectCat.value = catId;
+    }, 0);
     
     document.getElementById("gastoVencimiento").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
-	
-	if(gastoEnEdicion.mesImpacto){
-	    document.getElementById("gastoMesImpacto").value = gastoEnEdicion.mesImpacto.slice(0,7);
-	}else{
-	    document.getElementById("gastoMesImpacto").value = "";
-	}
-    
+
+    if(gastoEnEdicion.mesImpacto){
+        document.getElementById("gastoMesImpacto").value = gastoEnEdicion.mesImpacto.slice(0,7);
+    }else{
+        document.getElementById("gastoMesImpacto").value = "";
+    }
+
     const isPagado = gastoEnEdicion.pagado || false;
     document.getElementById("gastoPagado").checked = isPagado;
-    
+
     const divFechaPago = document.getElementById("divFechaPagoReal");
     if (isPagado) {
         divFechaPago.style.display = "block";
@@ -1205,7 +1211,6 @@ window.editarGasto = function(id) {
 
     document.getElementById("modalGasto").style.display = "flex";
 };
-
 window.eliminarIngreso = async function(id) { 
     if(confirm("¿Eliminar ingreso?")) { 
         await fetch(`${API}/ingresos/${id}`, { method: "DELETE", headers: authHeaders() }); 
