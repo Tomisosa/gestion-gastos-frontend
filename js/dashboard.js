@@ -1222,10 +1222,10 @@ window.crearCategoria = async function() {
     }
 
     try {
-        // CATEGORIAS USA EL OBJETO EN JAVA
+
         const body = { 
             nombre: inputCat.value.trim(),
-            usuario: { id: user.id }
+            usuarioId: user.id
         };
 
         const res = await fetch(`${API}/categorias`, { 
