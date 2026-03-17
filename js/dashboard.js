@@ -341,6 +341,9 @@ async function fetchYRenderizarMisTarjetas() {
         }
         
         globalTarjetas.forEach(t => {
+            // Incorporamos el ojito acá también para privacidad total
+            const montoAMostrar = saldosOcultos ? "••••••" : "$0,00"; // Por defecto arranca en 0 hasta que refreshAll() lo pise
+
             contenedor.innerHTML += `
             <div class="card" style="background: ${getBgColor(t.color)}; border: none; position: relative; overflow: hidden; padding-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                 <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
@@ -348,7 +351,7 @@ async function fetchYRenderizarMisTarjetas() {
                 <h3 style="color: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: none; margin-right: 30px; margin-top: 10px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">${t.nombre}</h3>
                 
                 <p style="color: rgba(255,255,255,0.7); margin: 15px 0 0 0; font-size: 0.85rem;">A pagar este mes:</p>
-                <h2 id="monto-tarjeta-${t.id}" style="color: #ffffff; margin: 2px 0 0 0; font-size: 1.8rem; font-weight: bold;">$0,00</h2>
+                <h2 id="monto-tarjeta-${t.id}" style="color: #ffffff; margin: 2px 0 0 0; font-size: 1.8rem; font-weight: bold;">${montoAMostrar}</h2>
             </div>`;
         });
     } catch (error) {
@@ -436,6 +439,7 @@ function renderCategorias(categorias) {
       });
   }
 }
+
 function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     const tbody = document.getElementById("tablaProyeccionBody");
     if (!tbody) return;
@@ -466,7 +470,7 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
             contenedorSaldos.innerHTML += `
             <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
                 <span>🏦 ${b}:</span> 
-                <span style="font-weight: bold; color: #00aae4;">${formatoMoneda(saldos[b] || 0)}</span>
+                <span style="font-weight: bold; color: #00aae4;">${saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0)}</span>
             </div>`;
         });
     }
@@ -488,12 +492,9 @@ async function refreshAll() {
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
   
   const gFiltradosMes = gTodos.filter(g => {
-
-        // prioridad: mesImpacto → vencimiento → fecha
         const fechaComparar = g.mesImpacto 
             ? g.mesImpacto 
             : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
-
         return (fechaComparar || "").startsWith(mesSeleccionado);
   });
   
@@ -519,8 +520,8 @@ async function refreshAll() {
 
   const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
   const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
-  if(divUSD) divUSD.textContent = `USD ${totalUSD.toFixed(2)}`;
-  if(divARS) divARS.textContent = formatoMoneda(totalARS_Inv);
+  if(divUSD) divUSD.textContent = saldosOcultos ? "••••••" : `USD ${totalUSD.toFixed(2)}`;
+  if(divARS) divARS.textContent = saldosOcultos ? "••••••" : formatoMoneda(totalARS_Inv);
   
   const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
@@ -536,15 +537,8 @@ async function refreshAll() {
   
   const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
   const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
-  
-  renderGastosVariables(gVariablesParaTabla); 
-  renderGastosFijos(gFijosParaTabla); 
-  renderIngresos(ingresosNormales); 
-  generarGrafico(gParaTablasYGrafico);
-  renderConsumosCuotas(gParaTablasYGrafico); 
-  renderPrestamos(pTodos); 
 
-  // --- ACÁ EMPIEZA LA MAGIA DE INYECTAR LA PLATA EN LAS TARJETAS ---
+  // --- MAGIA DE TARJETAS (Cálculo) ---
   const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO"];
   globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
 
@@ -557,14 +551,41 @@ async function refreshAll() {
       totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
   });
 
-  // Buscamos cada tarjeta en la pantalla y le mandamos su saldo adentro
+  // Mostrar saldo adentro de las tarjetas de arriba (Y aplicar ojito)
   globalTarjetas.forEach(t => {
       const idMonto = "monto-tarjeta-" + t.id;
       const total = totalesTarjetas[t.nombre] || 0;
       const el = document.getElementById(idMonto);
-      if (el) el.textContent = formatoMoneda(total);
+      if (el) el.textContent = saldosOcultos ? "••••••" : formatoMoneda(total);
   });
-  // ------------------------------------------------------------------
+
+  // --- MAGIA NUEVA: INYECTAR TOTAL DE TODAS LAS TARJETAS EN GASTOS FIJOS ---
+  let sumaTotalTarjetas = 0;
+  Object.values(totalesTarjetas).forEach(monto => {
+      sumaTotalTarjetas += (Number(monto) || 0);
+  });
+
+  if (sumaTotalTarjetas > 0) {
+      gFijosParaTabla.push({
+          id: 'virtual', // No existe como fijo real, es para la tabla
+          descripcion: `Resumen Total Tarjetas`,
+          monto: sumaTotalTarjetas,
+          fechaVencimiento: mesSeleccionado + "-10", 
+          categoriaNombre: "💳 Tarjetas", 
+          pagado: false,
+          medioPago: "MÚLTIPLES",
+          esVirtual: true // Esto le avisa a la tabla que oculte los botones
+      });
+  }
+  // -------------------------------------------------------------------------
+
+  // AHORA SÍ DIBUJAMOS LAS TABLAS (Con la nueva fila inyectada)
+  renderGastosVariables(gVariablesParaTabla); 
+  renderGastosFijos(gFijosParaTabla); 
+  renderIngresos(ingresosNormales); 
+  generarGrafico(gParaTablasYGrafico);
+  renderConsumosCuotas(gParaTablasYGrafico); 
+  renderPrestamos(pTodos); 
 
   const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
   const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
@@ -614,10 +635,17 @@ function renderGastosFijos(lista) {
 
   lista.forEach(g => {
     total += (Number(g.monto) || 0);
-    const acciones = `
-        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
-        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-    `;
+    
+    // Si es un resumen de tarjeta automático, ocultamos el botón de borrar/editar
+    let acciones = "";
+    if (g.esVirtual) {
+        acciones = `<span style="font-size: 0.8rem; background: var(--bg-saldos); padding: 4px 8px; border-radius: 5px; color: #888;">Automático</span>`;
+    } else {
+        acciones = `
+            <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+            <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+        `;
+    }
 
     const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
     const estadoPagado = g.pagado ? "✅ Sí" : "❌ No";
@@ -627,7 +655,7 @@ function renderGastosFijos(lista) {
         <td>${g.descripcion||"-"}</td>
         <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
         <td>${vto}</td>
-        <td>${g.categoriaNombre||"-"}</td>
+        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
         <td>${estadoPagado}</td>
         <td>${fechaPagoReal}</td>
         <td>${g.medioPago||"EFECTIVO"}</td>
