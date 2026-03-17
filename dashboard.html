@@ -146,8 +146,13 @@
 
         <div id="ahorros" class="page">
             <div class="panel">
-                <h2 style="color: var(--color-primario); margin-bottom: 10px;">Portafolio de Inversiones</h2>
-                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <h2 style="color: var(--color-primario); margin: 0;">Portafolio de Inversiones</h2>
+                    <button id="btnToggleSaldosAhorros" onclick="toggleSaldosAhorros()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
+                        <span class="material-icons" id="iconoSaldosAhorros" style="font-size: 20px;">visibility_off</span>
+                    </button>
+                </div>
+                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
                     <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
                         <h3 style="color: #86efac; border: none; padding: 0; font-size: 0.9rem;">Total Dólares (MEP / Efectivo)</h3>
                         <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">USD 0.00</div>
@@ -165,7 +170,7 @@
             <div class="panel">
 				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
 				    <div style="display: flex; align-items: center; gap: 10px;">
-				        <h2 style="color: var(--color-secundario); margin: 0;">Gestor de Tarjetas de Crédito</h2>
+				        <h2 style="color: var(--color-secundario); margin: 0;">Gestión de Tarjetas de Crédito</h2>
 				        <button id="btnToggleSaldosTarjetas" onclick="toggleSaldosTarjetas()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
 				            <span class="material-icons" id="iconoSaldosTarjetas" style="font-size: 20px;">visibility_off</span>
 				        </button>

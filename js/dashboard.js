@@ -26,6 +26,7 @@ let globalBilleteras = [];
 let gastoEnEdicion = null; 
 let saldosOcultos = true; // Por defecto arrancan tapados (DÉBITO)
 let saldosTarjetasOcultos = true; // Por defecto arrancan tapados (CRÉDITO)
+let saldosAhorrosOcultos = true; // Por defecto arrancan tapados (AHORROS)
 
 window.saldosActuales = {};
 
@@ -543,9 +544,10 @@ async function refreshAll() {
   });
 
   const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
-  const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
-  if(divUSD) divUSD.textContent = saldosOcultos ? "••••••" : `USD ${totalUSD.toFixed(2)}`;
-  if(divARS) divARS.textContent = saldosOcultos ? "••••••" : formatoMoneda(totalARS_Inv);
+    const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
+    // ACÁ LE CAMBIAMOS EL NOMBRE A LA VARIABLE DEL OJO
+    if(divUSD) divUSD.textContent = saldosAhorrosOcultos ? "••••••" : `USD ${totalUSD.toFixed(2)}`;
+    if(divARS) divARS.textContent = saldosAhorrosOcultos ? "••••••" : formatoMoneda(totalARS_Inv);
   
   const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
   const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
@@ -1577,6 +1579,19 @@ window.toggleSaldosTarjetas = function() {
     const icono = document.getElementById("iconoSaldosTarjetas");
     if(icono) {
         icono.textContent = saldosTarjetasOcultos ? "visibility_off" : "visibility";
+    }
+    
+    // Refrescamos los números
+    refreshAll();
+};
+
+window.toggleSaldosAhorros = function() {
+    saldosAhorrosOcultos = !saldosAhorrosOcultos; // Cambiamos el estado
+    
+    // Cambiamos el icono
+    const icono = document.getElementById("iconoSaldosAhorros");
+    if(icono) {
+        icono.textContent = saldosAhorrosOcultos ? "visibility_off" : "visibility";
     }
     
     // Refrescamos los números
