@@ -144,27 +144,36 @@
             </div>
         </div>
 
-        <div id="ahorros" class="page">
-            <div class="panel">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <h2 style="color: var(--color-primario); margin: 0;">Portafolio de Inversiones</h2>
-                    <button id="btnToggleSaldosAhorros" onclick="toggleSaldosAhorros()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
-                        <span class="material-icons" id="iconoSaldosAhorros" style="font-size: 20px;">visibility_off</span>
-                    </button>
-                </div>
-                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                    <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
-                        <h3 style="color: #86efac; border: none; padding: 0; font-size: 0.9rem;">Total Dólares (MEP / Efectivo)</h3>
-                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">USD 0.00</div>
-                    </div>
-                    <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: none; position: relative; overflow: hidden;">
-                        <h3 style="color: #94a3b8; border: none; padding: 0; font-size: 0.9rem;">Total Pesos (Money Market / Cedears)</h3>
-                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">$ 0,00</div>
-                    </div>
-                </div>
-                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalInversion').style.display = 'flex'">+ Registrar Nueva Inversión</button>
-            </div>
-        </div>
+		<div id="ahorros" class="page">
+		            <div class="panel">
+		                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+		                    <h2 style="color: var(--color-primario); margin: 0;">Portafolio de Inversiones</h2>
+		                    <button id="btnToggleSaldosAhorros" onclick="toggleSaldosAhorros()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
+		                        <span class="material-icons" id="iconoSaldosAhorros" style="font-size: 20px;">visibility_off</span>
+		                    </button>
+		                </div>
+		                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+		                    <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
+		                        <h3 style="color: #86efac; border: none; padding: 0; font-size: 0.9rem;">Total Dólares (MEP / Efectivo)</h3>
+		                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">USD 0.00</div>
+		                    </div>
+		                    <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: none; position: relative; overflow: hidden;">
+		                        <h3 style="color: #94a3b8; border: none; padding: 0; font-size: 0.9rem;">Total Pesos (Money Market / Cedears)</h3>
+		                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">$ 0,00</div>
+		                    </div>
+		                </div>
+
+		                <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Historial de Movimientos</h3>
+		                <div class="table-wrapper" style="max-height: 300px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
+		                    <table class="table" id="tablaInversiones">
+		                        <thead><tr><th>Fecha</th><th>Detalle de Inversión</th><th>Monto</th><th>Acciones</th></tr></thead>
+		                        <tbody></tbody>
+		                    </table>
+		                </div>
+
+		                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalInversion').style.display = 'flex'">+ Registrar Nueva Inversión</button>
+		            </div>
+		        </div>
 
         <div id="tarjetas" class="page">
             <div class="panel">
@@ -250,7 +259,26 @@
             </form>
         </div></div>
         
-        <div id="modalIngreso" class="modal"><div class="modal-content"><span class="close" id="closeIngreso">&times;</span><h3>Agregar Ingreso</h3><form id="formIngreso" class="form"><input type="hidden" id="ingresoId" value=""><label>Descripción <input id="ingresoDescripcion" type="text" /></label><label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label><label>Acreditar en (Cuentas Débito) <select id="ingresoMedio" required></select></label><label>Fecha <input id="ingresoFecha" type="date" required /></label><label>Categoría <select id="ingresoCategoria"></select></label><button type="submit" class="btn">Guardar</button></form></div></div>
+		<div id="modalIngreso" class="modal">
+		    <div class="modal-content">
+		        <span class="close" onclick="document.getElementById('modalIngreso').style.display = 'none'">&times;</span>
+		        <h3>Agregar Ingreso</h3>
+		        <form id="formIngreso" class="form">
+		            <input type="hidden" id="ingresoId" value="">
+		            <label>Descripción <input id="ingresoDescripcion" type="text" /></label>
+		            <label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label>
+		            <label>Acreditar en (Cuentas Débito) <select id="ingresoMedio" required></select></label>
+		            <label>Categoría <select id="ingresoCategoria"></select></label>
+		            
+		            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+		            
+		            <label>📅 Fecha de cobro real <input id="ingresoFecha" type="date" required /></label>
+		            <label>Mes de impacto (Opcional) <input type="month" id="ingresoMesImpacto"></label>
+		            
+		            <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
+		        </form>
+		    </div>
+		</div>
 
 		<div id="modalTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span><h3>🛒 Cargar Compra con Tarjeta</h3>
 		            <form id="formTarjeta" class="form">

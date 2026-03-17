@@ -523,7 +523,11 @@ async function refreshAll() {
   }
   // ---------------------------------------------------------------
   
-  const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
+  const iFiltradosMes = iTodos.filter(i => {
+          // Prioridad: mesImpacto → fecha de cobro
+          const fechaComparar = i.mesImpacto ? i.mesImpacto : i.fecha;
+          return (fechaComparar || "").startsWith(mesSeleccionado);
+    });
 
   const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
   let gParaTablasYGrafico = [...gFiltradosMes]; 
@@ -609,7 +613,8 @@ async function refreshAll() {
   // AHORA SÍ DIBUJAMOS LAS TABLAS (Con las nuevas filas inyectadas)
   renderGastosVariables(gVariablesParaTabla); 
   renderGastosFijos(gFijosParaTabla); 
-  renderIngresos(ingresosNormales); 
+  renderIngresos(ingresosNormales);
+  renderInversiones(inversiones);
   generarGrafico(gParaTablasYGrafico);
   renderConsumosCuotas(gParaTablasYGrafico); 
   renderPrestamos(pTodos); 
@@ -1060,15 +1065,20 @@ const formIngreso = document.getElementById("formIngreso");
 if (formIngreso) {
     formIngreso.onsubmit = async (e) => { 
         e.preventDefault(); 
+        const btnSubmit = document.querySelector("#formIngreso button[type='submit']");
+        btnSubmit.disabled = true;
         try {
-            // INGRESOS USAN DTO Y REQUIEREN NUMEROS SUELTOS
+            // Capturamos el mes de impacto
+            const mesImpacto = document.getElementById("ingresoMesImpacto").value;
+
             const body = {
                 descripcion: document.getElementById("ingresoDescripcion").value || "Ingreso",
                 monto: document.getElementById("ingresoMonto").value,
                 medioPago: document.getElementById("ingresoMedio").value,
                 fecha: document.getElementById("ingresoFecha").value,
                 usuarioId: user.id,
-                categoriaId: document.getElementById("ingresoCategoria").value || null
+                categoriaId: document.getElementById("ingresoCategoria").value || null,
+                mesImpacto: mesImpacto ? mesImpacto + "-01" : null // Se lo mandamos a la base de datos
             };
             
             const res = await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
@@ -1085,6 +1095,8 @@ if (formIngreso) {
             
         } catch(error) {
             alert("Error de conexión. Revisá tu internet y volvé a intentar.");
+        } finally {
+            btnSubmit.disabled = false;
         }
     };
 }
@@ -1429,16 +1441,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalGasto').style.display = 'flex'; 
     };
     
-    const btnFabIngreso = document.getElementById('btnFabIngreso');
-    if (btnFabIngreso) btnFabIngreso.onclick = () => { 
-        document.getElementById('formIngreso').reset();
-        document.getElementById('ingresoId').value = "";
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('ingresoFecha').value = hoy;
+	const btnFabIngreso = document.getElementById('btnFabIngreso');
+	    if (btnFabIngreso) btnFabIngreso.onclick = () => { 
+	        document.getElementById('formIngreso').reset();
+	        document.getElementById('ingresoId').value = "";
+	        
+	        const hoy = new Date().toISOString().split('T')[0];
+	        document.getElementById('ingresoFecha').value = hoy;
+	        
+	        const mesImpactoInput = document.getElementById('ingresoMesImpacto');
+	        if (mesImpactoInput) mesImpactoInput.value = "";
 
-        document.getElementById('modalIngreso').style.display = 'flex'; 
-    };
+	        document.getElementById('modalIngreso').style.display = 'flex'; 
+	    };
     
     const btnFabTarjeta = document.getElementById('btnFabTarjeta');
     if (btnFabTarjeta) btnFabTarjeta.onclick = () => { 
@@ -1557,6 +1572,31 @@ if (formEditarCuota) {
             btnSubmit.textContent = "Guardar Cambios";
         }
     };
+}
+
+function renderInversiones(lista) {
+  const tbody = document.querySelector('#tablaInversiones tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  lista.forEach(i => {
+    // Como las guardamos como ingresos, usamos la misma función de borrar ingresos
+    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+    
+    // Le sacamos el texto "INV: " para que quede más prolijo en la tabla
+    let detalleLimpio = (i.descripcion || "").replace("INV: ", "");
+    
+    // Le damos color verde a los USD y gris a los ARS
+    let colorMonto = detalleLimpio.includes('(USD)') ? '#86efac' : '#94a3b8';
+    let prefijo = detalleLimpio.includes('(USD)') ? 'USD ' : '';
+
+    tbody.innerHTML += `<tr>
+        <td>${i.fecha}</td>
+        <td>${detalleLimpio}</td>
+        <td style="font-weight: bold; color: ${colorMonto};">${prefijo}${formatoMoneda(i.monto)}</td>
+        <td>${acciones}</td>
+    </tr>`;
+  });
 }
 
 window.toggleSaldos = function() {
