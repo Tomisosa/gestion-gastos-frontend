@@ -163,14 +163,14 @@
 
         <div id="tarjetas" class="page">
             <div class="panel">
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
 				    <div style="display: flex; align-items: center; gap: 10px;">
 				        <h2 style="color: var(--color-secundario); margin: 0;">Gestor de Tarjetas de Crédito</h2>
-				        <button id="btnToggleSaldosTarjetas" onclick="toggleSaldosTarjetas()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center;">
+				        <button id="btnToggleSaldosTarjetas" onclick="toggleSaldosTarjetas()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
 				            <span class="material-icons" id="iconoSaldosTarjetas" style="font-size: 20px;">visibility_off</span>
 				        </button>
 				    </div>
-				    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" class="btn" style="background: var(--color-secundario); border: none; color: #000; font-weight: bold;">💳 + Nueva</button>
+				    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-secundario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; height: fit-content;">💳 + Nueva</button>
 				</div>
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
                 <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
