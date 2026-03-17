@@ -68,7 +68,8 @@ function getBgColor(color) {
         celeste: "#009ee3, #0284c7",
         violeta: "#8b5cf6, #4c1d95",
         verde: "#166534, #064e3b",
-        negro: "#262626, #000000"
+        negro: "#262626, #000000",
+        rojo: "#dc2626, #7f1d1d" // <--- ACÁ ESTÁ EL NUEVO ROJO
     };
 
     return `linear-gradient(135deg, ${m[color] || "#333333, #111111"})`;
