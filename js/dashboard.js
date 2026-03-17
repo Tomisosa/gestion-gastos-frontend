@@ -24,7 +24,8 @@ let globalIngresos = [];
 let globalTarjetas = []; 
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
-let saldosOcultos = true; // Por defecto arrancan tapados
+let saldosOcultos = true; // Por defecto arrancan tapados (DÉBITO)
+let saldosTarjetasOcultos = true; // Por defecto arrancan tapados (CRÉDITO)
 
 window.saldosActuales = {};
 
@@ -342,7 +343,7 @@ async function fetchYRenderizarMisTarjetas() {
         
         globalTarjetas.forEach(t => {
             // Incorporamos el ojito acá también para privacidad total
-            const montoAMostrar = saldosOcultos ? "••••••" : "$0,00"; // Por defecto arranca en 0 hasta que refreshAll() lo pise
+            const montoAMostrar = saldosTarjetasOcultos ? "••••••" : "$0,00";
 
             contenedor.innerHTML += `
             <div class="card" style="background: ${getBgColor(t.color)}; border: none; position: relative; overflow: hidden; padding-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -574,13 +575,14 @@ async function refreshAll() {
       totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
   });
 
-  // Mostrar saldo adentro de las tarjetas de arriba (Y aplicar ojito)
-  globalTarjetas.forEach(t => {
-      const idMonto = "monto-tarjeta-" + t.id;
-      const total = totalesTarjetas[t.nombre] || 0;
-      const el = document.getElementById(idMonto);
-      if (el) el.textContent = saldosOcultos ? "••••••" : formatoMoneda(total);
-  });
+  // Mostrar saldo adentro de las tarjetas de arriba (Y aplicar ojito NUEVO)
+    globalTarjetas.forEach(t => {
+        const idMonto = "monto-tarjeta-" + t.id;
+        const total = totalesTarjetas[t.nombre] || 0;
+        const el = document.getElementById(idMonto);
+        // ACÁ CAMBIAMOS LA VARIABLE:
+        if (el) el.textContent = saldosTarjetasOcultos ? "••••••" : formatoMoneda(total);
+    });
 
   // --- MAGIA DE TARJETAS: INYECTAR TOTAL EN GASTOS FIJOS ---
   let sumaTotalTarjetas = 0;
@@ -1562,6 +1564,19 @@ window.toggleSaldos = function() {
     const icono = document.getElementById("iconoSaldos");
     if(icono) {
         icono.textContent = saldosOcultos ? "visibility_off" : "visibility";
+    }
+    
+    // Refrescamos los números
+    refreshAll();
+};
+
+window.toggleSaldosTarjetas = function() {
+    saldosTarjetasOcultos = !saldosTarjetasOcultos; // Cambiamos el estado
+    
+    // Cambiamos el icono del ojo de las tarjetas
+    const icono = document.getElementById("iconoSaldosTarjetas");
+    if(icono) {
+        icono.textContent = saldosTarjetasOcultos ? "visibility_off" : "visibility";
     }
     
     // Refrescamos los números
