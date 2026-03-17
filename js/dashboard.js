@@ -497,6 +497,29 @@ async function refreshAll() {
             : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
         return (fechaComparar || "").startsWith(mesSeleccionado);
   });
+
+  // --- MAGIA NUEVA: INYECTAR PRÉSTAMOS COMO GASTO FIJO VIRTUAL ---
+  // Agarramos los prestamos del mes y sumamos lo que haya (usamos variables del sistema, no importa el nombre que el usuario les haya puesto)
+  const prestamosDelMes = pTodos.filter(p => (p.mesCuota || "").startsWith(mesSeleccionado));
+  let sumaTotalPrestamos = 0;
+  prestamosDelMes.forEach(p => {
+      sumaTotalPrestamos += (Number(p.aporteMama) || 0) + (Number(p.aporteBelen) || 0);
+  });
+
+  if (sumaTotalPrestamos > 0) {
+      gFiltradosMes.push({
+          id: 'virtual_prestamo',
+          descripcion: `Cuota Préstamos`, // Usamos un nombre genérico
+          monto: sumaTotalPrestamos,
+          fechaVencimiento: mesSeleccionado + "-10", // Simulamos vencimiento
+          categoriaNombre: "🤝 Préstamos", // Agrupado para el gráfico
+          pagado: false,
+          medioPago: "MÚLTIPLES",
+          esFijo: true, // Esto hace que vaya a la tabla de Fijos
+          esVirtual: true // Oculta el tacho de basura
+      });
+  }
+  // ---------------------------------------------------------------
   
   const iFiltradosMes = iTodos.filter(i => (i.fecha||"").startsWith(mesSeleccionado));
 
@@ -504,7 +527,7 @@ async function refreshAll() {
   let gParaTablasYGrafico = [...gFiltradosMes]; 
   
   if (catFilter !== "all" && catFilter !== "") {
-      gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter));
+      gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
   }
 
   const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
@@ -559,7 +582,7 @@ async function refreshAll() {
       if (el) el.textContent = saldosOcultos ? "••••••" : formatoMoneda(total);
   });
 
-  // --- MAGIA NUEVA: INYECTAR TOTAL DE TODAS LAS TARJETAS EN GASTOS FIJOS ---
+  // --- MAGIA DE TARJETAS: INYECTAR TOTAL EN GASTOS FIJOS ---
   let sumaTotalTarjetas = 0;
   Object.values(totalesTarjetas).forEach(monto => {
       sumaTotalTarjetas += (Number(monto) || 0);
@@ -567,19 +590,19 @@ async function refreshAll() {
 
   if (sumaTotalTarjetas > 0) {
       gFijosParaTabla.push({
-          id: 'virtual', // No existe como fijo real, es para la tabla
+          id: 'virtual_tarjeta', 
           descripcion: `Resumen Total Tarjetas`,
           monto: sumaTotalTarjetas,
           fechaVencimiento: mesSeleccionado + "-10", 
           categoriaNombre: "💳 Tarjetas", 
           pagado: false,
           medioPago: "MÚLTIPLES",
-          esVirtual: true // Esto le avisa a la tabla que oculte los botones
+          esVirtual: true 
       });
   }
   // -------------------------------------------------------------------------
 
-  // AHORA SÍ DIBUJAMOS LAS TABLAS (Con la nueva fila inyectada)
+  // AHORA SÍ DIBUJAMOS LAS TABLAS (Con las nuevas filas inyectadas)
   renderGastosVariables(gVariablesParaTabla); 
   renderGastosFijos(gFijosParaTabla); 
   renderIngresos(ingresosNormales); 
@@ -636,7 +659,7 @@ function renderGastosFijos(lista) {
   lista.forEach(g => {
     total += (Number(g.monto) || 0);
     
-    // Si es un resumen de tarjeta automático, ocultamos el botón de borrar/editar
+    // Si es un resumen automático (tarjetas o préstamos), ocultamos el botón de borrar/editar
     let acciones = "";
     if (g.esVirtual) {
         acciones = `<span style="font-size: 0.8rem; background: var(--bg-saldos); padding: 4px 8px; border-radius: 5px; color: #888;">Automático</span>`;
