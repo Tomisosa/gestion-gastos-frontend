@@ -744,7 +744,8 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
-      let montoAMostrar = saldosTarjetasOcultos ? "••••••" : formatoMoneda(g.monto);
+      // Le devolvemos el número visible siempre:
+      let montoAMostrar = formatoMoneda(g.monto);
       
       tbody.innerHTML += `
       <tr>
@@ -1532,7 +1533,8 @@ function renderInversiones(lista) {
     let colorMonto = detalleLimpio.includes('(USD)') ? '#86efac' : '#94a3b8';
     let prefijo = detalleLimpio.includes('(USD)') ? 'USD ' : '';
 
-    let montoAMostrar = saldosAhorrosOcultos ? "••••••" : `${prefijo}${formatoMoneda(i.monto)}`;
+    // Le devolvemos el número visible siempre:
+    let montoAMostrar = `${prefijo}${formatoMoneda(i.monto)}`;
 
     tbody.innerHTML += `<tr>
         <td>${i.fecha}</td>

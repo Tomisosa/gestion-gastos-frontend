@@ -8,6 +8,15 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="icon" href="icono.png" type="image/png">
+  <style>
+        /* Arreglo para que los títulos de la tabla tengan fondo y no se superpongan */
+        .table th {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff; /* Fondo blanco sólido */
+            z-index: 10; /* Lo mantiene siempre por encima de las letras que suben */
+        }
+    </style>
 </head>
 <body>
   <div class="app">
