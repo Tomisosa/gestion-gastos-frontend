@@ -604,11 +604,10 @@ select:focus, #filtroFechaMes:focus {
 .table th {
     position: sticky;
     top: 0;
-    /* Usamos el mismo color oscuro de tus paneles para que no desentone */
-    background-color: #1e1e1e !important; 
+    background-color: #ffffff !important; /* Fondo blanco para que combine con tus tablas */
+    color: #333333 !important; /* Forzamos las letras oscuras para que se lean perfecto */
     z-index: 100 !important;
-    /* Le agregamos una sombra abajo para que se note la separación con el texto que sube */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra súper suave y elegante */
 }
 
 /* Para asegurarnos de que las esquinas no dejen "huecos" transparentes */
@@ -618,5 +617,5 @@ select:focus, #filtroFechaMes:focus {
     left: 0;
     right: 0;
     bottom: -1px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid #e2e8f0; /* Borde clarito a juego */
 }
