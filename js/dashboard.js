@@ -856,7 +856,6 @@ if (formPrestamo) {
 const formGasto = document.getElementById("formGasto");
 
 if (formGasto) {
-
 formGasto.onsubmit = async (e) => { 
 e.preventDefault(); 
 
@@ -865,120 +864,74 @@ btnSubmit.disabled = true;
 btnSubmit.textContent = "Guardando...";
 
 try {
-
-const idAEditar = document.getElementById("gastoId").value 
-? parseInt(document.getElementById("gastoId").value) 
-: null;
-
+const idAEditar = document.getElementById("gastoId").value ? parseInt(document.getElementById("gastoId").value) : null;
 const descripcion = document.getElementById("gastoDescripcion").value;
 const montoRaw = document.getElementById("gastoMonto").value;
 const monto = parseFloat(montoRaw.replace(',', '.'));
-const medioPago = document.getElementById("gastoMedio").value;
+
+// MAGIA NUEVA: Si no está pagado, guardamos "PENDIENTE" y no nos importa el select
+const pagado = document.getElementById("gastoPagado").checked;
+const medioPago = pagado ? document.getElementById("gastoMedio").value : "PENDIENTE";
+
 const esFijo = document.getElementById("gastoEsFijo").checked;
 const repeticion = parseInt(document.getElementById("gastoRepeticion").value || 0);
 const categoriaId = document.getElementById("gastoCategoria").value || null;
 const fechaVto = document.getElementById("gastoVencimiento").value;
-const pagado = document.getElementById("gastoPagado").checked;
 const fechaReal = document.getElementById("gastoFecha").value;
 const mesImpacto = document.getElementById("gastoMesImpacto").value;
 
 let fechaBase = pagado ? fechaReal : fechaVto;
 
 if (idAEditar) {
-const body = {
-descripcion,
-monto,
-medioPago,
-fecha: pagado ? fechaReal : fechaVto,
-esFijo,
-usuarioId: user.id,
-categoriaId: categoriaId,
-fechaVencimiento: fechaVto || null,
-pagado,
-mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-};
+    const body = {
+    descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
+    esFijo, usuarioId: user.id, categoriaId: categoriaId,
+    fechaVencimiento: fechaVto || null, pagado, mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+    };
 
-const res = await fetch(`${API}/gastos/${idAEditar}`, {
-method: "PUT",
-headers: authHeaders(),
-body: JSON.stringify(body)
-});
-
-if (!res.ok) throw new Error("Error al guardar el gasto");
-
-alert("¡Gasto actualizado!");
+    const res = await fetch(`${API}/gastos/${idAEditar}`, {
+    method: "PUT", headers: authHeaders(), body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error("Error al guardar el gasto");
+    alert("¡Gasto actualizado!");
 
 } else {
+    if (esFijo && repeticion > 0) {
+        const [year, month, day] = fechaVto.split('-');
+        let saltoMes = 1;
+        const tipoRepeticion = document.getElementById("tipoRepeticion").value;
 
-if (esFijo && repeticion > 0) {
+        if(tipoRepeticion === "mensual") saltoMes = 1;
+        if(tipoRepeticion === "3meses") saltoMes = 3;
+        if(tipoRepeticion === "6meses") saltoMes = 6;
 
-const [year, month, day] = fechaVto.split('-');
-let saltoMes = 1;
-const tipoRepeticion = document.getElementById("tipoRepeticion").value;
+        for (let i = 0; i < repeticion; i++) {
+            let m = parseInt(month) + (i * saltoMes);
+            let y = parseInt(year);
+            while (m > 12) { m -= 12; y += 1; }
+            let safeDay = parseInt(day) > 28 ? "28" : day;
+            let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
+            let isPagado = (i === 0) ? pagado : false;
+            let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+            
+            // Si es repetición a futuro, obviamente es PENDIENTE
+            let mPago = isPagado ? medioPago : "PENDIENTE";
 
-if(tipoRepeticion === "mensual") saltoMes = 1;
-if(tipoRepeticion === "3meses") saltoMes = 3;
-if(tipoRepeticion === "6meses") saltoMes = 6;
-
-for (let i = 0; i < repeticion; i++) {
-
-let m = parseInt(month) + (i * saltoMes);
-let y = parseInt(year);
-
-while (m > 12) {
-m -= 12;
-y += 1;
-}
-
-let safeDay = parseInt(day) > 28 ? "28" : day;
-let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
-let isPagado = (i === 0) ? pagado : false;
-let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
-
-const bodyFijo = {
-descripcion,
-monto,
-medioPago,
-fecha: pFecha,
-esFijo: true,
-usuarioId: user.id,
-categoriaId: categoriaId,
-fechaVencimiento: nuevoVto,
-pagado: isPagado,
-mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-};
-
-await fetch(`${API}/gastos`, {
-method: "POST",
-headers: authHeaders(),
-body: JSON.stringify(bodyFijo)
-});
-
-}
-
-} else {
-
-const body = {
-descripcion,
-monto,
-medioPago,
-fecha: fechaBase,
-esFijo,
-usuarioId: user.id,
-categoriaId: categoriaId,
-fechaVencimiento: fechaVto,
-pagado,
-mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-};
-
-await fetch(`${API}/gastos`, {
-method: "POST",
-headers: authHeaders(),
-body: JSON.stringify(body)
-});
-
-}
-
+            const bodyFijo = {
+            descripcion, monto, medioPago: mPago, fecha: pFecha,
+            esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
+            fechaVencimiento: nuevoVto, pagado: isPagado, mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+            };
+            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
+        }
+    } else {
+        const body = {
+        descripcion, monto, medioPago, fecha: fechaBase,
+        esFijo, usuarioId: user.id, categoriaId: categoriaId,
+        fechaVencimiento: fechaVto, pagado, mesImpacto: mesImpacto ? mesImpacto + "-01" : null
+        };
+        await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+    }
 }
 
 document.getElementById("modalGasto").style.display = "none";
@@ -987,19 +940,15 @@ document.getElementById('gastoId').value = "";
 gastoEnEdicion = null;
 const divCamposFijos = document.getElementById('camposFijos');
 if (divCamposFijos) divCamposFijos.style.display = 'none';
-
 await refreshAll();
 
 } catch (error) {
-console.error(error);
 alert("❌ Error al guardar el gasto");
 } finally {
 btnSubmit.disabled = false;
 btnSubmit.textContent = "Guardar";
 }
-
 };
-
 }
 
 const formIngreso = document.getElementById("formIngreso");
