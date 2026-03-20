@@ -51,7 +51,7 @@
         <div id="inicio" class="page visible">
 			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 			    <div style="display: flex; align-items: center; gap: 10px;">
-			        <h3 style="margin: 0;">Plata en Mano (Débito)</h3>
+			        <h3 style="margin: 0;">Disponible</h3>
 			        <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center;">
 			            <span class="material-icons" id="iconoSaldos" style="font-size: 20px;">visibility_off</span>
 			        </button>
@@ -332,7 +332,19 @@
 	                  <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
 	              </form>
 	          </div></div>
-	  
+			  <div id="modalPagarGasto" class="modal">
+			              <div class="modal-content" style="max-width: 400px;">
+			                  <span class="close" onclick="document.getElementById('modalPagarGasto').style.display = 'none'">&times;</span>
+			                  <h3>✅ Confirmar Pago</h3>
+			                  <p style="color: #94a3b8; margin-bottom: 15px;">Estás por pagar: <strong id="pagoGastoDesc" style="color: #fff;"></strong></p>
+			                  <form id="formPagarGasto" class="form">
+			                      <input type="hidden" id="pagoGastoId">
+			                      <label>📅 ¿Qué día lo pagaste? <input id="pagoGastoFecha" type="date" required /></label>
+			                      <label>🏦 ¿De dónde salió la plata? <select id="pagoGastoMedio" required></select></label>
+			                      <button type="submit" class="btn" style="margin-top: 15px;">Registrar Pago</button>
+			                  </form>
+			              </div>
+			          </div>
       </section>
     </main>
   </div>
