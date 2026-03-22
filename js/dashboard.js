@@ -998,25 +998,32 @@ if (formTarjeta) {
         const btnSubmit = document.querySelector("#formTarjeta button[type='submit']");
         btnSubmit.disabled = true;
         try {
-            const descripcion = document.getElementById("tarjetaDescripcion").value;
+            const descripcionBase = document.getElementById("tarjetaDescripcion").value;
+            const moneda = document.getElementById("tarjetaMoneda").value;
             const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
-            const diaCompra = parseInt(document.getElementById("tarjetaDia").value) || 10;            
+            const fechaExacta = document.getElementById("tarjetaFechaExacta").value; // ¡Acá tomamos la fecha del calendario!
             const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
             const categoriaId = document.getElementById("tarjetaCategoria").value || null; 
 
+            // Si es USD, le agregamos la etiqueta a la descripción para reconocerlo visualmente
+            const descFinal = moneda === "USD" ? `[USD] ${descripcionBase}` : descripcionBase;
             const montoPorCuota = Number((montoTotal / cuotas).toFixed(2));
+            
+            // Usamos el mes de la "1° cuota" para calcular hacia adelante
             const [year, month] = primeraCuota.split('-');
-            let fechaActual = new Date(year, month - 1, diaCompra);
+            const diaCompraOriginal = parseInt(fechaExacta.split('-')[2]); 
+            
+            let fechaActualCalculo = new Date(year, month - 1, diaCompraOriginal);
 
             for (let i = 1; i <= cuotas; i++) {
-                const yyyy = fechaActual.getFullYear();
-                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-                const dd = String(fechaActual.getDate()).padStart(2, '0');
+                const yyyy = fechaActualCalculo.getFullYear();
+                const mm = String(fechaActualCalculo.getMonth() + 1).padStart(2, '0');
+                const dd = String(fechaActualCalculo.getDate()).padStart(2, '0');
 
                 const body = {
-                    descripcion: `${descripcion} (Cuota ${i}/${cuotas})`,
+                    descripcion: `${descFinal} (Cuota ${i}/${cuotas})`,
                     monto: montoPorCuota,
                     medioPago: tarjetaTipo,
                     fecha: `${yyyy}-${mm}-${dd}`,
@@ -1027,7 +1034,7 @@ if (formTarjeta) {
                 };
 
                 await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-                fechaActual.setMonth(fechaActual.getMonth() + 1);
+                fechaActualCalculo.setMonth(fechaActualCalculo.getMonth() + 1);
             }
 
             document.getElementById("modalTarjeta").style.display = "none";

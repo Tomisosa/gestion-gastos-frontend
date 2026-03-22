@@ -281,20 +281,49 @@
 		    </div>
 		</div>
 
-		<div id="modalTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span><h3>🛒 Cargar Compra con Tarjeta</h3>
-		            <form id="formTarjeta" class="form">
-		                <label>Descripción (Ej: Zapatillas) <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" /></label>
-		                <label>Monto TOTAL de la compra <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="$ 0.00" /></label>
-		                <div style="display: flex; gap: 15px; margin-top: 10px;">
-		                    <label style="flex: 1;">Cuotas <select id="tarjetaCuotas" required><option value="1">1 cuota (Un pago)</option><option value="3">3 cuotas</option><option value="6">6 cuotas</option><option value="9">9 cuotas</option><option value="12">12 cuotas</option><option value="18">18 cuotas</option><option value="24">24 cuotas</option></select></label>
-		                    <label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label>
-		                </div>
-						<label>Día de compra</label><input type="number" id="tarjetaDia" min="1" max="31" value="10">
-		                <label>Seleccionar Tarjeta de Crédito<select id="tarjetaTipo" required></select></label>
-		                <label>Categoría <select id="tarjetaCategoria"></select></label>
-		                <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
-		            </form>
-		        </div></div>
+		<div id="modalTarjeta" class="modal">
+		    <div class="modal-content">
+		        <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
+		        <h3>🛒 Cargar Compra con Tarjeta</h3>
+		        <form id="formTarjeta" class="form">
+		            <label>Descripción (Ej: Zapatillas) <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" /></label>
+		            
+		            <div style="display: flex; gap: 15px; margin-top: 10px;">
+		                <label style="flex: 1;">Moneda
+		                    <select id="tarjetaMoneda" required style="width: 100%; padding: 10px; border-radius: 5px; background: #333; color: white; border: 1px solid #444;">
+		                        <option value="ARS">Pesos (ARS)</option>
+		                        <option value="USD">Dólares (USD)</option>
+		                    </select>
+		                </label>
+		                <label style="flex: 2;">Monto TOTAL 
+		                    <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="0.00" />
+		                </label>
+		            </div>
+
+		            <div style="display: flex; gap: 15px; margin-top: 10px;">
+		                <label style="flex: 1;">Cuotas 
+		                    <select id="tarjetaCuotas" required>
+		                        <option value="1">1 cuota (Un pago)</option>
+		                        <option value="3">3 cuotas</option>
+		                        <option value="6">6 cuotas</option>
+		                        <option value="9">9 cuotas</option>
+		                        <option value="12">12 cuotas</option>
+		                        <option value="18">18 cuotas</option>
+		                        <option value="24">24 cuotas</option>
+		                    </select>
+		                </label>
+		                <label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label>
+		            </div>
+		            
+		            <label>Fecha exacta de la compra <input type="date" id="tarjetaFechaExacta" required></label>
+		            
+		            <label>Seleccionar Tarjeta de Crédito<select id="tarjetaTipo" required></select></label>
+		            <label>Categoría <select id="tarjetaCategoria"></select></label>
+		            
+		            <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
+		        </form>
+		    </div>
+		</div>
 
         <div id="modalPrestamo" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
             <h3>🤝 Cargar Cuota de Préstamo</h3>
