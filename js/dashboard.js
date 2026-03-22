@@ -524,54 +524,84 @@ async function refreshAll() {
 
   const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
   
-  const totalesTarjetas = {};
-  consumosTarjeta.forEach(g => {
-      const m = g.medioPago || "Tarjeta Desconocida";
-      const monto = Number(g.monto) || 0;
-      totalesTarjetas[m] = (totalesTarjetas[m] || 0) + monto;
-  });
+  const totalesTarjetasARS = {};
+    const totalesTarjetasUSD = {};
+    let sumaTotalTarjetasARS = 0;
+    let sumaTotalTarjetasUSD = 0;
 
-  globalTarjetas.forEach(t => {
-      const idMonto = "monto-tarjeta-" + t.id;
-      const total = totalesTarjetas[t.nombre] || 0;
-      const el = document.getElementById(idMonto);
-      if (el) el.textContent = saldosTarjetasOcultos ? "••••••" : formatoMoneda(total);
-  });
+    consumosTarjeta.forEach(g => {
+        const m = g.medioPago || "Tarjeta Desconocida";
+        const monto = Number(g.monto) || 0;
+        if ((g.descripcion || "").includes("[USD]")) {
+            totalesTarjetasUSD[m] = (totalesTarjetasUSD[m] || 0) + monto;
+            sumaTotalTarjetasUSD += monto;
+        } else {
+            totalesTarjetasARS[m] = (totalesTarjetasARS[m] || 0) + monto;
+            sumaTotalTarjetasARS += monto;
+        }
+    });
 
-  let sumaTotalTarjetas = 0;
-  Object.values(totalesTarjetas).forEach(monto => {
-      sumaTotalTarjetas += (Number(monto) || 0);
-  });
+    globalTarjetas.forEach(t => {
+        const idMonto = "monto-tarjeta-" + t.id;
+        const totalARS = totalesTarjetasARS[t.nombre] || 0;
+        const totalUSD = totalesTarjetasUSD[t.nombre] || 0;
+        const el = document.getElementById(idMonto);
+        if (el) {
+            if (saldosTarjetasOcultos) {
+                el.innerHTML = "••••••";
+            } else {
+                let textoHTML = formatoMoneda(totalARS);
+                if (totalUSD > 0) {
+                    textoHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
+                }
+                el.innerHTML = textoHTML;
+            }
+        }
+    });
 
-  if (sumaTotalTarjetas > 0) {
-      gFijosParaTabla.push({
-          id: 'virtual_tarjeta', 
-          descripcion: `Resumen Total Tarjetas`,
-          monto: sumaTotalTarjetas,
-          fechaVencimiento: mesSeleccionado + "-10", 
-          categoriaNombre: "💳 Tarjetas", 
-          pagado: false,
-          medioPago: "MÚLTIPLES",
-          esVirtual: true 
-      });
+    if (sumaTotalTarjetasARS > 0) {
+        gFijosParaTabla.push({
+            id: 'virtual_tarjeta_ars', 
+            descripcion: `Resumen Tarjetas (Pesos)`,
+            monto: sumaTotalTarjetasARS,
+            fechaVencimiento: mesSeleccionado + "-10", 
+            categoriaNombre: "💳 Tarjetas", 
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esVirtual: true 
+        });
+    }
+
+    if (sumaTotalTarjetasUSD > 0) {
+        gFijosParaTabla.push({
+            id: 'virtual_tarjeta_usd', 
+            descripcion: `Resumen Tarjetas (Dólares)`,
+            monto: sumaTotalTarjetasUSD,
+            fechaVencimiento: mesSeleccionado + "-10", 
+            categoriaNombre: "💳 Tarjetas", 
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esVirtual: true,
+            isUSD: true 
+        });
+    }
+
+    renderGastosVariables(gVariablesParaTabla); 
+    renderGastosFijos(gFijosParaTabla); 
+    renderIngresos(ingresosNormales);
+    renderInversiones(inversiones);
+    generarGrafico(gParaTablasYGrafico);
+    renderConsumosCuotas(gParaTablasYGrafico); 
+    renderPrestamos(pTodos); 
+
+    const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
+    const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
+
+    calcularSaldosPorCuenta(gHistoricos, iHistoricos);
+    
+    actualizarMediosDePagoSelects();
+    renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
   }
-
-  renderGastosVariables(gVariablesParaTabla); 
-  renderGastosFijos(gFijosParaTabla); 
-  renderIngresos(ingresosNormales);
-  renderInversiones(inversiones);
-  generarGrafico(gParaTablasYGrafico);
-  renderConsumosCuotas(gParaTablasYGrafico); 
-  renderPrestamos(pTodos); 
-
-  const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
-  const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
-
-  calcularSaldosPorCuenta(gHistoricos, iHistoricos);
-  
-  actualizarMediosDePagoSelects();
-  renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
-}
 
 function renderPrestamos(prestamos) {
     const tbody = document.querySelector("#tablaPrestamos tbody");
@@ -641,10 +671,14 @@ function renderGastosFijos(lista) {
     }
 
     const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+    
+    // MAGIA: Si es un gasto en USD, lo pintamos de verde claro y le ponemos "USD"
+    let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
+    let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
-        <td style="font-weight: bold; color: #ffce56;">${formatoMoneda(g.monto)}</td>
+        <td style="font-weight: bold; color: #ffce56;">${textoMonto}</td>
         <td>${vto}</td>
         <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
         <td>${estadoPagado}</td>
@@ -721,10 +755,10 @@ function renderConsumosCuotas(lista) {
     if (!tbody) return;
     tbody.innerHTML = "";
     
-	const consumosTarjeta = lista.filter(g => 
-	    g.medioPago && 
-	    !["BNA","MERCADO PAGO","MERCADO_PAGO","EFECTIVO"].includes(g.medioPago.toUpperCase())
-	);
+    const consumosTarjeta = lista.filter(g => 
+        g.medioPago && 
+        !["BNA","MERCADO PAGO","MERCADO_PAGO","EFECTIVO"].includes(g.medioPago.toUpperCase())
+    );
     
     consumosTarjeta.forEach(g => {
       const acciones = `
@@ -744,8 +778,9 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
-      // Le devolvemos el número visible siempre:
-      let montoAMostrar = formatoMoneda(g.monto);
+      // MAGIA: Formato USD en la tablita de abajo
+      let esDolar = (g.descripcion || "").includes("[USD]");
+      let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
       tbody.innerHTML += `
       <tr>
