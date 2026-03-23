@@ -594,10 +594,13 @@ async function refreshAll() {
     renderConsumosCuotas(gParaTablasYGrafico); 
     renderPrestamos(pTodos); 
 
-    const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
-    const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
+	const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
+	const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
 
-    calcularSaldosPorCuenta(gHistoricos, iHistoricos);
+	  // ¡MAGIA ACÁ! Filtramos las inversiones para que no se sumen como plata disponible
+	const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:"));
+
+	  calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
     
     actualizarMediosDePagoSelects();
     renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
