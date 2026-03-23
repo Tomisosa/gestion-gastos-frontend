@@ -915,9 +915,14 @@ const medioPago = pagado ? document.getElementById("gastoMedio").value : "PENDIE
 const esFijo = document.getElementById("gastoEsFijo").checked;
 const repeticion = parseInt(document.getElementById("gastoRepeticion").value || 0);
 const categoriaId = document.getElementById("gastoCategoria").value || null;
-const fechaVto = document.getElementById("gastoVencimiento").value;
+let fechaVto = document.getElementById("gastoVencimiento").value;
 const fechaReal = document.getElementById("gastoFecha").value;
 const mesImpacto = document.getElementById("gastoMesImpacto").value;
+
+// MAGIA: Si dejó vacío el vencimiento, usamos la fecha en la que lo pagó (o la de hoy)
+if (!fechaVto) {
+    fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
+}
 
 let fechaBase = pagado ? fechaReal : fechaVto;
 
@@ -1463,13 +1468,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => { btn.closest('.modal').style.display = 'none'; };
     });
 
-    const chkFijo = document.getElementById('gastoEsFijo');
-    const camposFijos = document.getElementById('camposFijos');
-    if (chkFijo && camposFijos) {
-        chkFijo.onchange = (e) => {
-            camposFijos.style.display = e.target.checked ? 'block' : 'none';
-        };
-    }
+	const chkFijo = document.getElementById('gastoEsFijo');
+	    const camposFijos = document.getElementById('camposFijos');
+	    const labelText = document.getElementById('labelTextGasto');
+	    if (chkFijo && camposFijos) {
+	        chkFijo.onchange = (e) => {
+	            camposFijos.style.display = e.target.checked ? 'block' : 'none';
+	            // Si es fijo le pide Vencimiento, si es variable le dice que lo puede dejar vacío
+	            if (labelText) {
+	                labelText.textContent = e.target.checked ? "📅 Fecha de Vencimiento" : "📅 Fecha del Gasto (Dejalo vacío si ya lo pagaste)";
+	            }
+	        };
+	    }
 });
 
 const logoutBtn = document.getElementById("logoutBtn");
