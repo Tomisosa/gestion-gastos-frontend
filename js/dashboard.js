@@ -1321,11 +1321,6 @@ window.editarGasto = async function(id) {
 	        chkFijo.checked = gastoEnEdicion.esFijo;
 	        const camposFijos = document.getElementById('camposFijos');
 	        if (camposFijos) camposFijos.style.display = gastoEnEdicion.esFijo ? 'block' : 'none';
-	        
-	        const divMesImpacto = document.getElementById('divMesImpacto');
-	        if (divMesImpacto) {
-	            divMesImpacto.style.display = gastoEnEdicion.esFijo ? 'none' : 'block';
-	        }
 	    }
 
 	    document.getElementById("modalGasto").style.display = "flex";
@@ -1473,24 +1468,20 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    const btnFabGasto = document.getElementById('btnFabGasto');
-    if (btnFabGasto) btnFabGasto.onclick = () => { 
-        document.getElementById('formGasto').reset(); 
-        document.getElementById('gastoId').value = ""; 
-        gastoEnEdicion = null; 
-        
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('gastoVencimiento').value = hoy;
-        
-		if(chkPagado) chkPagado.checked = false;
-		        if(divFechaPagoReal) divFechaPagoReal.style.display = 'none';
-		        
-		        // Hacemos que la caja sea visible siempre al abrir un gasto nuevo
-		        const divMesImpacto = document.getElementById('divMesImpacto');
-		        if(divMesImpacto) divMesImpacto.style.display = 'block';
+	const btnFabGasto = document.getElementById('btnFabGasto');
+	    if (btnFabGasto) btnFabGasto.onclick = () => { 
+	        document.getElementById('formGasto').reset(); 
+	        document.getElementById('gastoId').value = ""; 
+	        gastoEnEdicion = null; 
+	        
+	        const hoy = new Date().toISOString().split('T')[0];
+	        document.getElementById('gastoVencimiento').value = hoy;
+	        
+	        if(chkPagado) chkPagado.checked = false;
+	        if(divFechaPagoReal) divFechaPagoReal.style.display = 'none';
 
-		        document.getElementById('modalGasto').style.display = 'flex';
-    };
+	        document.getElementById('modalGasto').style.display = 'flex';
+	    };
     
 	const btnFabIngreso = document.getElementById('btnFabIngreso');
 	    if (btnFabIngreso) btnFabIngreso.onclick = () => { 
@@ -1520,25 +1511,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 	const chkFijo = document.getElementById('gastoEsFijo');
-		const camposFijos = document.getElementById('camposFijos');
-		const labelText = document.getElementById('labelTextGasto');
-		const divMesImpacto = document.getElementById('divMesImpacto'); // La caja nueva
+	    const camposFijos = document.getElementById('camposFijos');
+	    const labelText = document.getElementById('labelTextGasto');
 
-		if (chkFijo && camposFijos) {
-		    chkFijo.onchange = (e) => {
-		        camposFijos.style.display = e.target.checked ? 'block' : 'none';
-		        if (labelText) {
-		            labelText.textContent = e.target.checked ? "📅 Fecha de Vencimiento" : "📅 Fecha del Gasto (Dejalo vacío si ya lo pagaste)";
-		        }
-	            // ¡MAGIA ACÁ! Escondemos el Mes de Impacto si es fijo
-	            if (divMesImpacto) {
-	                divMesImpacto.style.display = e.target.checked ? 'none' : 'block';
-	                if (e.target.checked) {
-	                    document.getElementById('gastoMesImpacto').value = ""; // Vaciamos el dato por las dudas
-	                }
+	    if (chkFijo && camposFijos) {
+	        chkFijo.onchange = (e) => {
+	            camposFijos.style.display = e.target.checked ? 'block' : 'none';
+	            if (labelText) {
+	                labelText.textContent = e.target.checked ? "📅 Fecha de Vencimiento" : "📅 Fecha del Gasto (Dejalo vacío si ya lo pagaste)";
 	            }
-		    };
-		}
+	        };
+	    }
 });
 
 const logoutBtn = document.getElementById("logoutBtn");
