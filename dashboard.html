@@ -186,23 +186,23 @@
 				    </div>
 				    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-secundario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; height: fit-content;">💳 + Nueva</button>
 				</div>
-				<div style="background: transparent; padding: 10px 0; margin-bottom: 25px; border-top: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; justify-content: center;">
+				<div style="background: transparent; padding: 12px 0; margin-bottom: 25px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
 				    
-				    <div style="display: flex; align-items: center; gap: 8px;">
-				        <span class="material-icons" style="color: #94a3b8; font-size: 18px;">event_note</span>
-				        <span style="color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Fechas del Mes:</span>
+				    <div style="display: flex; align-items: center; gap: 6px; margin-right: 10px;">
+				        <span class="material-icons" style="color: #64748b; font-size: 20px;">event_note</span>
+				        <span style="color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Fechas del Mes:</span>
 				    </div>
 				    
-				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #ffffff; font-size: 0.9rem;">
-				        Cierre: <input type="date" id="fechaCierreMes" style="padding: 3px 5px; border-radius: 4px; border: 1px solid #475569; background: #1a1a1a; color: #ffffff; color-scheme: dark; outline: none; font-size: 0.85rem;">
+				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
+				        Cierre: <input type="date" id="fechaCierreMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
 				    </label>
 				    
-				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #ffffff; font-size: 0.9rem;">
-				        Vencimiento: <input type="date" id="fechaVtoMes" style="padding: 3px 5px; border-radius: 4px; border: 1px solid #475569; background: #1a1a1a; color: #ffffff; color-scheme: dark; outline: none; font-size: 0.85rem;">
+				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
+				        Vencimiento: <input type="date" id="fechaVtoMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
 				    </label>
 				    
-				    <button onclick="guardarFechasTarjetas()" style="padding: 4px 12px; font-size: 0.8rem; border-radius: 4px; background: transparent; color: #2ac9bb; border: 1px solid #2ac9bb; font-weight: bold; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px;">
-				        <span class="material-icons" style="font-size: 14px;">save</span> Guardar
+				    <button onclick="guardarFechasTarjetas()" style="padding: 5px 12px; font-size: 0.85rem; border-radius: 4px; background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+				        <span class="material-icons" style="font-size: 16px;">save</span> Guardar
 				    </button>
 				</div>
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
@@ -405,6 +405,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=13"></script>
+  <script src="js/dashboard.js?v=14"></script>
 </body>
 </html>
