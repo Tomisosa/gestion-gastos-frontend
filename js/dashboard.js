@@ -940,35 +940,44 @@ if (idAEditar) {
     alert("¡Gasto actualizado!");
 
 } else {
-    if (esFijo && repeticion > 0) {
-        const [year, month, day] = fechaVto.split('-');
-        let saltoMes = 1;
-        const tipoRepeticion = document.getElementById("tipoRepeticion").value;
+	if (esFijo && repeticion > 0) {
+	        const [year, month, day] = fechaVto.split('-');
+	        let saltoMes = 1;
+	        const tipoRepeticion = document.getElementById("tipoRepeticion").value;
 
-        if(tipoRepeticion === "mensual") saltoMes = 1;
-        if(tipoRepeticion === "3meses") saltoMes = 3;
-        if(tipoRepeticion === "6meses") saltoMes = 6;
+	        if(tipoRepeticion === "mensual") saltoMes = 1;
+	        if(tipoRepeticion === "3meses") saltoMes = 3;
+	        if(tipoRepeticion === "6meses") saltoMes = 6;
 
-        for (let i = 0; i < repeticion; i++) {
-            let m = parseInt(month) + (i * saltoMes);
-            let y = parseInt(year);
-            while (m > 12) { m -= 12; y += 1; }
-            let safeDay = parseInt(day) > 28 ? "28" : day;
-            let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
-            let isPagado = (i === 0) ? pagado : false;
-            let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
-            
-            // Si es repetición a futuro, obviamente es PENDIENTE
-            let mPago = isPagado ? medioPago : "PENDIENTE";
+	        for (let i = 0; i < repeticion; i++) {
+	            let m = parseInt(month) + (i * saltoMes);
+	            let y = parseInt(year);
+	            while (m > 12) { m -= 12; y += 1; }
+	            let safeDay = parseInt(day) > 28 ? "28" : day;
+	            let nuevoVto = `${y}-${String(m).padStart(2,'0')}-${safeDay}`;
+	            let isPagado = (i === 0) ? pagado : false;
+	            let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
+	            
+	            let mPago = isPagado ? medioPago : "PENDIENTE";
 
-            const bodyFijo = {
-            descripcion, monto, medioPago: mPago, fecha: pFecha,
-            esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-            fechaVencimiento: nuevoVto, pagado: isPagado, mesImpacto: mesImpacto ? mesImpacto + "-01" : null
-            };
-            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
-        }
-    } else {
+	            // ¡MAGIA ACÁ! Hacemos que el "Mes de Impacto" también avance correctamente
+	            let nuevoMesImpacto = null;
+	            if (mesImpacto) {
+	                let [mY, mM] = mesImpacto.split('-');
+	                let impM = parseInt(mM) + (i * saltoMes);
+	                let impY = parseInt(mY);
+	                while (impM > 12) { impM -= 12; impY += 1; }
+	                nuevoMesImpacto = `${impY}-${String(impM).padStart(2,'0')}-01`;
+	            }
+
+	            const bodyFijo = {
+	            descripcion, monto, medioPago: mPago, fecha: pFecha,
+	            esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
+	            fechaVencimiento: nuevoVto, pagado: isPagado, mesImpacto: nuevoMesImpacto
+	            };
+	            await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
+	        }
+	    }else {
         const body = {
         descripcion, monto, medioPago, fecha: fechaBase,
         esFijo, usuarioId: user.id, categoriaId: categoriaId,
