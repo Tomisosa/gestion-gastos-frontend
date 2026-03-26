@@ -437,16 +437,20 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
 }
 
 async function refreshAll() {
-  await fetchCategorias(); 
   if(!user) return; 
-  
   cargarNombresPrestamo(); 
-  globalBilleteras = await fetchBilleteras();
-  await fetchYRenderizarMisTarjetas();
-  
-  const gTodos = await fetchGastos(); 
-  const iTodos = await fetchIngresos();
-  const pTodos = await fetchPrestamos(); 
+
+  // 🚀 MAGIA DE VELOCIDAD: Pedimos TODO a la base de datos al mismo tiempo
+  const [categorias, billeteras, tarjetas, gTodos, iTodos, pTodos] = await Promise.all([
+      fetchCategorias(),
+      fetchBilleteras(),
+      fetchYRenderizarMisTarjetas(),
+      fetchGastos(),
+      fetchIngresos(),
+      fetchPrestamos()
+  ]);
+
+  globalBilleteras = billeteras || [];
   
   const selector = document.getElementById("filtroFechaMes");
   const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
