@@ -453,9 +453,34 @@ async function refreshAll() {
   globalBilleteras = billeteras || [];
   
   const selector = document.getElementById("filtroFechaMes");
-  const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
-  
-  const gFiltradosMes = gTodos.filter(g => {
+    const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+
+    // --- MAGIA: LEER FECHAS DESDE LA BD ---
+    let textoVencimientoTarjetas = "Según tarjeta"; // Por defecto
+    const configMensual = iTodos.find(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
+    
+    if (configMensual) {
+        const partes = configMensual.descripcion.split("|");
+        const cCierre = partes[1] ? partes[1].split(":")[1].trim() : "";
+        const cVto = partes[2] ? partes[2].split(":")[1].trim() : "";
+        
+        const fc = document.getElementById("fechaCierreMes");
+        const fv = document.getElementById("fechaVtoMes");
+        if(fc) fc.value = cCierre !== "undefined" ? cCierre : "";
+        if(fv) fv.value = cVto !== "undefined" ? cVto : "";
+        
+        if (cVto && cVto !== "undefined" && cVto !== "") {
+            textoVencimientoTarjetas = cVto; 
+        }
+    } else {
+        const fc = document.getElementById("fechaCierreMes");
+        const fv = document.getElementById("fechaVtoMes");
+        if(fc) fc.value = "";
+        if(fv) fv.value = "";
+    }
+    // --------------------------------------
+    
+    const gFiltradosMes = gTodos.filter(g => {
         const fechaComparar = g.mesImpacto ? g.mesImpacto : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
         return (fechaComparar || "").startsWith(mesSeleccionado);
   });
@@ -493,7 +518,7 @@ async function refreshAll() {
   }
 
   const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
-  const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:"));
+  const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
   let totalUSD = 0;
   let totalARS_Inv = 0;
@@ -564,31 +589,31 @@ async function refreshAll() {
     });
 
 	if (sumaTotalTarjetasARS > 0) {
-	        gFijosParaTabla.push({
-	            id: 'virtual_tarjeta_ars', 
-	            descripcion: `Resumen Tarjetas (Pesos)`,
-	            monto: sumaTotalTarjetasARS,
-	            fechaVencimiento: "Según tarjeta", 
-	            categoriaNombre: "💳 Tarjetas", 
-	            pagado: false,
-	            medioPago: "MÚLTIPLES",
-	            esVirtual: true 
-	        });
-	    }
+		        gFijosParaTabla.push({
+		            id: 'virtual_tarjeta_ars', 
+		            descripcion: `Resumen Tarjetas (Pesos)`,
+		            monto: sumaTotalTarjetasARS,
+		            fechaVencimiento: textoVencimientoTarjetas, 
+		            categoriaNombre: "💳 Tarjetas", 
+		            pagado: false,
+		            medioPago: "MÚLTIPLES",
+		            esVirtual: true 
+		        });
+		    }
 
-	    if (sumaTotalTarjetasUSD > 0) {
-	        gFijosParaTabla.push({
-	            id: 'virtual_tarjeta_usd', 
-	            descripcion: `Resumen Tarjetas (Dólares)`,
-	            monto: sumaTotalTarjetasUSD,
-	            fechaVencimiento: "Según tarjeta", 
-	            categoriaNombre: "💳 Tarjetas", 
-	            pagado: false,
-	            medioPago: "MÚLTIPLES",
-	            esVirtual: true,
-	            isUSD: true 
-	        });
-	    }
+		    if (sumaTotalTarjetasUSD > 0) {
+		        gFijosParaTabla.push({
+		            id: 'virtual_tarjeta_usd', 
+		            descripcion: `Resumen Tarjetas (Dólares)`,
+		            monto: sumaTotalTarjetasUSD,
+		            fechaVencimiento: textoVencimientoTarjetas, 
+		            categoriaNombre: "💳 Tarjetas", 
+		            pagado: false,
+		            medioPago: "MÚLTIPLES",
+		            esVirtual: true,
+		            isUSD: true 
+		        });
+		    }
 
     renderGastosVariables(gVariablesParaTabla); 
     renderGastosFijos(gFijosParaTabla); 
@@ -602,7 +627,7 @@ async function refreshAll() {
 	const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
 
 	  // ¡MAGIA ACÁ! Filtramos las inversiones para que no se sumen como plata disponible
-	const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:"));
+	const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
 	  calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
     
@@ -1291,14 +1316,19 @@ window.editarGasto = async function(id) {
         document.getElementById("gastoFecha").value = "";
     }
 
-    const chkFijo = document.getElementById("gastoEsFijo");
-    if (chkFijo) {
-        chkFijo.checked = gastoEnEdicion.esFijo;
-        const camposFijos = document.getElementById('camposFijos');
-        if (camposFijos) camposFijos.style.display = gastoEnEdicion.esFijo ? 'block' : 'none';
-    }
+	const chkFijo = document.getElementById("gastoEsFijo");
+	    if (chkFijo) {
+	        chkFijo.checked = gastoEnEdicion.esFijo;
+	        const camposFijos = document.getElementById('camposFijos');
+	        if (camposFijos) camposFijos.style.display = gastoEnEdicion.esFijo ? 'block' : 'none';
+	        
+	        const divMesImpacto = document.getElementById('divMesImpacto');
+	        if (divMesImpacto) {
+	            divMesImpacto.style.display = gastoEnEdicion.esFijo ? 'none' : 'block';
+	        }
+	    }
 
-    document.getElementById("modalGasto").style.display = "flex";
+	    document.getElementById("modalGasto").style.display = "flex";
 };
 
 window.eliminarIngreso = async function(id) { 
@@ -1452,10 +1482,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById('gastoVencimiento').value = hoy;
         
-        if(chkPagado) chkPagado.checked = false;
-        if(divFechaPagoReal) divFechaPagoReal.style.display = 'none';
+		if(chkPagado) chkPagado.checked = false;
+		        if(divFechaPagoReal) divFechaPagoReal.style.display = 'none';
+		        
+		        // Hacemos que la caja sea visible siempre al abrir un gasto nuevo
+		        const divMesImpacto = document.getElementById('divMesImpacto');
+		        if(divMesImpacto) divMesImpacto.style.display = 'block';
 
-        document.getElementById('modalGasto').style.display = 'flex'; 
+		        document.getElementById('modalGasto').style.display = 'flex';
     };
     
 	const btnFabIngreso = document.getElementById('btnFabIngreso');
@@ -1486,17 +1520,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 	const chkFijo = document.getElementById('gastoEsFijo');
-	    const camposFijos = document.getElementById('camposFijos');
-	    const labelText = document.getElementById('labelTextGasto');
-	    if (chkFijo && camposFijos) {
-	        chkFijo.onchange = (e) => {
-	            camposFijos.style.display = e.target.checked ? 'block' : 'none';
-	            // Si es fijo le pide Vencimiento, si es variable le dice que lo puede dejar vacío
-	            if (labelText) {
-	                labelText.textContent = e.target.checked ? "📅 Fecha de Vencimiento" : "📅 Fecha del Gasto (Dejalo vacío si ya lo pagaste)";
+		const camposFijos = document.getElementById('camposFijos');
+		const labelText = document.getElementById('labelTextGasto');
+		const divMesImpacto = document.getElementById('divMesImpacto'); // La caja nueva
+
+		if (chkFijo && camposFijos) {
+		    chkFijo.onchange = (e) => {
+		        camposFijos.style.display = e.target.checked ? 'block' : 'none';
+		        if (labelText) {
+		            labelText.textContent = e.target.checked ? "📅 Fecha de Vencimiento" : "📅 Fecha del Gasto (Dejalo vacío si ya lo pagaste)";
+		        }
+	            // ¡MAGIA ACÁ! Escondemos el Mes de Impacto si es fijo
+	            if (divMesImpacto) {
+	                divMesImpacto.style.display = e.target.checked ? 'none' : 'block';
+	                if (e.target.checked) {
+	                    document.getElementById('gastoMesImpacto').value = ""; // Vaciamos el dato por las dudas
+	                }
 	            }
-	        };
-	    }
+		    };
+		}
 });
 
 const logoutBtn = document.getElementById("logoutBtn");
@@ -1636,4 +1678,37 @@ window.toggleSaldosAhorros = function() {
     const icono = document.getElementById("iconoSaldosAhorros");
     if(icono) icono.textContent = saldosAhorrosOcultos ? "visibility_off" : "visibility";
     refreshAll();
+};
+
+// --- GUARDAR FECHAS DE TARJETAS EN LA BASE DE DATOS (FANTASMA) ---
+window.guardarFechasTarjetas = async function() {
+    const selector = document.getElementById("filtroFechaMes");
+    const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+    const cierre = document.getElementById("fechaCierreMes") ? document.getElementById("fechaCierreMes").value : "";
+    const vto = document.getElementById("fechaVtoMes") ? document.getElementById("fechaVtoMes").value : "";
+    
+    // Armamos el texto secreto que va a ir a la base de datos
+    const descString = `[CONFIG_TC] ${mesSeleccionado} | C:${cierre} | V:${vto}`;
+
+    try {
+        const iTodos = await fetchIngresos();
+        const existentes = iTodos.filter(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
+        for (let i of existentes) {
+            await fetch(`${API}/ingresos/${i.id}`, { method: "DELETE", headers: authHeaders() });
+        }
+
+        const body = {
+            descripcion: descString,
+            monto: 0,
+            medioPago: "EFECTIVO",
+            fecha: `${mesSeleccionado}-01`,
+            usuarioId: user.id
+        };
+        await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        
+        alert("¡Fechas guardadas!");
+        await refreshAll();
+    } catch(err) {
+        alert("Error al guardar en la base de datos.");
+    }
 };
