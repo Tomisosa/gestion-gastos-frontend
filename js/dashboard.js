@@ -519,7 +519,7 @@ async function refreshAll() {
   const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
   const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
 
-  const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO"];
+  const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
   globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
 
   const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
@@ -559,32 +559,32 @@ async function refreshAll() {
         }
     });
 
-    if (sumaTotalTarjetasARS > 0) {
-        gFijosParaTabla.push({
-            id: 'virtual_tarjeta_ars', 
-            descripcion: `Resumen Tarjetas (Pesos)`,
-            monto: sumaTotalTarjetasARS,
-            fechaVencimiento: mesSeleccionado + "-10", 
-            categoriaNombre: "💳 Tarjetas", 
-            pagado: false,
-            medioPago: "MÚLTIPLES",
-            esVirtual: true 
-        });
-    }
+	if (sumaTotalTarjetasARS > 0) {
+	        gFijosParaTabla.push({
+	            id: 'virtual_tarjeta_ars', 
+	            descripcion: `Resumen Tarjetas (Pesos)`,
+	            monto: sumaTotalTarjetasARS,
+	            fechaVencimiento: "Según tarjeta", 
+	            categoriaNombre: "💳 Tarjetas", 
+	            pagado: false,
+	            medioPago: "MÚLTIPLES",
+	            esVirtual: true 
+	        });
+	    }
 
-    if (sumaTotalTarjetasUSD > 0) {
-        gFijosParaTabla.push({
-            id: 'virtual_tarjeta_usd', 
-            descripcion: `Resumen Tarjetas (Dólares)`,
-            monto: sumaTotalTarjetasUSD,
-            fechaVencimiento: mesSeleccionado + "-10", 
-            categoriaNombre: "💳 Tarjetas", 
-            pagado: false,
-            medioPago: "MÚLTIPLES",
-            esVirtual: true,
-            isUSD: true 
-        });
-    }
+	    if (sumaTotalTarjetasUSD > 0) {
+	        gFijosParaTabla.push({
+	            id: 'virtual_tarjeta_usd', 
+	            descripcion: `Resumen Tarjetas (Dólares)`,
+	            monto: sumaTotalTarjetasUSD,
+	            fechaVencimiento: "Según tarjeta", 
+	            categoriaNombre: "💳 Tarjetas", 
+	            pagado: false,
+	            medioPago: "MÚLTIPLES",
+	            esVirtual: true,
+	            isUSD: true 
+	        });
+	    }
 
     renderGastosVariables(gVariablesParaTabla); 
     renderGastosFijos(gFijosParaTabla); 
