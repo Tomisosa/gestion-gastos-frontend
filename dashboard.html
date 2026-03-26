@@ -200,7 +200,12 @@
 				    <button onclick="guardarFechasTarjetas()" style="padding: 6px 15px; font-size: 0.9rem; border-radius: 5px; background: #2ac9bb; color: #000; font-weight: bold; border: none; cursor: pointer;">💾 Guardar</button>
 				</div>
 				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
-                <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Consumos para el mes seleccionado</h3>
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+				    <h3 style="color: var(--texto-oscuro); font-size: 1.2rem; margin: 0;">Consumos para el mes seleccionado</h3>
+				    <select id="filtroTarjetaSelect" onchange="refreshAll()" style="background: #222; color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none; font-weight: bold;">
+				        <option value="all">💳 TODAS</option>
+				    </select>
+				</div>
 				<div class="table-wrapper" style="max-height: 350px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
 				    <table class="table" id="tablaTarjetas">
                         <thead><tr><th>Fecha Compra</th><th>Descripción</th><th>Categoría</th><th>Cuota Actual</th><th>Monto Cuota</th><th>Acciones</th></tr></thead>
@@ -394,6 +399,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=10"></script>
+  <script src="js/dashboard.js?v=11"></script>
 </body>
 </html>

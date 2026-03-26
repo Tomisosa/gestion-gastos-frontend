@@ -337,6 +337,7 @@ function actualizarMediosDePagoSelects() {
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     const pagoGastoMedio = document.getElementById("pagoGastoMedio"); 
+    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); // <--- EL NUEVO FILTRO
     
     let opcionesBilleteras = `<option value="BNA">🏦 BNA</option><option value="MERCADO PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option>`;
     globalBilleteras.forEach(b => {
@@ -350,6 +351,16 @@ function actualizarMediosDePagoSelects() {
     if (tarjetaTipo) tarjetaTipo.innerHTML = "";
     if (globalTarjetas.length === 0 && tarjetaTipo) {
         tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
+    }
+
+    // MAGIA: Llenamos el filtro con las tarjetas que ella haya creado
+    if (filtroTarjeta) {
+        const valPrevio = filtroTarjeta.value;
+        filtroTarjeta.innerHTML = '<option value="all">💳 TODAS</option>';
+        globalTarjetas.forEach(t => {
+            filtroTarjeta.innerHTML += `<option value="${t.nombre.toUpperCase()}">💳 ${t.nombre.toUpperCase()}</option>`;
+        });
+        if (valPrevio) filtroTarjeta.value = valPrevio; // Mantiene lo que estaba seleccionado
     }
 
     globalTarjetas.forEach(t => {
@@ -787,14 +798,25 @@ function renderConsumosCuotas(lista) {
     if (!tbody) return;
     tbody.innerHTML = "";
     
-    // ¡ACÁ ESTÁ EL ARREGLO! Le enseñamos a la tabla exactamente qué cosas NO son tarjetas
     const mediosIgnorados = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO", "PENDIENTE", "MÚLTIPLES"];
     globalBilleteras.forEach(b => mediosIgnorados.push(b.nombre.toUpperCase()));
     
-    const consumosTarjeta = lista.filter(g => 
-        g.medioPago && 
-        !mediosIgnorados.includes(g.medioPago.toUpperCase())
-    );
+    // ¡ACÁ LEEMOS QUÉ TARJETA ELIGIÓ TU HERMANA!
+    const filtroSelect = document.getElementById("filtroTarjetaSelect");
+    const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
+
+    const consumosTarjeta = lista.filter(g => {
+        if (!g.medioPago) return false;
+        const medio = g.medioPago.toUpperCase();
+        
+        // 1. Descartar si no es tarjeta (billeteras, efectivo, etc)
+        if (mediosIgnorados.includes(medio)) return false;
+
+        // 2. Si eligió una tarjeta específica en el filtro, descartamos las demás
+        if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
+
+        return true;
+    });
     
     consumosTarjeta.forEach(g => {
       const acciones = `
@@ -814,7 +836,6 @@ function renderConsumosCuotas(lista) {
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       
-      // MAGIA: Formato USD en la tablita de abajo
       let esDolar = (g.descripcion || "").includes("[USD]");
       let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
