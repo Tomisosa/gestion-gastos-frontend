@@ -758,9 +758,13 @@ function renderConsumosCuotas(lista) {
     if (!tbody) return;
     tbody.innerHTML = "";
     
+    // ¡ACÁ ESTÁ EL ARREGLO! Le enseñamos a la tabla exactamente qué cosas NO son tarjetas
+    const mediosIgnorados = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO", "PENDIENTE", "MÚLTIPLES"];
+    globalBilleteras.forEach(b => mediosIgnorados.push(b.nombre.toUpperCase()));
+    
     const consumosTarjeta = lista.filter(g => 
         g.medioPago && 
-        !["BNA","MERCADO PAGO","MERCADO_PAGO","EFECTIVO"].includes(g.medioPago.toUpperCase())
+        !mediosIgnorados.includes(g.medioPago.toUpperCase())
     );
     
     consumosTarjeta.forEach(g => {
