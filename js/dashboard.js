@@ -161,40 +161,29 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DE TARJETAS Y BOTONES TOTALMENTE LIBRES ---
+// --- CORRECCIÓN DE TARJETAS (SIN FANTASMAS) ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    // 1. Ya no forzamos cuentas fijas. Solo usamos las creadas en la Base de Datos.
+    // 1. AHORA SÍ: SOLO mostramos las cuentas creadas por ustedes en la base de datos. Cero fantasmas.
     const nombres = [];
     globalBilleteras.forEach(b => {
-        const nom = b.nombre.toUpperCase();
-        if (!nombres.includes(nom)) nombres.push(nom);
-    });
-
-    // 2. Por seguridad: si hay gastos viejos en EFECTIVO o BNA, los sumamos para no ocultar la plata
-    const mediosIgnorados = ["PENDIENTE", "MÚLTIPLES"];
-    const nombresTarjetasCredito = globalTarjetas.map(t => t.nombre.toUpperCase());
-
-    ingresos.forEach(i => { 
-        let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
-        if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
-    });
-    gastos.forEach(g => { 
-        if (g.pagado === false) return; 
-        let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
-        if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
+        nombres.push(b.nombre.toUpperCase());
     });
 
     const saldos = {};
     nombres.forEach(n => saldos[n] = 0);
 
+    // Sumamos ingresos solo si la cuenta existe en nuestra lista
     ingresos.forEach(i => { 
         let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
     });
     
+    // Restamos gastos solo si la cuenta existe en nuestra lista
     gastos.forEach(g => { 
         if (g.pagado === false) return; 
         let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
     });
     
@@ -209,7 +198,6 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         contenedor.style.paddingBottom = "15px";
         contenedor.innerHTML = "";
 
-        // Si la lista de cuentas está vacía, mostramos el cartel para que empiece a crear
         if (nombres.length === 0) {
              contenedor.innerHTML = `
                 <div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">
@@ -221,31 +209,21 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         nombres.forEach(b => {
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
             
-            // Lápiz y Basurín: Aparecen siempre que la cuenta exista en la base de datos
-            let btnAcciones = '';
-            if (customObj) {
-                btnAcciones = `
+            // Como ahora solo mostramos las de la base de datos, TODAS tienen lápiz y basurín
+            let btnAcciones = `
                 <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
                     <button onclick="abrirEditarBilletera(${customObj.id}, '${customObj.nombre}', '${customObj.color || 'default'}')" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Editar">✏️</button>
                     <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Eliminar">🗑️</button>
                 </div>
-                `;
-            } else {
-                // Si es una cuenta vieja huérfana (que no está en la BD), le decimos que la cree
-                btnAcciones = `
-                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
-                    <span style="font-size: 0.7rem; color: #ffce56; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 5px; font-weight: bold;">⚠️ Creala en +Nueva Cuenta</span>
-                </div>
-                `;
-            }
+            `;
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
-            const bgColor = getBgColor(customObj ? customObj.color : 'default'); // Usamos el color de la BD o gris por defecto
+            const bgColor = getBgColor(customObj.color); 
 
             contenedor.innerHTML += `
             <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
                 ${btnAcciones}
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; padding-right: 75px; line-height: 1.2;">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; padding-right: 75px; line-height: 1.3;">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
                     <p style="font-size: 1.6rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px;">${montoAMostrar}</p>
                 </div>
