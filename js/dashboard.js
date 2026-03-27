@@ -159,12 +159,29 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DE TARJETAS Y BOTONES ---
+// --- CORRECCIÓN DE TARJETAS Y BOTONES TOTALMENTE LIBRES ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
+    // 1. Ya no forzamos cuentas. Solo usamos las que ella cree en la Base de Datos.
+    const nombres = [];
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
         if (!nombres.includes(nom)) nombres.push(nom);
+    });
+
+    // 2. Por seguridad: si hay gastos viejos en EFECTIVO o BNA, los sumamos para no ocultar la plata
+    const mediosIgnorados = ["PENDIENTE", "MÚLTIPLES"];
+    const nombresTarjetasCredito = globalTarjetas.map(t => t.nombre.toUpperCase());
+
+    ingresos.forEach(i => { 
+        let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
+        if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
+    });
+    gastos.forEach(g => { 
+        if (g.pagado === false) return; 
+        let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
+        if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
     });
 
     const saldos = {};
@@ -187,37 +204,43 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 
     const contenedor = document.getElementById("contenedorBilleteras");
     if (contenedor) {
+        contenedor.style.display = "flex";
+        contenedor.style.gap = "15px";
+        contenedor.style.overflowX = "auto";
+        contenedor.style.maxWidth = "100%";
+        contenedor.style.paddingBottom = "15px";
         contenedor.innerHTML = "";
-        nombres.forEach(b => {
-            let color = "#ffce56"; 
-            if(b === "BNA") color = "#2ac9bb";
-            if(b === "MERCADO PAGO") color = "#00aae4";
-            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
 
+        nombres.forEach(b => {
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
             
-            // Botones de editar y eliminar (Solo para cuentas creadas por el usuario)
+            // Lápiz y Basurín: Aparecen siempre que la cuenta exista en la base de datos
             let btnAcciones = '';
             if (customObj) {
-                // Las que la app trae por defecto (BNA, Mercado Pago, Efectivo) no se borran para no romper historial. 
-                // Las creadas por ella, tienen menú completo.
                 btnAcciones = `
-                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 10;">
-                    <button onclick="abrirEditarBilletera(${customObj.id}, '${customObj.nombre}', '${customObj.color || 'default'}')" style="background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Editar">✏️</button>
-                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Eliminar">🗑️</button>
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
+                    <button onclick="abrirEditarBilletera(${customObj.id}, '${customObj.nombre}', '${customObj.color || 'default'}')" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Editar">✏️</button>
+                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Eliminar">🗑️</button>
+                </div>
+                `;
+            } else {
+                // Si es una cuenta vieja huérfana, le decimos que la cree
+                btnAcciones = `
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
+                    <span style="font-size: 0.7rem; color: #ffce56; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 5px; font-weight: bold;">⚠️ Creala en +Nueva Cuenta</span>
                 </div>
                 `;
             }
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
+            const bgColor = getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'));
 
-            // Tamaño corregido: min-width 250px y height 140px. No estira la pantalla y se ve genial.
             contenedor.innerHTML += `
-            <div class="card-small" style="min-width: 250px; max-width: 250px; height: 140px; flex-shrink: 0; background: ${getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'))}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+            <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
                 ${btnAcciones}
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
-                    <p style="font-size: 1.8rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -1px;">${montoAMostrar}</p>
+                    <p style="font-size: 1.6rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px;">${montoAMostrar}</p>
                 </div>
             </div>`;
         });
@@ -373,12 +396,18 @@ function actualizarMediosDePagoSelects() {
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     const pagoGastoMedio = document.getElementById("pagoGastoMedio"); 
-    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); // <--- EL NUEVO FILTRO
+    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); 
     
-    let opcionesBilleteras = `<option value="BNA">🏦 BNA</option><option value="MERCADO PAGO">📱 Mercado Pago</option><option value="EFECTIVO">💵 Efectivo</option>`;
+    // Ya no hay listas fijas. Cargamos estrictamente lo que hay en la Base de Datos
+    let opcionesBilleteras = "";
     globalBilleteras.forEach(b => {
         opcionesBilleteras += `<option value="${b.nombre.toUpperCase()}">🏦 ${b.nombre}</option>`;
     });
+    
+    // Si borró todo y no hay nada, dejamos una alerta
+    if (globalBilleteras.length === 0) {
+        opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
+    }
     
     if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
     if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
@@ -389,14 +418,13 @@ function actualizarMediosDePagoSelects() {
         tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
     }
 
-    // MAGIA: Llenamos el filtro con las tarjetas que ella haya creado
     if (filtroTarjeta) {
         const valPrevio = filtroTarjeta.value;
         filtroTarjeta.innerHTML = '<option value="all">💳 TODAS</option>';
         globalTarjetas.forEach(t => {
             filtroTarjeta.innerHTML += `<option value="${t.nombre.toUpperCase()}">💳 ${t.nombre.toUpperCase()}</option>`;
         });
-        if (valPrevio) filtroTarjeta.value = valPrevio; // Mantiene lo que estaba seleccionado
+        if (valPrevio) filtroTarjeta.value = valPrevio; 
     }
 
     globalTarjetas.forEach(t => {
