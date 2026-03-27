@@ -646,36 +646,74 @@ async function refreshAll() {
     renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
   }
 
-function renderPrestamos(prestamos) {
-    const tbody = document.querySelector("#tablaPrestamos tbody");
-    if(!tbody) return;
-    tbody.innerHTML = "";
+  function renderPrestamos(prestamos) {
+      const contenedor = document.getElementById("contenedorTablasPrestamos");
+      if(!contenedor) return;
+      contenedor.innerHTML = "";
 
-    let totalMama = 0;
-    let totalBelen = 0;
+      const selector = document.getElementById("filtroFechaMes");
+      const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
 
-    prestamos.forEach(p => {
-        const aMama = Number(p.aporteMama) || 0;
-        const aBelen = Number(p.aporteBelen) || 0;
-        const total = aMama + aBelen;
+      // Filtramos solo los de este mes
+      const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
+      
+      const grupos = { "Mamá": [], "Papá": [], "Ambos": [] };
+      let sumaTotalBelen = 0;
 
-        totalMama += aMama;
-        totalBelen += aBelen;
+      prestamosDelMes.forEach(p => {
+          // Obtenemos los valores directo de las columnas nuevas (o 0 si están vacías)
+          const pertenece = p.perteneceA || "Desconocido";
+          const aBelen = Number(p.aporteBelen) || 0;
+          const aOtro = Number(p.aporteOtro) || 0;
+          const totalCuotaDinero = Number(p.montoTotal) || 0;
 
-        tbody.innerHTML += `<tr>
-            <td>${p.mesCuota}</td>
-            <td>${formatoMoneda(aMama)}</td>
-            <td>${formatoMoneda(aBelen)}</td>
-            <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(total)}</td>
-            <td><button onclick="eliminarPrestamo(${p.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;" title="Eliminar Cuota">🗑️</button></td>
-        </tr>`;
-    });
+          sumaTotalBelen += aBelen;
 
-    const cardMama = document.getElementById("totalAporteMama");
-    const cardBelen = document.getElementById("totalAporteBelen");
-    if(cardMama) cardMama.textContent = formatoMoneda(totalMama);
-    if(cardBelen) cardBelen.textContent = formatoMoneda(totalBelen);
-}
+          if(grupos[pertenece]) {
+              grupos[pertenece].push({
+                  id: p.id, 
+                  nombre: p.nombre || "Sin Nombre", 
+                  cuotaActual: p.cuotaActual || 1, 
+                  cuotaTotal: p.cuotaTotal || 1, 
+                  aBelen, aOtro, totalCuotaDinero
+              });
+          }
+      });
+
+      const cardBelen = document.getElementById("totalBelenPrestamos");
+      if(cardBelen) cardBelen.textContent = formatoMoneda(sumaTotalBelen);
+
+      // Dibujamos una tabla por cada persona
+      ["Mamá", "Papá", "Ambos"].forEach(grupo => {
+          if(grupos[grupo].length === 0) return;
+
+          let filas = "";
+          grupos[grupo].forEach(g => {
+              filas += `<tr>
+                  <td><strong>${g.nombre}</strong></td>
+                  <td><span style="background:var(--color-primario); color:#000; padding:2px 6px; border-radius:10px; font-size:0.8rem; font-weight:bold;">${g.cuotaActual}/${g.cuotaTotal}</span></td>
+                  <td>${formatoMoneda(g.totalCuotaDinero)}</td>
+                  <td style="color:#ffce56; font-weight:bold;">${formatoMoneda(g.aBelen)}</td>
+                  <td style="color:#94a3b8;">${formatoMoneda(g.aOtro)}</td>
+                  <td>
+                      <button onclick="abrirEditarPrestamo(${g.id}, ${g.totalCuotaDinero}, ${g.aBelen})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✏️</button>
+                      <button onclick="eliminarPrestamo(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>
+                  </td>
+              </tr>`;
+          });
+
+          contenedor.innerHTML += `
+          <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
+              <h3 style="margin-top: 0; color: #00aae4; border-bottom: 1px solid #333; padding-bottom: 5px;">Pertenece a: ${grupo}</h3>
+              <div class="table-wrapper tabla-con-scroll">
+                  <table class="table">
+                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th>Belén</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
+                      <tbody>${filas}</tbody>
+                  </table>
+              </div>
+          </div>`;
+      });
+  }
 
 // --- TABLA FIJOS (CON BOTÓN DE PAGO RÁPIDO) ---
 function renderGastosFijos(lista) {
@@ -927,21 +965,43 @@ if (formPrestamo) {
         e.preventDefault();
         const btnSubmit = document.querySelector("#formPrestamo button[type='submit']");
         btnSubmit.disabled = true;
+        btnSubmit.textContent = "Generando...";
         try {
-            const body = {
-                mesCuota: document.getElementById("prestamoMes").value,
-                aporteMama: parseFloat(document.getElementById("prestamoMama").value),
-                aporteBelen: parseFloat(document.getElementById("prestamoBelen").value),
-                usuario: { id: user.id }
-            };
-            await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            const nombre = document.getElementById("prestamoNombre").value.trim();
+            const pertenece = document.getElementById("prestamoPertenece").value;
+            const totalCuotas = parseInt(document.getElementById("prestamoTotalCuotas").value);
+            const mesInicio = document.getElementById("prestamoMesInicio").value;
+
+            const [year, month] = mesInicio.split('-');
+            let fechaActual = new Date(year, month - 1, 1);
+
+            for (let i = 1; i <= totalCuotas; i++) {
+                const yyyy = fechaActual.getFullYear();
+                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+
+                const body = {
+                    mesCuota: `${yyyy}-${mm}`, // Ahora solo guarda la fecha acá
+                    nombre: nombre,
+                    perteneceA: pertenece,
+                    cuotaActual: i,
+                    cuotaTotal: totalCuotas,
+                    montoTotal: 0,
+                    aporteBelen: 0,
+                    aporteOtro: 0,
+                    usuario: { id: user.id }
+                };
+                await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+            }
             document.getElementById("modalPrestamo").style.display = "none";
             formPrestamo.reset();
             await refreshAll();
+            alert(`¡Se generaron ${totalCuotas} cuotas con éxito!`);
         } catch(err) {
-            alert("Error al guardar préstamo.");
+            alert("Error al generar préstamo.");
         } finally {
             btnSubmit.disabled = false;
+            btnSubmit.textContent = "Generar Cuotas";
         }
     };
 }
@@ -1716,3 +1776,54 @@ window.guardarFechasTarjetas = async function() {
         alert("Error al guardar en la base de datos.");
     }
 };
+
+// NUEVA FUNCIÓN: Abrir modal de edición matemática
+window.abrirEditarPrestamo = function(id, total, belen) {
+    document.getElementById("editPrestamoId").value = id;
+    document.getElementById("editPrestamoTotal").value = total > 0 ? total : "";
+    document.getElementById("editPrestamoBelen").value = belen > 0 ? belen : "";
+    
+    // Calculadora en vivo
+    const inTotal = document.getElementById("editPrestamoTotal");
+    const inBelen = document.getElementById("editPrestamoBelen");
+    const outCalc = document.getElementById("calculoAportado");
+    
+    const recalcular = () => {
+        const t = Number(inTotal.value) || 0;
+        const b = Number(inBelen.value) || 0;
+        outCalc.textContent = formatoMoneda(t - b);
+    };
+    inTotal.onkeyup = recalcular;
+    inBelen.onkeyup = recalcular;
+    recalcular();
+
+    document.getElementById("modalEditarPrestamo").style.display = "flex";
+};
+
+// NUEVA FUNCIÓN: Guardar edición del préstamo (usando el PUT de Java)
+const formEditarPrestamo = document.getElementById("formEditarPrestamo");
+if (formEditarPrestamo) {
+    formEditarPrestamo.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const id = document.getElementById("editPrestamoId").value;
+            const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
+            const belen = parseFloat(document.getElementById("editPrestamoBelen").value) || 0;
+            const aportado = total - belen; // Calcula lo del otro automáticamente
+
+            const body = {
+                montoTotal: total,
+                aporteBelen: belen,
+                aporteOtro: aportado
+            };
+            
+            // Llama al nuevo método PUT que creamos en Java
+            await fetch(`${API}/prestamos/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            document.getElementById("modalEditarPrestamo").style.display = "none";
+            await refreshAll();
+        } catch(err) {
+            alert("Error al actualizar la cuota.");
+        }
+    };
+}

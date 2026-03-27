@@ -113,34 +113,24 @@
 		            </div>
 		          </div>
 		        </div>
+        
         <div id="prestamos" class="page">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h2 style="color: var(--color-primario); margin: 0;">🤝 Gestión de Préstamos</h2>
-                    <button onclick="configurarNombresPrestamo()" style="background: var(--bg-saldos); border: 1px solid #444; color: #fff; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">⚙️ Configurar Nombres</button>
                 </div>
-                <p style="color: var(--texto-claro); margin-bottom: 25px;">Control de cuotas compartidas.</p>
+                <p style="color: var(--texto-claro); margin-bottom: 25px;">Control de deudas y cuotas compartidas.</p>
                 
                 <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
-                    <div class="card" style="background: #222; border-left: 4px solid #ff6384;">
-                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total Aportado <span id="labelTotal1" style="color: #ff6384;">Persona 1</span></h4>
-                        <p id="totalAporteMama" style="font-size: 1.5rem; font-weight: bold; color: #fff; margin: 5px 0 0 0;">$ 0.00</p>
-                    </div>
-                    <div class="card" style="background: #222; border-left: 4px solid #00bcd4;">
-                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total Aportado <span id="labelTotal2" style="color: #00bcd4;">Persona 2</span></h4>
-                        <p id="totalAporteBelen" style="font-size: 1.5rem; font-weight: bold; color: #fff; margin: 5px 0 0 0;">$ 0.00</p>
+                    <div class="card" style="background: #222; border-left: 4px solid #ffce56;">
+                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total a pagar por Belén este mes</h4>
+                        <p id="totalBelenPrestamos" style="font-size: 1.5rem; font-weight: bold; color: #ffce56; margin: 5px 0 0 0;">$ 0.00</p>
                     </div>
                 </div>
 
-                <div class="table-wrapper">
-                    <table class="table" id="tablaPrestamos">
-                        <thead>
-                            <tr><th>Mes / Cuota</th><th>Aporte <span id="labelTabla1">Persona 1</span></th><th>Aporte <span id="labelTabla2">Persona 2</span></th><th>Total Pagado</th><th>Acciones</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalPrestamo').style.display = 'flex'">+ Cargar Nuevo Mes de Préstamo</button>
+                <div id="contenedorTablasPrestamos"></div>
+
+                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalPrestamo').style.display = 'flex'">+ Crear Nuevo Préstamo (Múltiples Cuotas)</button>
             </div>
         </div>
 
@@ -352,15 +342,49 @@
 		    </div>
 		</div>
 
-        <div id="modalPrestamo" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
-            <h3>🤝 Cargar Cuota de Préstamo</h3>
-            <form id="formPrestamo" class="form">
-                <label>Mes / Cuota (Ej: Agosto 25 - 1/36) <input id="prestamoMes" type="text" required placeholder="¿Qué cuota es?" /></label>
-                <label>Aporte <span id="labelModal1" style="font-weight: bold; color: #ff6384;">Persona 1</span> ($) <input id="prestamoMama" type="number" step="0.01" required placeholder="0.00" /></label>
-                <label>Aporte <span id="labelModal2" style="font-weight: bold; color: #00bcd4;">Persona 2</span> ($) <input id="prestamoBelen" type="number" step="0.01" required placeholder="0.00" /></label>
-                <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cuota</button>
-            </form>
-        </div></div>
+        <div id="modalPrestamo" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
+                <h3>🤝 Crear Nuevo Préstamo</h3>
+                <p style="font-size: 0.8rem; color: #888;">Esto generará las cuotas vacías. Mes a mes podrás llenarlas con el monto exacto.</p>
+                <form id="formPrestamo" class="form">
+                    <label>Nombre del Préstamo (Ej: Auto, Heladera) <input id="prestamoNombre" type="text" required /></label>
+                    <label>Pertenece a: 
+                        <select id="prestamoPertenece" required>
+                            <option value="Mamá">Mamá</option>
+                            <option value="Papá">Papá</option>
+                            <option value="Ambos">Ambos (Mamá y Papá)</option>
+                        </select>
+                    </label>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <label style="flex: 1;">Total de Cuotas <input id="prestamoTotalCuotas" type="number" min="1" required placeholder="Ej: 36" /></label>
+                        <label style="flex: 1;">1° Cuota empieza en: <input id="prestamoMesInicio" type="month" required /></label>
+                    </div>
+                    <button type="submit" class="btn" style="margin-top: 20px;">Generar Cuotas</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalEditarPrestamo" class="modal">
+            <div class="modal-content" style="max-width: 400px;">
+                <span class="close" onclick="document.getElementById('modalEditarPrestamo').style.display = 'none'">&times;</span>
+                <h3 id="tituloEditarPrestamo">📝 Cargar montos del mes</h3>
+                <form id="formEditarPrestamo" class="form">
+                    <input type="hidden" id="editPrestamoId">
+                    <input type="hidden" id="editPrestamoMesString">
+                    
+                    <label style="color: #ffce56;">Monto TOTAL de la Cuota ($) <input id="editPrestamoTotal" type="number" step="0.01" required /></label>
+                    <label style="color: #2ac9bb;">Lo que paga Belén ($) <input id="editPrestamoBelen" type="number" step="0.01" required /></label>
+                    
+                    <div style="background: #222; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center;">
+                        <p style="margin: 0; font-size: 0.8rem; color: #888;">El otro aportará automáticamente:</p>
+                        <h3 id="calculoAportado" style="margin: 5px 0 0 0; color: #fff;">$ 0.00</h3>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="margin-top: 20px;">Guardar Montos</button>
+                </form>
+            </div>
+        </div>
         
         <div id="modalCategorias" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalCategorias').style.display = 'none'">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="nuevaCategoriaInput" placeholder="Nueva categoría" /><button onclick="crearCategoria()" class="btn">Crear</button></div><ul id="listaCategoriasGestion" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div></div>
 
@@ -405,6 +429,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=14"></script>
+  <script src="js/dashboard.js?v=16"></script>
 </body>
 </html>
