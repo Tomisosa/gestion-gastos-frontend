@@ -175,15 +175,16 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
 
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
-            let btnEliminar = customObj ? `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer; color: #888; font-size: 0.9rem;">✖</button>` : '';
+            let btnEliminar = customObj ? `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; color: #fff; font-size: 0.9rem;">✖</button>` : '';
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
 
+            // MAGIA ACÁ: Las tarjetas ahora son inmensas y robustas
             contenedor.innerHTML += `
-            <div class="card-small" style="min-width: 160px; background: var(--bg-saldos); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; position: relative;">
+            <div class="card-small" style="min-width: 240px; background: #1a1a1a; padding: 25px 20px; border-radius: 15px; border-bottom: 5px solid ${color}; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
                 ${btnEliminar}
-                <h4 style="color: #94a3b8; font-size: 0.8rem; margin: 0;">🏦 ${b}</h4>
-                <p style="font-size: 1.3rem; font-weight: bold; color: ${color}; margin: 5px 0 0 0;">${montoAMostrar}</p>
+                <h4 style="color: #94a3b8; font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🏦 ${b}</h4>
+                <p style="font-size: 2rem; font-weight: bold; color: ${color}; margin: 10px 0 0 0; letter-spacing: -1px;">${montoAMostrar}</p>
             </div>`;
         });
     }
@@ -731,10 +732,21 @@ function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
   tbody.innerHTML = "";
+  
   let total = 0;
+  let pagado = 0;
+  let faltaPagar = 0;
 
   lista.forEach(g => {
-    total += (Number(g.monto) || 0);
+    const montoNum = Number(g.monto) || 0;
+    total += montoNum;
+    
+    // Matemática mágica para los 3 cuadritos
+    if (g.pagado) {
+        pagado += montoNum;
+    } else {
+        faltaPagar += montoNum;
+    }
     
     let acciones = "";
     let estadoPagado = "";
@@ -763,10 +775,8 @@ function renderGastosFijos(lista) {
     }
 
     const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
-    
-    // MAGIA: Si es un gasto en USD, lo pintamos de verde claro y le ponemos "USD"
     let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
-    let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
+    let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
@@ -780,9 +790,10 @@ function renderGastosFijos(lista) {
     </tr>`;
   });
 
-  if (document.getElementById("totalFijos")) {
-      document.getElementById("totalFijos").textContent = formatoMoneda(total);
-  }
+  // Actualizamos el HTML con los cálculos
+  if (document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(total);
+  if (document.getElementById("totalFijosPagado")) document.getElementById("totalFijosPagado").textContent = formatoMoneda(pagado);
+  if (document.getElementById("totalFijosFalta")) document.getElementById("totalFijosFalta").textContent = formatoMoneda(faltaPagar);
 }
 
 // --- TABLA VARIABLES (CON BOTÓN DE PAGO RÁPIDO) ---

@@ -49,32 +49,29 @@
         </div>
 
         <div id="inicio" class="page visible">
-			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-			    <div style="display: flex; align-items: center; gap: 10px;">
-			        <h3 style="margin: 0;">Disponible</h3>
-			        <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center;">
-			            <span class="material-icons" id="iconoSaldos" style="font-size: 20px;">visibility_off</span>
-			        </button>
-			    </div>
-			    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Añadir nueva billetera virtual o cuenta">🏦 + Nueva Cuenta</button>
-			</div>
-          
-          <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 10px;">
-             </div>
-          
-          <div class="cards">
-            <div class="card">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0;">Categorías</h3>
-                <button id="btnGestionarCategorias" title="Gestionar categorías" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;">⚙️</button>
-              </div>
-              <div style="display: flex; justify-content: flex-start; width: 100%; margin-top: 10px;">
-                <p id="countCategorias" class="highlight" style="margin: 0;">0</p>
-              </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--color-primario);">💸 Dinero Disponible</h3>
+                    <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center;">
+                        <span class="material-icons" id="iconoSaldos" style="font-size: 20px;">visibility_off</span>
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="background: #222; border: 1px solid #444; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; font-size: 0.85rem; color: #aaa;">
+                        <span>🏷️ Categorías: <span id="countCategorias" style="color: white; font-weight: bold;">0</span></span>
+                        <button id="btnGestionarCategorias" title="Gestionar categorías" style="background: none; border: none; cursor: pointer; padding: 0; font-size: 1rem; margin-left: 5px;">⚙️</button>
+                    </div>
+                    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Añadir nueva billetera virtual o cuenta">🏦 + Nueva Cuenta</button>
+                </div>
             </div>
-            <div class="card"><h3>Balance Total</h3><p id="balanceTotal" class="highlight">$0.00</p></div>
-            <div class="card"><h3>Total gastado</h3><p id="totalGastado" class="highlight">$0.00</p></div>
-          </div>
+          
+            <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px;">
+            </div>
+          
+            <div class="cards">
+                <div class="card"><h3>Total gastado en el mes</h3><p id="totalGastado" class="highlight" style="color: #ff6384;">$0.00</p></div>
+            </div>
         </div>
 
         <div id="ver-gastos" class="page">
@@ -87,12 +84,31 @@
             </div>
 
             <div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🔒 Gastos FIJOS</h3>
-                    <h3 id="totalFijos" style="color: #ffce56;">$0.00</h3>
+                    <div style="display: flex; gap: 15px; background: #222; padding: 10px 15px; border-radius: 8px; border: 1px solid #444;">
+                        <div style="text-align: center;">
+                            <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Total Fijos</span><br>
+                            <strong id="totalFijos" style="color: #ffce56; font-size: 1.1rem;">$0.00</strong>
+                        </div>
+                        <div style="border-left: 1px solid #444; padding-left: 15px; text-align: center;">
+                            <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Pagado ✅</span><br>
+                            <strong id="totalFijosPagado" style="color: #2ac9bb; font-size: 1.1rem;">$0.00</strong>
+                        </div>
+                        <div style="border-left: 1px solid #444; padding-left: 15px; text-align: center;">
+                            <span style="font-size: 0.75rem; color: #888; text-transform: uppercase;">Falta Pagar ⏳</span><br>
+                            <strong id="totalFijosFalta" style="color: #ff6384; font-size: 1.1rem;">$0.00</strong>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-wrapper tabla-con-scroll"><table id="tablaGastosFijos" class="table"><thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+                <div class="table-wrapper tabla-con-scroll" style="margin-top: 15px;">
+                    <table id="tablaGastosFijos" class="table">
+                        <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
+
             <div class="panel" style="border-left: 5px solid #2ac9bb;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3>🛒 Gastos VARIABLES</h3>
@@ -429,6 +445,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=18"></script>
+  <script src="js/dashboard.js?v=19"></script>
 </body>
 </html>
