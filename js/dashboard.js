@@ -497,24 +497,28 @@ async function refreshAll() {
   });
 
   const prestamosDelMes = pTodos.filter(p => (p.mesCuota || "").startsWith(mesSeleccionado));
-  let sumaTotalPrestamos = 0;
-  prestamosDelMes.forEach(p => {
-      sumaTotalPrestamos += (Number(p.aporteMama) || 0) + (Number(p.aporteBelen) || 0);
-  });
+    let sumaTotalMiaPrestamos = 0;
+    prestamosDelMes.forEach(p => {
+        // MAGIA: Solo suma tu aporte (el que está guardado en la base de datos como aporteBelen)
+        sumaTotalMiaPrestamos += (Number(p.aporteBelen) || 0); 
+    });
 
-  if (sumaTotalPrestamos > 0) {
-      gFiltradosMes.push({
-          id: 'virtual_prestamo',
-          descripcion: `Cuota Préstamos`,
-          monto: sumaTotalPrestamos,
-          fechaVencimiento: mesSeleccionado + "-10",
-          categoriaNombre: "🤝 Préstamos",
-          pagado: false,
-          medioPago: "MÚLTIPLES",
-          esFijo: true,
-          esVirtual: true
-      });
-  }
+    if (sumaTotalMiaPrestamos > 0) {
+        // MAGIA: Saca tu nombre dinámicamente
+        let nombreVirtual = user.nombre ? user.nombre.split(" ")[0].charAt(0).toUpperCase() + user.nombre.split(" ")[0].slice(1).toLowerCase() : 'vos';
+        
+        gFiltradosMes.push({
+            id: 'virtual_prestamo',
+            descripcion: `Resumen Préstamos (Pagado por ${nombreVirtual})`,
+            monto: sumaTotalMiaPrestamos,
+            fechaVencimiento: "Automático",
+            categoriaNombre: "🤝 Préstamos",
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esFijo: true,
+            esVirtual: true
+        });
+    }
   
   const iFiltradosMes = iTodos.filter(i => {
           const fechaComparar = i.mesImpacto ? i.mesImpacto : i.fecha;
@@ -651,6 +655,13 @@ async function refreshAll() {
       if(!contenedor) return;
       contenedor.innerHTML = "";
 
+      // MAGIA: Obtenemos tu nombre de usuario y lo ponemos prolijo (Ej: "tomas" -> "Tomas")
+      let minombre = user.nombre ? user.nombre.split(" ")[0] : "Vos";
+      minombre = minombre.charAt(0).toUpperCase() + minombre.slice(1).toLowerCase();
+
+      // Inyectamos el nombre en las tarjetas del HTML
+      document.querySelectorAll('.nombreDinamico').forEach(el => el.textContent = minombre);
+
       const selector = document.getElementById("filtroFechaMes");
       const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
 
@@ -658,16 +669,15 @@ async function refreshAll() {
       const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
       
       const grupos = { "Mamá": [], "Papá": [], "Ambos": [] };
-      let sumaTotalBelen = 0;
+      let sumaTotalMia = 0;
 
       prestamosDelMes.forEach(p => {
-          // Obtenemos los valores directo de las columnas nuevas (o 0 si están vacías)
           const pertenece = p.perteneceA || "Desconocido";
           const aBelen = Number(p.aporteBelen) || 0;
           const aOtro = Number(p.aporteOtro) || 0;
           const totalCuotaDinero = Number(p.montoTotal) || 0;
 
-          sumaTotalBelen += aBelen;
+          sumaTotalMia += aBelen;
 
           if(grupos[pertenece]) {
               grupos[pertenece].push({
@@ -681,7 +691,7 @@ async function refreshAll() {
       });
 
       const cardBelen = document.getElementById("totalBelenPrestamos");
-      if(cardBelen) cardBelen.textContent = formatoMoneda(sumaTotalBelen);
+      if(cardBelen) cardBelen.textContent = formatoMoneda(sumaTotalMia);
 
       // Dibujamos una tabla por cada persona
       ["Mamá", "Papá", "Ambos"].forEach(grupo => {
@@ -702,12 +712,13 @@ async function refreshAll() {
               </tr>`;
           });
 
+          // ACÁ INYECTAMOS TU NOMBRE EN LA CABECERA DE LA TABLA (<th>${minombre}</th>)
           contenedor.innerHTML += `
           <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
               <h3 style="margin-top: 0; color: #00aae4; border-bottom: 1px solid #333; padding-bottom: 5px;">Pertenece a: ${grupo}</h3>
               <div class="table-wrapper tabla-con-scroll">
                   <table class="table">
-                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th>Belén</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
+                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th style="color:#ffce56;">${minombre}</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
                       <tbody>${filas}</tbody>
                   </table>
               </div>
