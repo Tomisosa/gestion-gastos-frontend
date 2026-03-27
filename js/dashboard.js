@@ -86,14 +86,34 @@ function generarGrafico(gastos) {
   const ctx = canvas.getContext('2d');
   const datosAgrupados = {};
   
+  // Armamos la lista de billeteras para saber si se pagó con tarjeta
+  const nombresBilleteras = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
+  globalBilleteras.forEach(b => nombresBilleteras.push(b.nombre.toUpperCase()));
+
   gastos.forEach(g => {
-    const cat = g.categoriaNombre || "Sin categoría";
+    let cat = g.categoriaNombre;
+
+    // MAGIA: Si el gasto no tiene categoría, la aplicación adivina de dónde viene
+    if (!cat || cat === "" || cat === "Sin categoría") {
+        const medio = (g.medioPago || "").toUpperCase();
+        const esTarjeta = !nombresBilleteras.includes(medio) && medio !== "";
+
+        if (esTarjeta) {
+            const esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
+            cat = esDolar ? "💳 Tarjetas (Dólares)" : "💳 Tarjetas (Pesos)";
+        } else {
+            cat = "Sin categoría";
+        }
+    }
+
     datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
   });
 
+  // Agregué un par de colores más para que no se repitan
   const coloresFinancieros = [
       '#1e3a8a', '#0284c7', '#0f766e', '#d97706', 
-      '#64748b', '#b91c1c', '#4338ca', '#a16207'
+      '#64748b', '#b91c1c', '#4338ca', '#a16207',
+      '#ffce56', '#2ac9bb'
   ];
 
   miGrafico = new Chart(ctx, {
@@ -139,7 +159,7 @@ function generarGrafico(gastos) {
     }
   });
 }
-// CÁLCULO INTELIGENTE DE SALDOS
+// --- CORRECCIÓN DE TARJETAS ESTIRADAS Y AGREGADO DE EDICIÓN/ELIMINACIÓN ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
     globalBilleteras.forEach(b => {
@@ -169,26 +189,42 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     if (contenedor) {
         contenedor.innerHTML = "";
         nombres.forEach(b => {
-            let color = "#ffce56"; 
+            let color = "#ffce56"; // Default para Efectivo o desconocidos
             if(b === "BNA") color = "#2ac9bb";
             if(b === "MERCADO PAGO") color = "#00aae4";
-            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
+            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; // Color para cuentas personalizadas
 
+            // Buscamos si es una cuenta personalizada (para saber si se puede editar/eliminar)
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
-            let btnEliminar = customObj ? `<button onclick="eliminarBilletera(${customObj.id})" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; color: #fff; font-size: 0.9rem;">✖</button>` : '';
+            
+            // Si es personalizada, le habilitamos los iconos de acciones
+            let accionesBilletera = '';
+            if (customObj) {
+                accionesBilletera = `
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
+                    <button onclick="abrirEditarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Editar">✏️</button>
+                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Eliminar">🗑️</button>
+                </div>
+                `;
+            }
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
 
-            // MAGIA ACÁ: Las tarjetas ahora son inmensas y robustas
+            // MAGIA ACÁ: Definimos ancho (300px), alto (180px) y quitamos el estirado
             contenedor.innerHTML += `
-            <div class="card-small" style="min-width: 240px; background: #1a1a1a; padding: 25px 20px; border-radius: 15px; border-bottom: 5px solid ${color}; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-                ${btnEliminar}
-                <h4 style="color: #94a3b8; font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 1px;">🏦 ${b}</h4>
-                <p style="font-size: 2rem; font-weight: bold; color: ${color}; margin: 10px 0 0 0; letter-spacing: -1px;">${montoAMostrar}</p>
+            <div class="card-small" style="min-width: 300px; max-width: 300px; height: 180px; flex-shrink: 0; background: ${getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'))}; padding: 20px; border-radius: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                ${accionesBilletera}
+                
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; margin-right: 60px;">🏦 ${b}</h4>
+                
+                <div style="margin-top: auto;">
+                    <p style="font-size: 2rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -1.5px;">${montoAMostrar}</p>
+                </div>
             </div>`;
         });
     }
 }
+// --- FIN DE LA CORRECCIÓN ---
 
 function cargarSelectorFechas() {
   const selector = document.getElementById("filtroFechaMes");
