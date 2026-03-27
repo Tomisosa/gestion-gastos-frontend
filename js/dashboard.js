@@ -238,7 +238,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             contenedor.innerHTML += `
             <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
                 ${btnAcciones}
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; width: 65%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; padding-right: 75px; line-height: 1.2;">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
                     <p style="font-size: 1.6rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px;">${montoAMostrar}</p>
                 </div>
@@ -973,7 +973,6 @@ function renderConsumosCuotas(lista) {
       </tr>`;
     });
 }
-
 // --- CREAR BILLETERA ---
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
@@ -987,11 +986,17 @@ if (formBilletera) {
                 color: document.getElementById("billeteraColor").value, // GUARDAMOS COLOR
                 usuario: { id: user.id } 
             };
-            await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            const res = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            handleAuthError(res); // <--- ACÁ ESTÁ LA ALARMA DE SEGURIDAD
+            if(!res.ok) throw new Error("Error del servidor");
+
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { alert("Error al guardar cuenta."); } 
+        } catch(err) { 
+            if (err.message !== "Sesión expirada") alert("Error al guardar cuenta."); 
+        } 
         finally { btnSubmit.disabled = false; }
     };
 }
@@ -1018,14 +1023,18 @@ if (formEditarBilletera) {
                 nombre: document.getElementById("editBilleteraNombre").value.trim(),
                 color: document.getElementById("editBilleteraColor").value
             };
-            await fetch(`${API}/billeteras/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+            const res = await fetch(`${API}/billeteras/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
             
+            handleAuthError(res); // <--- ALARMA DE SEGURIDAD ACÁ TAMBIÉN
+            if(!res.ok) throw new Error("Error al editar");
+
             document.getElementById("modalEditarBilletera").style.display = "none";
             await refreshAll();
-        } catch(err) { alert("Error al actualizar la cuenta."); }
+        } catch(err) { 
+            if (err.message !== "Sesión expirada") alert("Error al actualizar la cuenta."); 
+        }
     };
 }
-
 const formNuevaTarjeta = document.getElementById("formNuevaTarjeta");
 if (formNuevaTarjeta) {
     formNuevaTarjeta.onsubmit = async (e) => {
