@@ -66,8 +66,7 @@
                 </div>
             </div>
           
-			<div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; max-width: 100%; box-sizing: border-box;">
-			</div>
+			<div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
           
             <div class="cards">
                 <div class="card"><h3>Total gastado en el mes</h3><p id="totalGastado" class="highlight" style="color: #ff6384;">$0.00</p></div>
@@ -406,7 +405,52 @@
 
        <div id="modalNuevaTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span><h3>💳 Agregar Tarjeta de Crédito</h3><form id="formNuevaTarjeta" class="form"><label>Nombre (Ej: Visa, Mastercard) <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label><label>Color de fondo para la cajita <select id="nuevaTarjetaColor" required><option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option><option value="rojo">Rojo</option></select></label><button type="submit" class="btn" style="margin-top: 20px;">Guardar Crédito</button></form></div></div>
 
-       <div id="modalBilletera" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalBilletera').style.display = 'none'">&times;</span><h3>🏦 Agregar Nueva Cuenta</h3><form id="formBilletera" class="form"><label>Nombre de la Cuenta (Ej: Ualá, Galicia) <input id="billeteraNombre" type="text" required placeholder="¿Dónde tenés la plata?" /></label><button type="submit" class="btn" style="margin-top: 20px;">Crear Cuenta de Débito</button></form></div></div>
+	   <div id="modalBilletera" class="modal">
+	       <div class="modal-content">
+	           <span class="close" onclick="document.getElementById('modalBilletera').style.display = 'none'">&times;</span>
+	           <h3>🏦 Agregar Nueva Cuenta</h3>
+	           <form id="formBilletera" class="form">
+	               <label>Nombre de la Cuenta <input id="billeteraNombre" type="text" required placeholder="Ej: Ualá, Galicia" /></label>
+	               <label>Color de fondo 
+	                   <select id="billeteraColor" required>
+	                       <option value="azul">Azul Oscuro</option>
+	                       <option value="naranja">Naranja</option>
+	                       <option value="violeta">Violeta</option>
+	                       <option value="celeste">Celeste</option>
+	                       <option value="verde">Verde</option>
+	                       <option value="bna">Verde Agua</option>
+	                       <option value="negro">Negro</option>
+	                       <option value="rojo">Rojo</option>
+	                   </select>
+	               </label>
+	               <button type="submit" class="btn" style="margin-top: 20px;">Crear Cuenta</button>
+	           </form>
+	       </div>
+	   </div>
+
+	   <div id="modalEditarBilletera" class="modal">
+	       <div class="modal-content">
+	           <span class="close" onclick="document.getElementById('modalEditarBilletera').style.display = 'none'">&times;</span>
+	           <h3>✏️ Editar Cuenta</h3>
+	           <form id="formEditarBilletera" class="form">
+	               <input type="hidden" id="editBilleteraId">
+	               <label>Nombre de la Cuenta <input id="editBilleteraNombre" type="text" required /></label>
+	               <label>Color de fondo 
+	                   <select id="editBilleteraColor" required>
+	                       <option value="azul">Azul Oscuro</option>
+	                       <option value="naranja">Naranja</option>
+	                       <option value="violeta">Violeta</option>
+	                       <option value="celeste">Celeste</option>
+	                       <option value="verde">Verde</option>
+	                       <option value="bna">Verde Agua</option>
+	                       <option value="negro">Negro</option>
+	                       <option value="rojo">Rojo</option>
+	                   </select>
+	               </label>
+	               <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
+	           </form>
+	       </div>
+	   </div>
 
         <div id="modalInversion" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span><h3>📈 Nueva Inversión / Ahorro</h3><form id="formInversion" class="form"><label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label><label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label><div style="display: flex; gap: 15px;"><label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label><label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label></div><button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button></form></div></div>
 
@@ -445,6 +489,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=22"></script>
+  <script src="js/dashboard.js?v=23"></script>
 </body>
 </html>

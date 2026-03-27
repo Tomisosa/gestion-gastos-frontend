@@ -189,33 +189,35 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     if (contenedor) {
         contenedor.innerHTML = "";
         nombres.forEach(b => {
-            let color = "#ffce56"; // Default para Efectivo o desconocidos
+            let color = "#ffce56"; 
             if(b === "BNA") color = "#2ac9bb";
             if(b === "MERCADO PAGO") color = "#00aae4";
             if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
 
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
             
-            // Solo dejamos el botón de eliminar (el tachito)
-            let btnEliminar = '';
+            // Botones de editar y eliminar (Solo para cuentas creadas por el usuario)
+            let btnAcciones = '';
             if (customObj) {
-                btnEliminar = `
-                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
-                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Eliminar">🗑️</button>
+                // Las que la app trae por defecto (BNA, Mercado Pago, Efectivo) no se borran para no romper historial. 
+                // Las creadas por ella, tienen menú completo.
+                btnAcciones = `
+                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 10;">
+                    <button onclick="abrirEditarBilletera(${customObj.id}, '${customObj.nombre}', '${customObj.color || 'default'}')" style="background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Editar">✏️</button>
+                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Eliminar">🗑️</button>
                 </div>
                 `;
             }
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
 
+            // Tamaño corregido: min-width 250px y height 140px. No estira la pantalla y se ve genial.
             contenedor.innerHTML += `
-            <div class="card-small" style="min-width: 300px; max-width: 300px; height: 180px; flex-shrink: 0; background: ${getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'))}; padding: 20px; border-radius: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                ${btnEliminar}
-                
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; margin-right: 40px;">🏦 ${b}</h4>
-                
+            <div class="card-small" style="min-width: 250px; max-width: 250px; height: 140px; flex-shrink: 0; background: ${getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'))}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
+                ${btnAcciones}
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
-                    <p style="font-size: 2rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -1.5px;">${montoAMostrar}</p>
+                    <p style="font-size: 1.8rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -1px;">${montoAMostrar}</p>
                 </div>
             </div>`;
         });
@@ -944,8 +946,7 @@ function renderConsumosCuotas(lista) {
     });
 }
 
-/* --- ACCIONES PARA GUARDAR NUEVOS ELEMENTOS --- */
-
+// --- CREAR BILLETERA ---
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
     formBilletera.onsubmit = async (e) => {
@@ -955,20 +956,45 @@ if (formBilletera) {
         try {
             const body = { 
                 nombre: document.getElementById("billeteraNombre").value.trim(), 
+                color: document.getElementById("billeteraColor").value, // GUARDAMOS COLOR
                 usuario: { id: user.id } 
             };
-            const response = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            
-            if(!response.ok) throw new Error("Error del servidor al guardar billetera");
-            
+            await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { 
-            alert("Error al conectar con la base de datos."); 
-        } finally { 
-            btnSubmit.disabled = false; 
-        }
+        } catch(err) { alert("Error al guardar cuenta."); } 
+        finally { btnSubmit.disabled = false; }
+    };
+}
+
+// --- ABRIR EDITAR BILLETERA ---
+window.abrirEditarBilletera = function(id, nombre, color) {
+    document.getElementById("editBilleteraId").value = id;
+    document.getElementById("editBilleteraNombre").value = nombre;
+    
+    const selectColor = document.getElementById("editBilleteraColor");
+    if(selectColor) selectColor.value = color !== 'undefined' ? color : 'azul';
+
+    document.getElementById("modalEditarBilletera").style.display = "flex";
+};
+
+// --- GUARDAR EDICIÓN BILLETERA ---
+const formEditarBilletera = document.getElementById("formEditarBilletera");
+if (formEditarBilletera) {
+    formEditarBilletera.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const id = document.getElementById("editBilleteraId").value;
+            const body = {
+                nombre: document.getElementById("editBilleteraNombre").value.trim(),
+                color: document.getElementById("editBilleteraColor").value
+            };
+            await fetch(`${API}/billeteras/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            document.getElementById("modalEditarBilletera").style.display = "none";
+            await refreshAll();
+        } catch(err) { alert("Error al actualizar la cuenta."); }
     };
 }
 
