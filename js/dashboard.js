@@ -965,12 +965,15 @@ if (formBilletera) {
         e.preventDefault();
         const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
         btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando..."; // Para que sepas que está procesando
+        btnSubmit.textContent = "Guardando..."; 
 
         try {
             const body = { 
                 nombre: document.getElementById("billeteraNombre").value.trim(), 
-                color: document.getElementById("billeteraColor").value,
+                
+                // MAGIA: COMENTAMOS EL COLOR UN SEGUNDO PARA PROBAR
+                // color: document.getElementById("billeteraColor").value,
+                
                 usuario: { id: user.id } 
             };
             
@@ -982,7 +985,6 @@ if (formBilletera) {
             
             handleAuthError(res);
 
-            // Si el servidor (Railway) lo rechaza, tiramos el error exacto
             if(!res.ok) {
                 const errText = await res.text();
                 throw new Error(`El servidor bloqueó la cuenta. Código: ${res.status}. Detalle: ${errText}`);
@@ -993,12 +995,11 @@ if (formBilletera) {
             await refreshAll();
             
         } catch(err) { 
-            // ACÁ ESTÁ LA CLAVE: Te va a mostrar una alerta en pantalla con el problema
             alert("Error técnico al guardar: " + err.message); 
             console.error(err);
         } finally { 
             btnSubmit.disabled = false; 
-            btnSubmit.textContent = "Crear Cuenta"; // Vuelve a la normalidad
+            btnSubmit.textContent = "Crear Cuenta"; 
         }
     };
 }
