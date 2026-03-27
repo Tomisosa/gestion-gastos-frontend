@@ -40,7 +40,9 @@ function authHeaders() {
 
 // --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
-    if (res.status === 401 || res.status === 403) {
+    // MAGIA: Ahora solo te cierra la sesión si el error es 401 (Vencimiento real del token).
+    // Si el servidor te devuelve 403 u otra cosa, no te patea de la app.
+    if (res.status === 401) {
         localStorage.removeItem("token"); 
         localStorage.removeItem("userId"); 
         localStorage.removeItem("userName"); 
@@ -161,7 +163,7 @@ function generarGrafico(gastos) {
 }
 // --- CORRECCIÓN DE TARJETAS Y BOTONES TOTALMENTE LIBRES ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    // 1. Ya no forzamos cuentas. Solo usamos las que ella cree en la Base de Datos.
+    // 1. Ya no forzamos cuentas fijas. Solo usamos las creadas en la Base de Datos.
     const nombres = [];
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
@@ -174,13 +176,11 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 
     ingresos.forEach(i => { 
         let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
     });
     gastos.forEach(g => { 
         if (g.pagado === false) return; 
         let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (!nombres.includes(m) && !mediosIgnorados.includes(m) && !nombresTarjetasCredito.includes(m)) nombres.push(m);
     });
 
@@ -189,14 +189,12 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 
     ingresos.forEach(i => { 
         let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
     });
     
     gastos.forEach(g => { 
         if (g.pagado === false) return; 
         let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
     });
     
@@ -211,6 +209,15 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         contenedor.style.paddingBottom = "15px";
         contenedor.innerHTML = "";
 
+        // Si la lista de cuentas está vacía, mostramos el cartel para que empiece a crear
+        if (nombres.length === 0) {
+             contenedor.innerHTML = `
+                <div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">
+                    No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.
+                </div>`;
+            return;
+        }
+
         nombres.forEach(b => {
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
             
@@ -224,7 +231,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
                 </div>
                 `;
             } else {
-                // Si es una cuenta vieja huérfana, le decimos que la cree
+                // Si es una cuenta vieja huérfana (que no está en la BD), le decimos que la cree
                 btnAcciones = `
                 <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
                     <span style="font-size: 0.7rem; color: #ffce56; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 5px; font-weight: bold;">⚠️ Creala en +Nueva Cuenta</span>
@@ -233,7 +240,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             }
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
-            const bgColor = getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'));
+            const bgColor = getBgColor(customObj ? customObj.color : 'default'); // Usamos el color de la BD o gris por defecto
 
             contenedor.innerHTML += `
             <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
@@ -973,6 +980,7 @@ function renderConsumosCuotas(lista) {
       </tr>`;
     });
 }
+
 // --- CREAR BILLETERA ---
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
@@ -986,17 +994,11 @@ if (formBilletera) {
                 color: document.getElementById("billeteraColor").value, // GUARDAMOS COLOR
                 usuario: { id: user.id } 
             };
-            const res = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            
-            handleAuthError(res); // <--- ACÁ ESTÁ LA ALARMA DE SEGURIDAD
-            if(!res.ok) throw new Error("Error del servidor");
-
+            await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { 
-            if (err.message !== "Sesión expirada") alert("Error al guardar cuenta."); 
-        } 
+        } catch(err) { alert("Error al guardar cuenta."); } 
         finally { btnSubmit.disabled = false; }
     };
 }
@@ -1023,18 +1025,14 @@ if (formEditarBilletera) {
                 nombre: document.getElementById("editBilleteraNombre").value.trim(),
                 color: document.getElementById("editBilleteraColor").value
             };
-            const res = await fetch(`${API}/billeteras/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+            await fetch(`${API}/billeteras/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
             
-            handleAuthError(res); // <--- ALARMA DE SEGURIDAD ACÁ TAMBIÉN
-            if(!res.ok) throw new Error("Error al editar");
-
             document.getElementById("modalEditarBilletera").style.display = "none";
             await refreshAll();
-        } catch(err) { 
-            if (err.message !== "Sesión expirada") alert("Error al actualizar la cuenta."); 
-        }
+        } catch(err) { alert("Error al actualizar la cuenta."); }
     };
 }
+
 const formNuevaTarjeta = document.getElementById("formNuevaTarjeta");
 if (formNuevaTarjeta) {
     formNuevaTarjeta.onsubmit = async (e) => {
