@@ -40,8 +40,7 @@ function authHeaders() {
 
 // --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
-    // MAGIA: Ahora solo te cierra la sesión si el error es 401 (Vencimiento real del token).
-    // Si el servidor te devuelve 403 u otra cosa, no te patea de la app.
+    // Si la llave está vencida (401), cerramos sesión.
     if (res.status === 401) {
         localStorage.removeItem("token"); 
         localStorage.removeItem("userId"); 
@@ -966,18 +965,41 @@ if (formBilletera) {
         e.preventDefault();
         const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
         btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando..."; // Para que sepas que está procesando
+
         try {
             const body = { 
                 nombre: document.getElementById("billeteraNombre").value.trim(), 
-                color: document.getElementById("billeteraColor").value, // GUARDAMOS COLOR
+                color: document.getElementById("billeteraColor").value,
                 usuario: { id: user.id } 
             };
-            await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            const res = await fetch(`${API}/billeteras`, { 
+                method: "POST", 
+                headers: authHeaders(), 
+                body: JSON.stringify(body) 
+            });
+            
+            handleAuthError(res);
+
+            // Si el servidor (Railway) lo rechaza, tiramos el error exacto
+            if(!res.ok) {
+                const errText = await res.text();
+                throw new Error(`El servidor bloqueó la cuenta. Código: ${res.status}. Detalle: ${errText}`);
+            }
+
             document.getElementById("modalBilletera").style.display = "none";
             formBilletera.reset();
             await refreshAll();
-        } catch(err) { alert("Error al guardar cuenta."); } 
-        finally { btnSubmit.disabled = false; }
+            
+        } catch(err) { 
+            // ACÁ ESTÁ LA CLAVE: Te va a mostrar una alerta en pantalla con el problema
+            alert("Error técnico al guardar: " + err.message); 
+            console.error(err);
+        } finally { 
+            btnSubmit.disabled = false; 
+            btnSubmit.textContent = "Crear Cuenta"; // Vuelve a la normalidad
+        }
     };
 }
 
