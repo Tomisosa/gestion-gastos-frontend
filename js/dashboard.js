@@ -159,7 +159,7 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DE TARJETAS ESTIRADAS Y AGREGADO DE EDICIÓN/ELIMINACIÓN ---
+// --- CORRECCIÓN DE TARJETAS Y BOTONES ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
     globalBilleteras.forEach(b => {
@@ -192,17 +192,15 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             let color = "#ffce56"; // Default para Efectivo o desconocidos
             if(b === "BNA") color = "#2ac9bb";
             if(b === "MERCADO PAGO") color = "#00aae4";
-            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; // Color para cuentas personalizadas
+            if(b !== "BNA" && b !== "MERCADO PAGO" && b !== "EFECTIVO") color = "#a855f7"; 
 
-            // Buscamos si es una cuenta personalizada (para saber si se puede editar/eliminar)
             const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
             
-            // Si es personalizada, le habilitamos los iconos de acciones
-            let accionesBilletera = '';
+            // Solo dejamos el botón de eliminar (el tachito)
+            let btnEliminar = '';
             if (customObj) {
-                accionesBilletera = `
+                btnEliminar = `
                 <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
-                    <button onclick="abrirEditarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Editar">✏️</button>
                     <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(255,255,255,0.1); border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;" title="Eliminar">🗑️</button>
                 </div>
                 `;
@@ -210,12 +208,11 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 
             const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
 
-            // MAGIA ACÁ: Definimos ancho (300px), alto (180px) y quitamos el estirado
             contenedor.innerHTML += `
             <div class="card-small" style="min-width: 300px; max-width: 300px; height: 180px; flex-shrink: 0; background: ${getBgColor(customObj ? customObj.color : (b === 'BNA' ? 'bna' : b === 'MERCADO PAGO' ? 'celeste' : 'default'))}; padding: 20px; border-radius: 15px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                ${accionesBilletera}
+                ${btnEliminar}
                 
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; margin-right: 60px;">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; margin-right: 40px;">🏦 ${b}</h4>
                 
                 <div style="margin-top: auto;">
                     <p style="font-size: 2rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -1.5px;">${montoAMostrar}</p>
