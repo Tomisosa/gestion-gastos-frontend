@@ -628,8 +628,9 @@ async function refreshAll() {
 	      }
 	  };
 
-	  aplicarMagia(divUSD, textoRealUSD, window.saldosAhorrosOcultos);
-	  aplicarMagia(divARS, textoRealARS, window.saldosAhorrosOcultos);
+	  // ¡CORREGIDO! Sin el window.
+	  aplicarMagia(divUSD, textoRealUSD, saldosAhorrosOcultos);
+	  aplicarMagia(divARS, textoRealARS, saldosAhorrosOcultos);
 	  // ----------------------------------------------
   
     const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
@@ -717,8 +718,8 @@ async function refreshAll() {
 	              textoRealHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
 	          }
 	          
-	          // Si el ojo está activado, ocultamos e inyectamos la magia
-	          if (window.saldosTarjetasOcultos) {
+	          // ¡CORREGIDO! Sin el window.
+	          if (saldosTarjetasOcultos) {
 	              el.innerHTML = "••••••";
 	              el.onmouseover = () => el.innerHTML = textoRealHTML;
 	              el.onmouseout = () => el.innerHTML = "••••••";
