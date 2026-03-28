@@ -250,7 +250,7 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
             ${btnAcciones}
             
             <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; width: 135px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
                     <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
                 </div>
