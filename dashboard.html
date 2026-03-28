@@ -34,46 +34,55 @@
 
     <main class="main">
       
-      <div class="mobile-header">
-        <button id="menuToggle" class="menu-btn">
-            <span class="material-icons">menu</span>
-        </button>
-        <h2>💰 Gastos</h2>
-      </div>
+		<div class="mobile-header">
+		        <button id="menuToggle" class="menu-btn">
+		            <span class="material-icons">menu</span>
+		        </button>
+		        <h2>💰 Gastos</h2>
+		      </div>
 
-      <section class="content">
-        
-        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; background: var(--bg-saldos); padding: 10px; border-radius: 8px; width: fit-content;">
-            <label style="color: #888; font-weight: bold;">📅 Mes:</label>
-            <select id="filtroFechaMes" style="background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none;"></select>
-        </div>
+		      <section class="content">
+		        
+		        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; background: var(--bg-saldos); padding: 10px; border-radius: 8px; width: fit-content;">
+		            <label style="color: #888; font-weight: bold;">📅 Mes:</label>
+		            <select id="filtroFechaMes" style="background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none;"></select>
+		        </div>
 
-        <div id="inicio" class="page visible">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <h3 style="margin: 0; font-size: 1.5rem; color: var(--color-primario);">💸 Dinero Disponible</h3>
-                    <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center;">
-                        <span class="material-icons" id="iconoSaldos" style="font-size: 20px;">visibility_off</span>
-                    </button>
-                </div>
-                
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <div style="background: #222; border: 1px solid #444; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; font-size: 0.85rem; color: #aaa;">
-                        <span>🏷️ Categorías: <span id="countCategorias" style="color: white; font-weight: bold;">0</span></span>
-                        <button id="btnGestionarCategorias" title="Gestionar categorías" style="background: none; border: none; cursor: pointer; padding: 0; font-size: 1rem; margin-left: 5px;">⚙️</button>
-                    </div>
-                    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" style="background: var(--color-primario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;" title="Añadir nueva billetera virtual o cuenta">🏦 + Nueva Cuenta</button>
-                </div>
-            </div>
-          
-			<div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
-          
-			<div class="cards">
-			    <div class="card">
-			        <h3>Total gastado en el mes</h3>
-			        <p id="totalGastado" class="highlight">$0.00</p>
-			    </div>
-			</div>
+		        <div id="inicio" class="page visible">
+		            
+		            <div class="cards" style="margin-bottom: 2rem;">
+		                <div class="card">
+		                    <h3>Total gastado en el mes</h3>
+		                    <p id="totalGastado" class="highlight">$0.00</p>
+		                </div>
+		            </div>
+
+		            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: nowrap; width: 100%;">
+		                
+		                <div style="display: flex; align-items: center; gap: 8px;">
+		                    <h3 style="margin: 0; font-size: 1.2rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Dinero Disponible</h3>
+		                    <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
+		                        <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
+		                    </button>
+		                </div>
+		                
+		                <div style="display: flex; gap: 12px; align-items: center;">
+		                    
+		                    <button id="btnGestionarCategorias" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
+		                        <span class="material-icons" style="font-size: 22px;">category</span>
+		                        <span id="countCategorias" style="position: absolute; top: -6px; right: -6px; background: #be123c; color: white; font-size: 0.65rem; font-weight: bold; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">0</span>
+		                    </button>
+
+		                    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" title="Añadir Nueva Cuenta" style="background: var(--color-primario); border: none; color: #000; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+		                        <span class="material-icons" style="font-size: 24px;">add_card</span>
+		                    </button>
+
+		                </div>
+		            </div>
+		          
+		            <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
+		          
+		        </div>
 
         <div id="ver-gastos" class="page">
             <div class="panel" style="margin-bottom: 2rem;">
