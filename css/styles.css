@@ -491,7 +491,17 @@ input, textarea, select {
   /* Mismo margen extra para que no tape la basura de la tabla en celular */
   .content { padding: 15px; padding-bottom: 120px; }
   
-  .cards, .wallet-cards { display: flex !important; flex-direction: column !important; gap: 15px !important; }
+  /* Le dejamos la columna solo al "Total Gastado" (.cards) */
+  .cards { display: flex !important; flex-direction: column !important; gap: 15px !important; }
+
+  /* Y blindamos el carrusel (.wallet-cards) para que siga siendo una fila (row) */
+  .wallet-cards { 
+      display: flex !important; 
+      flex-direction: row !important; 
+      flex-wrap: nowrap !important; 
+      overflow-x: auto !important; 
+      gap: 1.5rem !important;
+  }
   .card { width: 100% !important; }
   .card .highlight { font-size: 1.3rem !important; word-break: break-all !important; white-space: normal !important; }
   
