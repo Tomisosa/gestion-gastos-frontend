@@ -226,16 +226,15 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 			                    <h4>${b}</h4>
 			                </div>
 							<div style="margin-top: auto;">
-		                        <p onmouseenter="this.textContent = '${montoRealTarjeta}'" 
-		                           onmouseleave="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
-		                           ontouchstart="this.textContent = '${montoRealTarjeta}'"
-		                           ontouchend="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
-		                           ontouchcancel="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
-		                           title="Mantené apretado para ver" 
-		                           style="cursor: pointer; -webkit-tap-highlight-color: transparent;">
-		                           ${montoAMostrar}
-		                        </p>
-		                    </div>
+							                    <p onmouseover="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'" 
+							                       onmouseout="if(${saldosOcultos}) this.textContent = '••••••'"
+							                       ontouchstart="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'"
+							                       ontouchend="if(${saldosOcultos}) this.textContent = '••••••'"
+							                       title="${saldosOcultos ? 'Pasá el mouse o mantené apretado para ver' : ''}" 
+							                       style="${saldosOcultos ? 'cursor: pointer;' : ''} -webkit-tap-highlight-color: transparent;">
+							                       ${montoAMostrar}
+							                    </p>
+							                </div>
 			            </div>
 			        </div>`;
 			    });
@@ -608,43 +607,36 @@ async function refreshAll() {
     const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     
-    // --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
-    let containerGasto = document.getElementById("totalGastoWidget");
-    if(!containerGasto) {
-        const oldP = document.getElementById("totalGastado");
-        if(oldP) {
-            const parent = oldP.closest('.card');
-            if(parent) {
-                parent.id = "totalGastoWidget";
-                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
-            }
-        }
-    }
-    
-    containerGasto = document.getElementById("totalGastoWidget");
-    if(containerGasto) {
-        const montoRealTotal = formatoMoneda(totalG);
-        const montoVisibleTotal = saldosOcultos ? "••••••" : montoRealTotal;
+	// --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
+	    let containerGasto = document.getElementById("totalGastoWidget");
+	    if(!containerGasto) {
+	        const oldP = document.getElementById("totalGastado");
+	        if(oldP) {
+	            const parent = oldP.closest('.card');
+	            if(parent) {
+	                parent.id = "totalGastoWidget";
+	                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
+	            }
+	        }
+	    }
+	    
+	    containerGasto = document.getElementById("totalGastoWidget");
+	    if(containerGasto) {
+	        // Acá ya no nos importa el ojito, siempre mostramos el total real
+	        const montoRealTotal = formatoMoneda(totalG);
 
-        containerGasto.innerHTML = `
-            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
-            
-            <div id="totalGastado" 
-                 onmouseover="if(window.saldosOcultos) this.textContent = '${montoRealTotal}'" 
-                 onmouseout="if(window.saldosOcultos) this.textContent = '••••••'"
-                 ontouchstart="if(window.saldosOcultos) this.textContent = '${montoRealTotal}'"
-                 ontouchend="if(window.saldosOcultos) this.textContent = '••••••'"
-                 ontouchcancel="if(window.saldosOcultos) this.textContent = '••••••'"
-                 title="Pasá el mouse o mantené apretado para ver el monto"
-                 style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1; cursor: pointer; transition: opacity 0.2s ease; -webkit-tap-highlight-color: transparent;">
-                 ${montoVisibleTotal}
-            </div>
-            
-            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
-        `;
-        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
-    }
-    // --------------------------------------------------
+	        containerGasto.innerHTML = `
+	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
+	            
+	            <div id="totalGastado" style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1;">
+	                 ${montoRealTotal}
+	            </div>
+	            
+	            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
+	        `;
+	        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
+	    }
+	    // --------------------------------------------------
 
     const elBal = document.getElementById("balanceTotal");
     if(elBal) {
