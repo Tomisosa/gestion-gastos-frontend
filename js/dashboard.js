@@ -198,37 +198,47 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 	        return;
 	    }
 
-	    globalBilleteras.forEach(billetera => {
-	        const b = billetera.nombre.toUpperCase();
-	        
-	        let btnAcciones = `
-	        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
-	            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
-	            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
-	        </div>
-	        `;
+		globalBilleteras.forEach(billetera => {
+			        const b = billetera.nombre.toUpperCase();
+			        
+			        let btnAcciones = `
+			        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
+			            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
+			            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
+			        </div>
+			        `;
 
-	        const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
-	        const bgColor = getBgColor(billetera.color || 'default'); 
+		            // ¡ACÁ ESTÁ LA CORRECCIÓN! Creamos la variable montoRealTarjeta
+		            const montoRealTarjeta = formatoMoneda(saldos[b] || 0);
+			        const montoAMostrar = saldosOcultos ? "••••••" : montoRealTarjeta;
+			        const bgColor = getBgColor(billetera.color || 'default'); 
 
-	        // ACÁ ESTÁ LA MAGIA: Pasamos todo el diseño de la tarjeta al CSS usando "tarjeta-billetera"
-	        contenedor.innerHTML += `
-	        <div class="tarjeta-billetera" style="background: ${bgColor};">
-	            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
-	            
-	            ${btnAcciones}
-	            
-	            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-	                <div style="display: flex; align-items: center; gap: 4px;">
-	                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
-	                    <h4>${b}</h4>
-	                </div>
-	                <div style="margin-top: auto;">
-	                    <p>${montoAMostrar}</p>
-	                </div>
-	            </div>
-	        </div>`;
-	    });
+			        // ACÁ ESTÁ LA MAGIA: Pasamos todo el diseño de la tarjeta al CSS usando "tarjeta-billetera"
+			        contenedor.innerHTML += `
+			        <div class="tarjeta-billetera" style="background: ${bgColor};">
+			            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
+			            
+			            ${btnAcciones}
+			            
+			            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+			                <div style="display: flex; align-items: center; gap: 4px;">
+			                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
+			                    <h4>${b}</h4>
+			                </div>
+							<div style="margin-top: auto;">
+		                        <p onmouseenter="this.textContent = '${montoRealTarjeta}'" 
+		                           onmouseleave="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
+		                           ontouchstart="this.textContent = '${montoRealTarjeta}'"
+		                           ontouchend="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
+		                           ontouchcancel="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTarjeta}'"
+		                           title="Mantené apretado para ver" 
+		                           style="cursor: pointer; -webkit-tap-highlight-color: transparent;">
+		                           ${montoAMostrar}
+		                        </p>
+		                    </div>
+			            </div>
+			        </div>`;
+			    });
 	}
 // --- FIN DE LA CORRECCIÓN ---
 
@@ -600,29 +610,30 @@ async function refreshAll() {
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     
     // --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
-    let containerGasto = document.getElementById("totalGastoWidget");
-    if(!containerGasto) {
-        // Si es la primera vez, convertimos la tarjeta vieja en el nuevo widget
-        const oldP = document.getElementById("totalGastado");
-        if(oldP) {
-            const parent = oldP.closest('.card');
-            if(parent) {
-                parent.id = "totalGastoWidget";
-                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
-            }
-        }
-    }
-    
-    containerGasto = document.getElementById("totalGastoWidget");
-    if(containerGasto) {
-        containerGasto.innerHTML = `
-            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
-            <div id="totalGastado" style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1;">${formatoMoneda(totalG)}</div>
-            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
-        `;
-        // Esperamos 50ms para que el canvas exista en el HTML y dibujamos la olita
-        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
-    }
+	containerGasto = document.getElementById("totalGastoWidget");
+	    if(containerGasto) {
+	        // MAGIA HOVER Y TÁCTIL: Preparamos el monto real y el que se va a mostrar
+	        const montoRealTotal = formatoMoneda(totalG);
+	        const montoVisibleTotal = saldosOcultos ? "••••••" : montoRealTotal;
+
+	        containerGasto.innerHTML = `
+	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
+	            
+	            <div id="totalGastado" 
+	                 onmouseenter="this.textContent = '${montoRealTotal}'" 
+	                 onmouseleave="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTotal}'"
+	                 ontouchstart="this.textContent = '${montoRealTotal}'"
+	                 ontouchend="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTotal}'"
+	                 ontouchcancel="this.textContent = ${saldosOcultos} ? '••••••' : '${montoRealTotal}'"
+	                 title="Pasá el mouse o mantené apretado para ver el monto"
+	                 style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1; cursor: pointer; transition: opacity 0.2s ease; -webkit-tap-highlight-color: transparent;">
+	                 ${montoVisibleTotal}
+	            </div>
+	            
+	            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
+	        `;
+	        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
+	    }
     // --------------------------------------------------
     
    
