@@ -608,35 +608,40 @@ async function refreshAll() {
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     
 	// --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
-	    let containerGasto = document.getElementById("totalGastoWidget");
-	    if(!containerGasto) {
-	        const oldP = document.getElementById("totalGastado");
-	        if(oldP) {
-	            const parent = oldP.closest('.card');
-	            if(parent) {
-	                parent.id = "totalGastoWidget";
-	                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
-	            }
-	        }
-	    }
-	    
-	    containerGasto = document.getElementById("totalGastoWidget");
-	    if(containerGasto) {
-	        // Acá ya no nos importa el ojito, siempre mostramos el total real
-	        const montoRealTotal = formatoMoneda(totalG);
+		    let containerGasto = document.getElementById("totalGastoWidget");
+		    if(!containerGasto) {
+		        const oldP = document.getElementById("totalGastado");
+		        if(oldP) {
+		            const parent = oldP.closest('.card');
+		            if(parent) {
+		                parent.id = "totalGastoWidget";
+		                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
+		            }
+		        }
+		    }
+		    
+		    containerGasto = document.getElementById("totalGastoWidget");
+		    if(containerGasto) {
+		        // Guardamos el número real para usarlo cuando pasen el mouse
+		        const montoRealTotal = formatoMoneda(totalG);
 
-	        containerGasto.innerHTML = `
-	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
-	            
-	            <div id="totalGastado" style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1;">
-	                 ${montoRealTotal}
-	            </div>
-	            
-	            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
-	        `;
-	        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
-	    }
-	    // --------------------------------------------------
+		        containerGasto.innerHTML = `
+		            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
+		            
+		            <div id="totalGastado" 
+		                 onmouseover="this.textContent = '${montoRealTotal}'" 
+		                 onmouseout="this.textContent = '••••••'"
+		                 ontouchstart="this.textContent = '${montoRealTotal}'"
+		                 ontouchend="this.textContent = '••••••'"
+		                 ontouchcancel="this.textContent = '••••••'"
+		                 title="Pasá el mouse o mantené apretado para ver el monto"
+		                 style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1; cursor: pointer; transition: opacity 0.2s ease; -webkit-tap-highlight-color: transparent;">••••••</div>
+		            
+		            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
+		        `;
+		        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
+		    }
+		    // --------------------------------------------------
 
     const elBal = document.getElementById("balanceTotal");
     if(elBal) {
