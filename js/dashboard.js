@@ -167,7 +167,7 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DEFINITIVA DE CARRUSEL (BLINDADO) ---
+// --- CORRECCIÓN DE TARJETAS (DISEÑO LIMPIO Y CARRUSEL NATIVO) ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const contenedor = document.getElementById("contenedorBilleteras");
     if (!contenedor) return;
@@ -178,74 +178,54 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         if (!nombres.includes(nom)) nombres.push(nom);
     });
 
-    ingresos.forEach(i => { 
-        let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
-        if (!nombres.includes(m)) nombres.push(m);
-    });
-    
-    gastos.forEach(g => { 
-        if (g.pagado === false) return; 
-        let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
-        if (!nombres.includes(m)) nombres.push(m);
-    });
+    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
+    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
 
     const saldos = {};
     nombres.forEach(n => saldos[n] = 0);
 
-    ingresos.forEach(i => { 
-        let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
-        if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
-    });
-    
-    gastos.forEach(g => { 
-        if (g.pagado === false) return; 
-        let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
-        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
-        if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); 
-    });
+    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); });
+    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); });
     
     window.saldosActuales = saldos;
 
-    // MAGIA BRUTA: Pisamos todo con !important para que NADA lo pueda romper
-    contenedor.style.cssText = "display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 15px !important; overflow-x: auto !important; max-width: 100% !important; padding-bottom: 15px !important; -webkit-overflow-scrolling: touch;";
+    // MAGIA BRUTA: Carrusel nativo y espaciado
+    contenedor.style.cssText = "display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 16px !important; overflow-x: auto !important; max-width: 100% !important; padding: 10px 5px 20px 5px !important; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;";
     contenedor.innerHTML = "";
 
     if (nombres.length === 0) {
-         contenedor.innerHTML = `
-            <div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">
-                No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.
-            </div>`;
+         contenedor.innerHTML = `<div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta".</div>`;
         return;
     }
 
     globalBilleteras.forEach(billetera => {
         const b = billetera.nombre.toUpperCase();
         
+        // BOTONES LIMPIOS (Sin fondo oscuro, solo los emojis como íconos sutiles)
         let btnAcciones = `
-        <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10;">
-            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;" title="Editar">✏️</button>
-            <button onclick="eliminarBilletera(${billetera.id})" style="background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;" title="Eliminar">🗑️</button>
+        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
+            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
+            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
         </div>
         `;
 
         const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
         const bgColor = getBgColor(billetera.color || 'default'); 
 
-        // También blindamos la tarjeta con "flex: 0 0 220px !important"
         contenedor.innerHTML += `
-        <div style="flex: 0 0 220px !important; width: 220px !important; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="flex: 0 0 170px !important; width: 170px !important; height: 110px; background: ${bgColor}; padding: 16px; border-radius: 16px; position: relative; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; scroll-snap-align: start;">
             
-            <div style="position: absolute; top: -10px; right: -20px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; filter: blur(1px); transform: scale(1.1); z-index: 1; pointer-events: none;"></div>
+            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
             
             ${btnAcciones}
             
             <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
+                    <h4 style="color: rgba(255,255,255,0.95); font-size: 0.75rem; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${b}</h4>
+                </div>
                 <div style="margin-top: auto;">
-                    <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
+                    <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${montoAMostrar}</p>
                 </div>
             </div>
         </div>`;
@@ -618,8 +598,35 @@ async function refreshAll() {
   if(divARS) divARS.textContent = saldosAhorrosOcultos ? "••••••" : formatoMoneda(totalARS_Inv);
   
   const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
-  const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
-  
+    const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+    
+    // --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
+    let containerGasto = document.getElementById("totalGastoWidget");
+    if(!containerGasto) {
+        // Si es la primera vez, convertimos la tarjeta vieja en el nuevo widget
+        const oldP = document.getElementById("totalGastado");
+        if(oldP) {
+            const parent = oldP.closest('.card');
+            if(parent) {
+                parent.id = "totalGastoWidget";
+                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
+            }
+        }
+    }
+    
+    containerGasto = document.getElementById("totalGastoWidget");
+    if(containerGasto) {
+        containerGasto.innerHTML = `
+            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
+            <div id="totalGastado" style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1;">${formatoMoneda(totalG)}</div>
+            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
+        `;
+        // Esperamos 50ms para que el canvas exista en el HTML y dibujamos la olita
+        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
+    }
+    // --------------------------------------------------
+    
+   
   if(document.getElementById("totalGastado")) document.getElementById("totalGastado").textContent = formatoMoneda(totalG);
   
   const elBal = document.getElementById("balanceTotal");
@@ -1965,3 +1972,60 @@ if (formEditarPrestamo) {
         }
     };
 }
+
+// --- NUEVO: MICRO-VISUALIZACIÓN (SPARKLINE) ---
+let miSparkline = null;
+window.generarSparkline = function(gastos, mes) {
+    const canvas = document.getElementById('sparklineCanvas');
+    if (!canvas) return;
+    if (miSparkline) { miSparkline.destroy(); miSparkline = null; }
+
+    const [yyyy, mm] = mes.split('-');
+    const numDays = new Date(yyyy, mm, 0).getDate();
+    const dias = {};
+    for(let i=1; i<=numDays; i++) dias[i] = 0;
+
+    gastos.forEach(g => {
+        const f = g.fecha || g.fechaVencimiento;
+        if(!f) return;
+        const d = parseInt(f.split('-')[2]);
+        if(dias[d] !== undefined) dias[d] += (Number(g.monto) || 0);
+    });
+
+    let acumulado = 0;
+    const data = Object.keys(dias).map(d => {
+        acumulado += dias[d];
+        return acumulado;
+    });
+
+    const ctx = canvas.getContext('2d');
+    
+    // Gradiente sutil para la curva
+    let gradient = ctx.createLinearGradient(0, 0, 0, 45);
+    gradient.addColorStop(0, 'rgba(190, 18, 60, 0.25)'); // Carmesí suave
+    gradient.addColorStop(1, 'rgba(190, 18, 60, 0)');
+
+    miSparkline = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(dias),
+            datasets: [{
+                data: data,
+                borderColor: '#be123c', // Carmesí vibrante
+                backgroundColor: gradient,
+                borderWidth: 2,
+                tension: 0.4, // Curva suave
+                fill: true,
+                pointRadius: 0, // Esconde los puntitos para que sea limpio
+                pointHoverRadius: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false, min: 0 } },
+            layout: { padding: 0 },
+            animation: { duration: 1000, easing: 'easeOutQuart' }
+        }
+    });
+};
