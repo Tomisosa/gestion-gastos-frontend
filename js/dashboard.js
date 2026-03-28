@@ -227,37 +227,38 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         return;
     }
 
-    // ¡ESTA ES LA MAGIA DEL ARREGLO! Iteramos directamente sobre globalBilleteras
-    globalBilleteras.forEach(billetera => {
-        const b = billetera.nombre.toUpperCase();
-        
-        // Botones de acciones integrados con el nuevo estilo translúcido
-        let btnAcciones = `
-        <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
-            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Editar">✏️</button>
-            <button onclick="eliminarBilletera(${billetera.id})" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Eliminar">🗑️</button>
-        </div>
-        `;
+	// ¡ESTA ES LA MAGIA DEL ARREGLO! Iteramos directamente sobre globalBilleteras
+	    globalBilleteras.forEach(billetera => {
+	        const b = billetera.nombre.toUpperCase();
+	        
+	        // BOTONES MÁS CHICOS Y PEGADOS A LA ESQUINA (top: 8px, right: 8px)
+	        let btnAcciones = `
+	        <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10;">
+	            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;" title="Editar">✏️</button>
+	            <button onclick="eliminarBilletera(${billetera.id})" style="background: rgba(0,0,0,0.2); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;" title="Eliminar">🗑️</button>
+	        </div>
+	        `;
 
-        const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
-        const bgColor = getBgColor(billetera.color || 'default'); 
+	        const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
+	        const bgColor = getBgColor(billetera.color || 'default'); 
 
-        // --- ACÁ ESTÁ EL NUEVO DISEÑO Glassmorphism ---
-        contenedor.innerHTML += `
-        <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
-            
-            <div style="position: absolute; top: -10px; right: -20px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; filter: blur(1px); transform: scale(1.1); z-index: 1;"></div>
-            
-            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                ${btnAcciones}
-                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; padding-right: 75px; line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
-                <div style="margin-top: auto;">
-                    <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
-                </div>
-            </div>
-        </div>`;
-    });
-}
+	        // --- ACÁ ESTÁ EL NUEVO DISEÑO Glassmorphism ---
+	        contenedor.innerHTML += `
+	        <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
+	            
+	            <div style="position: absolute; top: -10px; right: -20px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; filter: blur(1px); transform: scale(1.1); z-index: 1;"></div>
+	            
+	            ${btnAcciones}
+	            
+	            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+	                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; padding-right: 50px; line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
+	                <div style="margin-top: auto;">
+	                    <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
+	                </div>
+	            </div>
+	        </div>`;
+	    });
+	}
 // --- FIN DE LA CORRECCIÓN ---
 
 function cargarSelectorFechas() {
