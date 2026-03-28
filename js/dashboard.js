@@ -59,22 +59,29 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-// --- COLORES TARJETAS ---
+// --- NUEVOS COLORES Y DISEÑO MODERNO ---
 function getBgColor(color) {
-
+    // Nuevos degradados más vibrantes y modernos
     const m = {
-        bna: "#2ac9bb, #0f766e",
-        naranja: "#f97316, #7c2d12",
-        azul: "#1e3a5f, #0f172a",
-        celeste: "#009ee3, #0284c7",
-        violeta: "#8b5cf6, #4c1d95",
-        verde: "#166534, #064e3b",
-        negro: "#262626, #000000",
-        rojo: "#dc2626, #7f1d1d",
-        uala: "#ef4444, #cbd5e1"
+        naranja: "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)",
+        azul: "linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)",
+        violeta: "linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%)",
+        celeste: "linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)",
+        verde: "linear-gradient(135deg, #22c55e 0%, #166534 100%)",
+        bna: "linear-gradient(135deg, #2ac9bb 0%, #0f766e 100%)", // Mantenemos el BNA clásico
+        rojo: "linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%)",
+        uala: "linear-gradient(135deg, #ef4444 0%, #cbd5e1 100%)", // Ualá clásico
+        amarillo: "linear-gradient(135deg, #f59e0b 0%, #92400e 100%)", // NUEVO
+        emerald: "linear-gradient(135deg, #10b981 0%, #065f46 100%)", // NUEVO
+        fuchsia: "linear-gradient(135deg, #d946ef 0%, #701a75 100%)", // NUEVO
+        indigo: "linear-gradient(135deg, #6366f1 0%, #312e81 100%)", // NUEVO
+        sky: "linear-gradient(135deg, #06b6d4 0%, #155e75 100%)", // NUEVO
+        rose: "linear-gradient(135deg, #f43f5e 0%, #881337 100%)", // NUEVO
+        negro: "linear-gradient(135deg, #262626 0%, #000000 100%)",
+        darkly: "linear-gradient(135deg, #1f2937 0%, #111827 100%)", // NUEVO (Gris muy oscuro)
     };
 
-    return `linear-gradient(135deg, ${m[color] || "#333333, #111111"})`;
+    return m[color] || m['darkly']; // Si no encuentra el color, usa el darkly
 }
 /* --- GRÁFICOS --- */
 function generarGrafico(gastos) {
@@ -160,25 +167,41 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DE TARJETAS (SIN FANTASMAS) ---
+// --- CORRECCIÓN DE TARJETAS Y NUEVO DISEÑO GLASSMORPHISM ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
-    // 1. AHORA SÍ: SOLO mostramos las cuentas creadas por ustedes en la base de datos. Cero fantasmas.
+    const contenedor = document.getElementById("contenedorBilleteras");
+    if (!contenedor) return;
+
+    // 1. Ya no forzamos cuentas fijas. Solo usamos las que ella cree en la Base de Datos.
     const nombres = [];
     globalBilleteras.forEach(b => {
-        nombres.push(b.nombre.toUpperCase());
+        const nom = b.nombre.toUpperCase();
+        if (!nombres.includes(nom)) nombres.push(nom);
+    });
+
+    // 2. Sumamos y restamos SOLO si la cuenta existe en nuestra lista
+    ingresos.forEach(i => { 
+        let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
+        if (!nombres.includes(m)) nombres.push(m);
+    });
+    
+    gastos.forEach(g => { 
+        if (g.pagado === false) return; 
+        let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
+        if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
+        if (!nombres.includes(m)) nombres.push(m);
     });
 
     const saldos = {};
     nombres.forEach(n => saldos[n] = 0);
 
-    // Sumamos ingresos solo si la cuenta existe en nuestra lista
     ingresos.forEach(i => { 
         let m = (i.medioPago || "EFECTIVO").toUpperCase(); 
         if (m === "MERCADO_PAGO") m = "MERCADO PAGO";
         if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); 
     });
     
-    // Restamos gastos solo si la cuenta existe en nuestra lista
     gastos.forEach(g => { 
         if (g.pagado === false) return; 
         let m = (g.medioPago || "EFECTIVO").toUpperCase(); 
@@ -188,47 +211,52 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     
     window.saldosActuales = saldos;
 
-    const contenedor = document.getElementById("contenedorBilleteras");
-    if (contenedor) {
-        contenedor.style.display = "flex";
-        contenedor.style.gap = "15px";
-        contenedor.style.overflowX = "auto";
-        contenedor.style.maxWidth = "100%";
-        contenedor.style.paddingBottom = "15px";
-        contenedor.innerHTML = "";
+    // Estilos del contenedor para que no se rompa la pantalla
+    contenedor.style.display = "flex";
+    contenedor.style.gap = "15px";
+    contenedor.style.overflowX = "auto";
+    contenedor.style.maxWidth = "100%";
+    contenedor.style.paddingBottom = "15px";
+    contenedor.innerHTML = "";
 
-        if (nombres.length === 0) {
-             contenedor.innerHTML = `
-                <div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">
-                    No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.
-                </div>`;
-            return;
-        }
-
-        nombres.forEach(b => {
-            const customObj = globalBilleteras.find(x => x.nombre.toUpperCase() === b);
-            
-            // Como ahora solo mostramos las de la base de datos, TODAS tienen lápiz y basurín
-            let btnAcciones = `
-                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
-                    <button onclick="abrirEditarBilletera(${customObj.id}, '${customObj.nombre}', '${customObj.color || 'default'}')" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Editar">✏️</button>
-                    <button onclick="eliminarBilletera(${customObj.id})" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Eliminar">🗑️</button>
-                </div>
-            `;
-
-            const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b]);
-            const bgColor = getBgColor(customObj.color); 
-
-            contenedor.innerHTML += `
-            <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;">
-                ${btnAcciones}
-                <h4 style="color: rgba(255,255,255,0.8); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; padding-right: 75px; line-height: 1.3;">🏦 ${b}</h4>
-                <div style="margin-top: auto;">
-                    <p style="font-size: 1.6rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px;">${montoAMostrar}</p>
-                </div>
+    if (nombres.length === 0) {
+         contenedor.innerHTML = `
+            <div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">
+                No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.
             </div>`;
-        });
+        return;
     }
+
+    // ¡ESTA ES LA MAGIA DEL ARREGLO! Iteramos directamente sobre globalBilleteras
+    globalBilleteras.forEach(billetera => {
+        const b = billetera.nombre.toUpperCase();
+        
+        // Botones de acciones integrados con el nuevo estilo translúcido
+        let btnAcciones = `
+        <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 10;">
+            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Editar">✏️</button>
+            <button onclick="eliminarBilletera(${billetera.id})" style="background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem;" title="Eliminar">🗑️</button>
+        </div>
+        `;
+
+        const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
+        const bgColor = getBgColor(billetera.color || 'default'); 
+
+        // --- ACÁ ESTÁ EL NUEVO DISEÑO Glassmorphism ---
+        contenedor.innerHTML += `
+        <div style="min-width: 220px; max-width: 240px; flex: 0 0 auto; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
+            
+            <div style="position: absolute; top: -10px; right: -20px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; filter: blur(1px); transform: scale(1.1); z-index: 1;"></div>
+            
+            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                ${btnAcciones}
+                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; padding-right: 75px; line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
+                <div style="margin-top: auto;">
+                    <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
+                </div>
+            </div>
+        </div>`;
+    });
 }
 // --- FIN DE LA CORRECCIÓN ---
 
