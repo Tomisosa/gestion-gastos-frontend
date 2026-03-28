@@ -636,42 +636,101 @@ async function refreshAll() {
     const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     
-	// --- INYECCIÓN DEL NUEVO WIDGET DE GASTO TOTAL ---
-		    let containerGasto = document.getElementById("totalGastoWidget");
-		    if(!containerGasto) {
-		        const oldP = document.getElementById("totalGastado");
-		        if(oldP) {
-		            const parent = oldP.closest('.card');
-		            if(parent) {
-		                parent.id = "totalGastoWidget";
-		                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
-		            }
-		        }
-		    }
-		    
-		    containerGasto = document.getElementById("totalGastoWidget");
-		    if(containerGasto) {
-		        // Guardamos el número real para usarlo cuando pasen el mouse
-		        const montoRealTotal = formatoMoneda(totalG);
+	// --- 1. CÁLCULOS PARA EL FLUJO DE CAJA Y TOP CATEGORÍAS ---
+	    const balanceNeto = totalI - totalG;
+	    const porcentajeGastado = totalI > 0 ? Math.min((totalG / totalI) * 100, 100) : (totalG > 0 ? 100 : 0);
+	    
+	    // Decidimos el color del "Termómetro" (Verde < 75%, Amarillo < 90%, Rojo > 90%)
+	    let colorTermometro = '#10b981'; // Verde
+	    if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; // Amarillo
+	    if (porcentajeGastado > 90) colorTermometro = '#ef4444'; // Rojo
 
-		        containerGasto.innerHTML = `
-		            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO EN EL MES</div>
-		            
-		            <div id="totalGastado" 
-		                 onmouseover="this.textContent = '${montoRealTotal}'" 
-		                 onmouseout="this.textContent = '••••••'"
-		                 ontouchstart="this.textContent = '${montoRealTotal}'"
-		                 ontouchend="this.textContent = '••••••'"
-		                 ontouchcancel="this.textContent = '••••••'"
-		                 title="Pasá el mouse o mantené apretado para ver el monto"
-		                 style="font-size: 2.8rem; font-weight: 800; color: #be123c; letter-spacing: -1.5px; line-height: 1; cursor: pointer; transition: opacity 0.2s ease; -webkit-tap-highlight-color: transparent;">••••••</div>
-		            
-		            <div style="height: 45px; margin-top: 15px; width: 100%; position: relative;"><canvas id="sparklineCanvas"></canvas></div>
-		        `;
-		        setTimeout(() => generarSparkline(gParaTablasYGrafico, mesSeleccionado), 50);
-		    }
-		    // --------------------------------------------------
+	    // Buscamos cuáles son tus 3 categorías en las que más gastaste este mes
+	    const gastosPorCategoria = {};
+	    gFiltradosMes.forEach(g => {
+	        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos") {
+	            gastosPorCategoria[g.categoriaNombre] = (gastosPorCategoria[g.categoriaNombre] || 0) + Number(g.monto);
+	        }
+	    });
+	    
+	    // Ordenamos de mayor a menor y sacamos el Top 3
+	    const topCats = Object.entries(gastosPorCategoria)
+	        .sort((a,b) => b[1] - a[1])
+	        .slice(0, 3);
 
+	    // Armamos el HTML de las barritas para las categorías
+	    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
+	    
+	    topCats.forEach(cat => {
+	        const nombreCat = cat[0] || 'Sin categoría';
+	        const montoCat = cat[1];
+	        // Calculamos qué porcentaje del total gastado representa esta categoría
+	        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
+	        
+	        htmlTopCats += `
+	            <div style="margin-bottom: 12px;">
+	                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+	                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
+	                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
+	                </div>
+	                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+	                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
+	                </div>
+	            </div>
+	        `;
+	    });
+	    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
+	    htmlTopCats += '</div>';
+
+
+	    // --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA ---
+	    let containerGasto = document.getElementById("totalGastoWidget");
+	    if(!containerGasto) {
+	        const oldP = document.getElementById("totalGastado");
+	        if(oldP) {
+	            const parent = oldP.closest('.card');
+	            if(parent) {
+	                parent.id = "totalGastoWidget";
+	                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
+	            }
+	        }
+	    }
+	    
+	    containerGasto = document.getElementById("totalGastoWidget");
+	    if(containerGasto) {
+	        // Formateamos los números para el hover (respetando los puntitos de privacidad)
+	        const montoRealGasto = formatoMoneda(totalG);
+	        const montoRealIngreso = formatoMoneda(totalI);
+	        const montoRealNeto = formatoMoneda(balanceNeto);
+
+	        containerGasto.innerHTML = `
+	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO</div>
+	            
+	            <div id="totalGastado" 
+	                 onmouseover="this.textContent = '${montoRealGasto}'" 
+	                 onmouseout="this.textContent = '••••••'"
+	                 ontouchstart="this.textContent = '${montoRealGasto}'"
+	                 ontouchend="this.textContent = '••••••'"
+	                 ontouchcancel="this.textContent = '••••••'"
+	                 title="Mantené apretado para ver"
+	                 style="font-size: 2.5rem; font-weight: 800; color: ${colorTermometro}; letter-spacing: -1px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: 15px;">••••••</div>
+	            
+	            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 5px;">
+	                <span>Ingresos: ${montoRealIngreso}</span>
+	                <span>${porcentajeGastado.toFixed(1)}% consumido</span>
+	            </div>
+	            <div style="width: 100%; background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 15px;">
+	                <div style="width: ${porcentajeGastado}%; background: ${colorTermometro}; height: 100%; border-radius: 5px; transition: width 1s ease;"></div>
+	            </div>
+	            
+	            <div style="background: ${balanceNeto >= 0 ? '#ecfdf5' : '#fef2f2'}; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+	                <span style="font-size: 0.85rem; font-weight: 600; color: ${balanceNeto >= 0 ? '#059669' : '#dc2626'};">Saldo Neto Libre:</span>
+	                <span style="font-weight: 800; font-size: 1.1rem; color: ${balanceNeto >= 0 ? '#059669' : '#dc2626'};">${montoRealNeto}</span>
+	            </div>
+
+	            ${htmlTopCats}
+	        `;
+	    }
     const elBal = document.getElementById("balanceTotal");
     if(elBal) {
         const bal = totalI - totalG;
