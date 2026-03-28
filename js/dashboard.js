@@ -599,10 +599,38 @@ async function refreshAll() {
         else totalARS_Inv += monto;
     });
 
-    const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
-    const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
-    if(divUSD) divUSD.textContent = saldosAhorrosOcultos ? "••••••" : `USD ${totalUSD.toFixed(2)}`;
-    if(divARS) divARS.textContent = saldosAhorrosOcultos ? "••••••" : formatoMoneda(totalARS_Inv);
+	// --- MAGIA HOVER PARA AHORROS E INVERSIONES ---
+	  const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
+	  const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
+	  
+	  const textoRealUSD = `USD ${totalUSD.toFixed(2)}`;
+	  const textoRealARS = formatoMoneda(totalARS_Inv);
+
+	  // Función interna que inyecta la interactividad táctil y de mouse
+	  const aplicarMagia = (elemento, textoReal, estaOculto) => {
+	      if (!elemento) return;
+	      if (estaOculto) {
+	          elemento.innerHTML = "••••••";
+	          elemento.onmouseover = () => elemento.innerHTML = textoReal;
+	          elemento.onmouseout = () => elemento.innerHTML = "••••••";
+	          elemento.ontouchstart = () => elemento.innerHTML = textoReal;
+	          elemento.ontouchend = () => elemento.innerHTML = "••••••";
+	          elemento.ontouchcancel = () => elemento.innerHTML = "••••••";
+	          elemento.style.cursor = "pointer";
+	          elemento.style.webkitTapHighlightColor = "transparent";
+	          elemento.title = "Pasá el mouse o mantené apretado para ver";
+	      } else {
+	          elemento.innerHTML = textoReal;
+	          elemento.onmouseover = null; elemento.onmouseout = null; 
+	          elemento.ontouchstart = null; elemento.ontouchend = null; elemento.ontouchcancel = null;
+	          elemento.style.cursor = "default";
+	          elemento.title = "";
+	      }
+	  };
+
+	  aplicarMagia(divUSD, textoRealUSD, window.saldosAhorrosOcultos);
+	  aplicarMagia(divARS, textoRealARS, window.saldosAhorrosOcultos);
+	  // ----------------------------------------------
   
     const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
@@ -675,23 +703,42 @@ async function refreshAll() {
         }
     });
 
-    globalTarjetas.forEach(t => {
-        const idMonto = "monto-tarjeta-" + t.id;
-        const totalARS = totalesTarjetasARS[t.nombre] || 0;
-        const totalUSD = totalesTarjetasUSD[t.nombre] || 0;
-        const el = document.getElementById(idMonto);
-        if (el) {
-            if (saldosTarjetasOcultos) {
-                el.innerHTML = "••••••";
-            } else {
-                let textoHTML = formatoMoneda(totalARS);
-                if (totalUSD > 0) {
-                    textoHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
-                }
-                el.innerHTML = textoHTML;
-            }
-        }
-    });
+	// --- MAGIA HOVER PARA TARJETAS DE CRÉDITO DINÁMICAS ---
+	  globalTarjetas.forEach(t => {
+	      const idMonto = "monto-tarjeta-" + t.id;
+	      const totalARS = totalesTarjetasARS[t.nombre] || 0;
+	      const totalUSD = totalesTarjetasUSD[t.nombre] || 0;
+	      const el = document.getElementById(idMonto);
+	      
+	      if (el) {
+	          // Preparamos el texto real (incluso si tiene pesos y dólares combinados)
+	          let textoRealHTML = formatoMoneda(totalARS);
+	          if (totalUSD > 0) {
+	              textoRealHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
+	          }
+	          
+	          // Si el ojo está activado, ocultamos e inyectamos la magia
+	          if (window.saldosTarjetasOcultos) {
+	              el.innerHTML = "••••••";
+	              el.onmouseover = () => el.innerHTML = textoRealHTML;
+	              el.onmouseout = () => el.innerHTML = "••••••";
+	              el.ontouchstart = () => el.innerHTML = textoRealHTML;
+	              el.ontouchend = () => el.innerHTML = "••••••";
+	              el.ontouchcancel = () => el.innerHTML = "••••••";
+	              el.style.cursor = "pointer";
+	              el.style.webkitTapHighlightColor = "transparent";
+	              el.title = "Pasá el mouse o mantené apretado para ver";
+	          } else {
+	              // Si el ojo está apagado, mostramos siempre y le sacamos la magia
+	              el.innerHTML = textoRealHTML;
+	              el.onmouseover = null; el.onmouseout = null; 
+	              el.ontouchstart = null; el.ontouchend = null; el.ontouchcancel = null;
+	              el.style.cursor = "default";
+	              el.title = "";
+	          }
+	      }
+	  });
+	  // ------------------------------------------------------
 
     if (sumaTotalTarjetasARS > 0) {
         gFijosParaTabla.push({
