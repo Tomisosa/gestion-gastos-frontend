@@ -189,32 +189,31 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     
     window.saldosActuales = saldos;
 
-    // MAGIA BRUTA: Carrusel nativo y espaciado
-    contenedor.style.cssText = "display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 16px !important; overflow-x: auto !important; max-width: 100% !important; padding: 10px 5px 20px 5px !important; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;";
-    contenedor.innerHTML = "";
+	// Contenedor general limpio
+	    contenedor.style.cssText = "display: flex; flex-direction: row; flex-wrap: nowrap; gap: 16px; overflow-x: auto; max-width: 100%; padding: 10px 5px 20px 5px; -webkit-overflow-scrolling: touch;";
+	    contenedor.innerHTML = "";
 
-    if (nombres.length === 0) {
-         contenedor.innerHTML = `<div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta".</div>`;
-        return;
-    }
+	    if (nombres.length === 0) {
+	         contenedor.innerHTML = `<div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.</div>`;
+	        return;
+	    }
 
-	globalBilleteras.forEach(billetera => {
+	    globalBilleteras.forEach(billetera => {
 	        const b = billetera.nombre.toUpperCase();
 	        
-	        // ACHICAMOS EL GAP Y EL TAMAÑO DE LOS BOTONES
 	        let btnAcciones = `
-	        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 10;">
-	            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
-	            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
+	        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
+	            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
+	            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
 	        </div>
 	        `;
 
 	        const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
 	        const bgColor = getBgColor(billetera.color || 'default'); 
 
+	        // ACÁ ESTÁ LA MAGIA: Pasamos todo el diseño de la tarjeta al CSS usando "tarjeta-billetera"
 	        contenedor.innerHTML += `
-	        <div style="flex: 0 0 170px !important; width: 170px !important; height: 110px; background: ${bgColor}; padding: 16px; border-radius: 16px; position: relative; box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; scroll-snap-align: start;">
-	            
+	        <div class="tarjeta-billetera" style="background: ${bgColor};">
 	            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
 	            
 	            ${btnAcciones}
@@ -222,15 +221,15 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 	            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
 	                <div style="display: flex; align-items: center; gap: 4px;">
 	                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
-	                    <h4 style="color: rgba(255,255,255,0.95); font-size: 0.75rem; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; max-width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">${b}</h4>
+	                    <h4>${b}</h4>
 	                </div>
 	                <div style="margin-top: auto;">
-	                    <p style="font-size: 1.4rem; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${montoAMostrar}</p>
+	                    <p>${montoAMostrar}</p>
 	                </div>
 	            </div>
 	        </div>`;
 	    });
-}
+	}
 // --- FIN DE LA CORRECCIÓN ---
 
 function cargarSelectorFechas() {

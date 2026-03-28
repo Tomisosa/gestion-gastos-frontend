@@ -619,3 +619,89 @@ select:focus, #filtroFechaMes:focus {
     bottom: -1px;
     border-bottom: 1px solid #e2e8f0; /* Borde clarito a juego */
 }
+
+/* =========================================================
+   DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
+   ========================================================= */
+
+/* 1. Base para Celulares (Compacto) */
+.tarjeta-billetera {
+    flex: 0 0 170px; /* Ancho fijo para deslizar */
+    width: 170px;
+    height: 110px;
+    padding: 16px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    scroll-snap-align: start;
+    transition: all 0.3s ease;
+}
+
+.tarjeta-billetera h4 {
+    color: rgba(255,255,255,0.95);
+    font-size: 0.75rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.tarjeta-billetera p {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 2. Adaptación para Computadoras (PANTALLA GRANDE) */
+@media (min-width: 768px) {
+    
+    /* Textos de la cabecera más grandes */
+    .titulo-dinero { font-size: 1.8rem !important; }
+    #iconoSaldos { font-size: 26px !important; }
+
+    /* Botones superiores más grandes */
+    .btn-cuadrado {
+        width: 55px !important;
+        height: 55px !important;
+        border-radius: 14px !important;
+    }
+    .btn-cuadrado .material-icons { font-size: 28px !important; }
+    
+    #countCategorias {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 0.8rem !important;
+        top: -6px !important;
+        right: -6px !important;
+    }
+
+    /* Tarjetas de débito GIGANTES */
+    .tarjeta-billetera {
+        flex: 0 0 320px; /* Casi el doble de anchas */
+        height: 160px;   /* Mucho más altas */
+        padding: 24px;   /* Más aire interior */
+        border-radius: 20px;
+    }
+    
+    .tarjeta-billetera h4 {
+        font-size: 1.1rem; /* Título de cuenta grande */
+        max-width: 200px;
+    }
+
+    .tarjeta-billetera p {
+        font-size: 2.2rem; /* Monto inmenso */
+    }
+}
