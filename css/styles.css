@@ -675,9 +675,70 @@ select:focus, #filtroFechaMes:focus {
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* 2. Adaptación para Computadoras (PANTALLA GRANDE) */
+/* =========================================================
+   DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
+   ========================================================= */
+
+/* 1. BASE PARA CELULARES (AFUERA del @media) */
+/* Todo esto se aplica por defecto a los teléfonos */
+
+.tarjeta-billetera {
+    flex: 0 0 210px; /* Tarjetas más anchas en el celu */
+    width: 210px;
+    height: 130px;   /* Tarjetas más altas */
+    padding: 18px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    scroll-snap-align: start;
+    transition: all 0.3s ease;
+}
+
+.tarjeta-billetera h4 {
+    color: rgba(255,255,255,0.95);
+    font-size: 0.8rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    max-width: 100px; /* Como la tarjeta es más ancha, le damos más espacio a la letra */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.tarjeta-billetera p {
+    font-size: 1.6rem; /* Monto de la tarjeta un poco más grande */
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* NÚMERO TOTAL MÁS CHICO EN CELULAR */
+#totalGastado {
+    font-size: 2.2rem !important; /* Lo bajamos un cambio para que no grite en el celu */
+}
+
+
+/* --------------------------------------------------------- */
+/* 2. ADAPTACIÓN PARA COMPUTADORAS (PANTALLA GRANDE) */
+/* Todo lo que esté adentro de esta llave solo afecta a la PC */
+/* --------------------------------------------------------- */
 @media (min-width: 768px) {
     
+    /* El número del total vuelve a ser gigante en la compu */
+    #totalGastado {
+        font-size: 3rem !important; 
+    }
+
     /* Textos de la cabecera más grandes */
     .titulo-dinero { font-size: 1.8rem !important; }
     #iconoSaldos { font-size: 26px !important; }
@@ -698,9 +759,10 @@ select:focus, #filtroFechaMes:focus {
         right: -6px !important;
     }
 
-    /* Tarjetas de débito GIGANTES */
+    /* Tarjetas de débito GIGANTES en la compu */
     .tarjeta-billetera {
         flex: 0 0 320px; /* Casi el doble de anchas */
+        width: 320px;
         height: 160px;   /* Mucho más altas */
         padding: 24px;   /* Más aire interior */
         border-radius: 20px;
