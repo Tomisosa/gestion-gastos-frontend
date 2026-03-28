@@ -167,12 +167,11 @@ function generarGrafico(gastos) {
     }
   });
 }
-// --- CORRECCIÓN DE TARJETAS (MÓVIL Y TEXTO LARGO) ---
+// --- CORRECCIÓN DEFINITIVA DE CARRUSEL (BLINDADO) ---
 function calcularSaldosPorCuenta(gastos, ingresos) {
     const contenedor = document.getElementById("contenedorBilleteras");
     if (!contenedor) return;
 
-    // 1. Usamos solo las que ella cree
     const nombres = [];
     globalBilleteras.forEach(b => {
         const nom = b.nombre.toUpperCase();
@@ -210,15 +209,8 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
     
     window.saldosActuales = saldos;
 
-    // ESTILOS DEL CONTENEDOR: Forzamos el "carrusel" en celulares
-    contenedor.style.display = "flex";
-    contenedor.style.flexDirection = "row";
-    contenedor.style.flexWrap = "nowrap"; // Clave para que NO se caigan abajo
-    contenedor.style.gap = "15px";
-    contenedor.style.overflowX = "auto";
-    contenedor.style.maxWidth = "100%";
-    contenedor.style.paddingBottom = "15px";
-    contenedor.style.WebkitOverflowScrolling = "touch"; // Scroll suave en celulares
+    // MAGIA BRUTA: Pisamos todo con !important para que NADA lo pueda romper
+    contenedor.style.cssText = "display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: 15px !important; overflow-x: auto !important; max-width: 100% !important; padding-bottom: 15px !important; -webkit-overflow-scrolling: touch;";
     contenedor.innerHTML = "";
 
     if (nombres.length === 0) {
@@ -242,15 +234,16 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
         const montoAMostrar = saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0);
         const bgColor = getBgColor(billetera.color || 'default'); 
 
+        // También blindamos la tarjeta con "flex: 0 0 220px !important"
         contenedor.innerHTML += `
-        <div style="width: 220px; min-width: 220px; max-width: 220px; flex-shrink: 0; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="flex: 0 0 220px !important; width: 220px !important; height: 130px; background: ${bgColor}; padding: 15px 20px; border-radius: 12px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;">
             
             <div style="position: absolute; top: -10px; right: -20px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.08); border-radius: 50%; filter: blur(1px); transform: scale(1.1); z-index: 1; pointer-events: none;"></div>
             
             ${btnAcciones}
             
             <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
+                <h4 style="color: rgba(255,255,255,0.9); font-size: 0.85rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">🏦 ${b}</h4>
                 <div style="margin-top: auto;">
                     <p style="font-size: 1.7rem; font-weight: bold; color: #fff; margin: 0; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${montoAMostrar}</p>
                 </div>
