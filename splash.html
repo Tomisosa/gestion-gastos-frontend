@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finty - Cargando...</title>
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <style>
+    body.splash-page {
+      background-color: #0b1120; /* Azul Noche Profundo de Finty */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="splash-page">
+
+  <div style="transform: scale(2.5); animation: splashLogoEntry 1.5s ease-out forwards;">
+      <div class="finty-logo-container">
+          <div class="finty-dot"></div>
+          <span class="finty-f">F</span>
+      </div>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      // MAGIA: Redirecciona al index.html (la portada oscura que ya armamos)
+      window.location.href = "index.html"; 
+    }, 3000); // 3000ms = 3 segundos
+  </script>
+
+</body>
+</html>
