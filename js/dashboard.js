@@ -948,190 +948,193 @@ async function refreshAll() {
       });
   }
 
-// --- TABLA FIJOS (CON BOTÓN DE PAGO RÁPIDO) ---
-function renderGastosFijos(lista) {
-  const tbody = document.querySelector("#tablaGastosFijos tbody");
-  if (!tbody) return; 
-  tbody.innerHTML = "";
-  
-  let total = 0;
-  let pagado = 0;
-  let faltaPagar = 0;
-
-  lista.forEach(g => {
-    const montoNum = Number(g.monto) || 0;
-    total += montoNum;
-    
-    // Matemática mágica para los 3 cuadritos
-    if (g.pagado) {
-        pagado += montoNum;
-    } else {
-        faltaPagar += montoNum;
-    }
-    
-    let acciones = "";
-    let estadoPagado = "";
-    let fechaPagoReal = "-";
-    let medioPagoReal = "-";
-
-    if (g.esVirtual) {
-        acciones = `<span style="font-size: 0.8rem; background: var(--bg-saldos); padding: 4px 8px; border-radius: 5px; color: #888;">Automático</span>`;
-        estadoPagado = "-";
-        medioPagoReal = g.medioPago || "MÚLTIPLES";
-    } else {
-        acciones = `
-            <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
-            <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-        `;
-        
-        if (g.pagado) {
-            estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
-            fechaPagoReal = g.fecha || "-";
-            medioPagoReal = g.medioPago || "EFECTIVO";
-        } else {
-            estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPago(${g.id})" title="Tildar para pagar">`;
-            fechaPagoReal = "-";
-            medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
-        }
-    }
-
-    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
-    let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
-    let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
-
-    tbody.innerHTML += `<tr>
-        <td>${g.descripcion||"-"}</td>
-        <td style="font-weight: bold; color: #ffce56;">${textoMonto}</td>
-        <td>${vto}</td>
-        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
-        <td>${estadoPagado}</td>
-        <td>${fechaPagoReal}</td>
-        <td>${medioPagoReal}</td>
-        <td>${acciones}</td>
-    </tr>`;
-  });
-
-  // Actualizamos el HTML con los cálculos
-  if (document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(total);
-  if (document.getElementById("totalFijosPagado")) document.getElementById("totalFijosPagado").textContent = formatoMoneda(pagado);
-  if (document.getElementById("totalFijosFalta")) document.getElementById("totalFijosFalta").textContent = formatoMoneda(faltaPagar);
-}
-
-// --- TABLA VARIABLES (CON BOTÓN DE PAGO RÁPIDO) ---
-function renderGastosVariables(lista) {
-  const tbody = document.querySelector("#tablaGastosVariables tbody");
-  if (!tbody) return; 
-  tbody.innerHTML = "";
-  let total = 0;
-  
-  lista.forEach(g => {
-    total += (Number(g.monto) || 0);
-    const acciones = `
-        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
-        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-    `;
-    
-    let estadoPagado = "";
-    let fechaPagoReal = "-";
-    let medioPagoReal = "-";
-
-    if (g.pagado) {
-        estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
-        fechaPagoReal = g.fecha || "-";
-        medioPagoReal = g.medioPago || "EFECTIVO";
-    } else {
-        estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPago(${g.id})" title="Tildar para pagar">`;
-        fechaPagoReal = "-";
-        medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
-    }
-    
-    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
-
-    tbody.innerHTML += `<tr>
-        <td>${g.descripcion||"-"}</td>
-        <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(g.monto)}</td>
-        <td>${vto}</td>
-        <td>${g.categoriaNombre||"-"}</td>
-        <td>${estadoPagado}</td>
-        <td>${fechaPagoReal}</td>
-        <td>${medioPagoReal}</td>
-        <td>${acciones}</td>
-    </tr>`;
-  });
-  
-  if (document.getElementById("totalVariables")) {
-      document.getElementById("totalVariables").textContent = formatoMoneda(total);
-  }
-}
-
-function renderIngresos(ingresos) {
-  const tbody = document.querySelector('#tablaIngresos tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  ingresos.forEach(i => {
-    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
-    tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td>${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
-  });
-}
-
-function renderConsumosCuotas(lista) {
-    const tbody = document.querySelector("#tablaTarjetas tbody");
-    if (!tbody) return;
+  // --- TABLA FIJOS (CON BOTÓN DE PAGO RÁPIDO) ---
+  function renderGastosFijos(lista) {
+    const tbody = document.querySelector("#tablaGastosFijos tbody");
+    if (!tbody) return; 
     tbody.innerHTML = "";
     
-    const mediosIgnorados = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO", "PENDIENTE", "MÚLTIPLES"];
-    globalBilleteras.forEach(b => mediosIgnorados.push(b.nombre.toUpperCase()));
-    
-    // ¡ACÁ LEEMOS QUÉ TARJETA ELIGIÓ TU HERMANA!
-    const filtroSelect = document.getElementById("filtroTarjetaSelect");
-    const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
+    let total = 0;
+    let pagado = 0;
+    let faltaPagar = 0;
 
-    const consumosTarjeta = lista.filter(g => {
-        if (!g.medioPago) return false;
-        const medio = g.medioPago.toUpperCase();
-        
-        // 1. Descartar si no es tarjeta (billeteras, efectivo, etc)
-        if (mediosIgnorados.includes(medio)) return false;
-
-        // 2. Si eligió una tarjeta específica en el filtro, descartamos las demás
-        if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
-
-        return true;
-    });
-    
-    consumosTarjeta.forEach(g => {
-      const acciones = `
-          <button onclick="editarCuotaTarjeta(${g.id})" class="btn-edit" style="padding: 2px 6px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Editar">✏️</button>
-          <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-      `;
+    lista.forEach(g => {
+      const montoNum = Number(g.monto) || 0;
+      total += montoNum;
       
-      let desc = g.descripcion || "-";
-      let badgeCuota = "-";
-      
-      if (desc.includes("(Cuota")) {
-          const partes = desc.split("(Cuota");
-          desc = partes[0].trim();
-          const cuotaInfo = "Cuota " + partes[1].replace(")", "");
-          badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
+      if (g.pagado) {
+          pagado += montoNum;
+      } else {
+          faltaPagar += montoNum;
       }
       
-      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
-      
-      let esDolar = (g.descripcion || "").includes("[USD]");
-      let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
-      
-      tbody.innerHTML += `
-      <tr>
-          <td>${g.fecha} ${tarjetaBadge}</td>
-          <td>${desc}</td>
-          <td>${g.categoriaNombre || "-"}</td>
-          <td>${badgeCuota}</td>
-          <td style="font-weight: bold;">${montoAMostrar}</td>
+      let acciones = "";
+      let estadoPagado = "";
+      let fechaPagoReal = "-";
+      let medioPagoReal = "-";
+
+      if (g.esVirtual) {
+          acciones = `<span style="font-size: 0.8rem; background: var(--bg-saldos); padding: 4px 8px; border-radius: 5px; color: #888;">Automático</span>`;
+          estadoPagado = "-";
+          medioPagoReal = g.medioPago || "MÚLTIPLES";
+      } else {
+          acciones = `
+              <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+              <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+          `;
+          
+          if (g.pagado) {
+              estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
+              fechaPagoReal = g.fecha || "-";
+              medioPagoReal = g.medioPago || "EFECTIVO";
+          } else {
+              estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPago(${g.id})" title="Tildar para pagar">`;
+              fechaPagoReal = "-";
+              medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
+          }
+      }
+
+      const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+      let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
+      let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
+
+      // ACÁ ESTÁ EL CAMBIO: Se agregó la clase "monto-gasto"
+      tbody.innerHTML += `<tr>
+          <td>${g.descripcion||"-"}</td>
+          <td class="monto-gasto">${textoMonto}</td>
+          <td>${vto}</td>
+          <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
+          <td>${estadoPagado}</td>
+          <td>${fechaPagoReal}</td>
+          <td>${medioPagoReal}</td>
           <td>${acciones}</td>
       </tr>`;
     });
-}
 
+    if (document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(total);
+    if (document.getElementById("totalFijosPagado")) document.getElementById("totalFijosPagado").textContent = formatoMoneda(pagado);
+    if (document.getElementById("totalFijosFalta")) document.getElementById("totalFijosFalta").textContent = formatoMoneda(faltaPagar);
+  }
+
+  // --- TABLA VARIABLES (CON BOTÓN DE PAGO RÁPIDO) ---
+  function renderGastosVariables(lista) {
+    const tbody = document.querySelector("#tablaGastosVariables tbody");
+    if (!tbody) return; 
+    tbody.innerHTML = "";
+    let total = 0;
+    
+    lista.forEach(g => {
+      total += (Number(g.monto) || 0);
+      const acciones = `
+          <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+          <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+      `;
+      
+      let estadoPagado = "";
+      let fechaPagoReal = "-";
+      let medioPagoReal = "-";
+
+      if (g.pagado) {
+          estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
+          fechaPagoReal = g.fecha || "-";
+          medioPagoReal = g.medioPago || "EFECTIVO";
+      } else {
+          estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPago(${g.id})" title="Tildar para pagar">`;
+          fechaPagoReal = "-";
+          medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
+      }
+      
+      const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+
+      // ACÁ ESTÁ EL CAMBIO: Se agregó la clase "monto-gasto"
+      tbody.innerHTML += `<tr>
+          <td>${g.descripcion||"-"}</td>
+          <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
+          <td>${vto}</td>
+          <td>${g.categoriaNombre||"-"}</td>
+          <td>${estadoPagado}</td>
+          <td>${fechaPagoReal}</td>
+          <td>${medioPagoReal}</td>
+          <td>${acciones}</td>
+      </tr>`;
+    });
+    
+    if (document.getElementById("totalVariables")) {
+        document.getElementById("totalVariables").textContent = formatoMoneda(total);
+    }
+  }
+
+  function renderIngresos(ingresos) {
+    const tbody = document.querySelector('#tablaIngresos tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    ingresos.forEach(i => {
+      const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+      
+      // ACÁ ESTÁ EL CAMBIO: Se agregó la clase "monto-ingreso"
+      tbody.innerHTML += `<tr>
+          <td>${i.fecha}</td>
+          <td>${i.descripcion||'-'}</td>
+          <td>${i.medioPago||'EFECTIVO'}</td>
+          <td>${i.categoriaNombre||'-'}</td>
+          <td class="monto-ingreso">${formatoMoneda(i.monto)}</td>
+          <td>${acciones}</td>
+      </tr>`;
+    });
+  }
+
+  function renderConsumosCuotas(lista) {
+      const tbody = document.querySelector("#tablaTarjetas tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      
+      const mediosIgnorados = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO", "PENDIENTE", "MÚLTIPLES"];
+      globalBilleteras.forEach(b => mediosIgnorados.push(b.nombre.toUpperCase()));
+      
+      const filtroSelect = document.getElementById("filtroTarjetaSelect");
+      const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
+
+      const consumosTarjeta = lista.filter(g => {
+          if (!g.medioPago) return false;
+          const medio = g.medioPago.toUpperCase();
+          if (mediosIgnorados.includes(medio)) return false;
+          if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
+          return true;
+      });
+      
+      consumosTarjeta.forEach(g => {
+        const acciones = `
+            <button onclick="editarCuotaTarjeta(${g.id})" class="btn-edit" style="padding: 2px 6px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Editar">✏️</button>
+            <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="padding: 2px 6px; margin-left: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+        `;
+        
+        let desc = g.descripcion || "-";
+        let badgeCuota = "-";
+        
+        if (desc.includes("(Cuota")) {
+            const partes = desc.split("(Cuota");
+            desc = partes[0].trim();
+            const cuotaInfo = "Cuota " + partes[1].replace(")", "");
+            badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
+        }
+        
+        let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
+        
+        let esDolar = (g.descripcion || "").includes("[USD]");
+        let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
+        
+        // ACÁ ESTÁ EL CAMBIO: Se agregó la clase "monto-gasto"
+        tbody.innerHTML += `
+        <tr>
+            <td>${g.fecha} ${tarjetaBadge}</td>
+            <td>${desc}</td>
+            <td>${g.categoriaNombre || "-"}</td>
+            <td>${badgeCuota}</td>
+            <td class="monto-gasto">${montoAMostrar}</td>
+            <td>${acciones}</td>
+        </tr>`;
+      });
+  }
 // --- CREAR BILLETERA ---
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {

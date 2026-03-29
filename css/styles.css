@@ -777,3 +777,16 @@ select:focus, #filtroFechaMes:focus {
         font-size: 2.2rem; /* Monto inmenso */
     }
 }
+
+/* =========================================================
+   COLORES UNIFICADOS PARA MONTOS EN TABLAS
+   ========================================================= */
+.monto-gasto {
+    color: #FF5454 !important; /* Rojo para todos los gastos */
+    font-weight: bold;
+}
+
+.monto-ingreso {
+    color: var(--color-primario) !important; /* Turquesa para ingresos */
+    font-weight: bold;
+}
