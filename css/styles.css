@@ -973,28 +973,47 @@ select:focus, #filtroFechaMes:focus {
     letter-spacing: -1px !important;
 }
 
-/* Gastos e Ingresos: Reemplazá este bloque para que no se corte el texto */
-#totalGastoWidget > div:nth-child(3) span {
-    display: block !important; /* MAGIA: Esto evita que el número se corte */
-    width: 100% !important;
-    font-size: 1.1rem !important;
-    color: #475569 !important;
-    border-bottom: 1px solid #e2e8f0 !important; 
-    padding-bottom: 8px !important;
-    text-align: left !important;
-    white-space: normal !important;
+/* =========================================================
+   NUEVO DISEÑO: INGRESOS ARRIBA (DER) Y GASTOS ABAJO (IZQ)
+   ========================================================= */
 
-}
-
-#totalGastoWidget > div:nth-child(3) span {
+/* Contenedor principal de los dos datos */
+#totalGastoWidget > div:nth-child(3) {
     display: flex !important;
-    justify-content: space-between !important; /* Separa la palabra del número */
+    flex-direction: column !important;
+    gap: 0 !important; /* Quitamos el hueco para controlarlo con los paddings */
+    margin-bottom: 25px !important;
     width: 100% !important;
-    font-size: 1.05rem !important;
-    color: #475569 !important;
-    border-bottom: 1px solid #f1f5f9; /* Línea separadora muy sutil y elegante */
-    padding-bottom: 8px;
 }
+
+/* INGRESOS (Está 2do en el código, lo forzamos a ir 1ro, arriba a la derecha) */
+#totalGastoWidget > div:nth-child(3) span:last-child {
+    order: 1 !important; 
+    text-align: right !important; 
+    font-size: clamp(1rem, 5vw, 1.15rem) !important; /* Se achica solo si el número es larguísimo */
+    color: #475569 !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    border-bottom: 1px solid #cbd5e1 !important; /* LÍNEA SEPARADORA GRIS */
+    padding-bottom: 8px !important;
+    white-space: nowrap !important; /* Prohíbe que salte de renglón */
+}
+
+/* GASTOS (Está 1ro en el código, lo forzamos a ir 2do, abajo a la izquierda) */
+#totalGastoWidget > div:nth-child(3) span:first-child {
+    order: 2 !important; 
+    text-align: left !important; 
+    font-size: clamp(1rem, 5vw, 1.15rem) !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    padding-top: 8px !important;
+    white-space: nowrap !important; /* Prohíbe que salte de renglón */
+}
+
+/* =========================================================
+   TOP CATEGORÍAS Y ANTI-DESBORDES
+   ========================================================= */
 
 /* 3. Top Categorías: Prohibido saltar de renglón */
 #totalGastoWidget div[style*="display: flex; justify-content: space-between"] {
@@ -1025,10 +1044,6 @@ select:focus, #filtroFechaMes:focus {
     font-size: 0.75rem !important;
     color: #94a3b8 !important;
 }
-
-/* =========================================================
-   ARREGLO ANTI-DESBORDE: NÚMEROS LARGOS (MILLONES)
-   ========================================================= */
 
 /* 1. Saldo Neto Principal (Evita que el ,87 caiga al renglón de abajo) */
 #saldoNetoProtagonista {
