@@ -692,7 +692,7 @@ async function refreshAll() {
 		    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
 		    htmlTopCats += '</div>';
 
-			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA (REDISEÑO) ---
+			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA (COLORES CLÁSICOS) ---
 			    let containerGasto = document.getElementById("totalGastoWidget");
 			    if(!containerGasto) {
 			        const oldP = document.getElementById("totalGastado");
@@ -712,26 +712,20 @@ async function refreshAll() {
 			        const montoRealGasto = formatoMoneda(totalG);
 			        const montoRealIngreso = formatoMoneda(totalI);
 			        
-			        // Color dinámico para el Saldo Neto (El gran protagonista)
-			        const colorSaldoNeto = balanceNeto >= 0 ? '#1e293b' : '#dc2626'; // Neutro oscuro si está bien, Rojo si está en negativo
+			        // Color para el Saldo Neto: Verde oscuro si te sobra plata, Rojo si estás en negativo
+			        const colorSaldoNeto = balanceNeto >= 0 ? '#166534' : '#dc2626'; 
 
-			        // Lógica de la barra superpuesta moderna
-			        // Calculamos qué porcentaje del total representan los gastos
+			        // Lógica de la barra (El fondo será verde oscuro, la barra que avanza será roja)
 			        let pctBarraGastos = 0;
-			        let colorBarraGastos = '#3b82f6'; // Azul por defecto
 			        
 			        if (totalI > 0) {
 			            pctBarraGastos = (totalG / totalI) * 100;
-			            if (pctBarraGastos > 75) colorBarraGastos = '#f59e0b'; // Amarillo alerta
-			            if (pctBarraGastos > 90) colorBarraGastos = '#ef4444'; // Rojo peligro
 			            if (pctBarraGastos > 100) {
 			                pctBarraGastos = 100; // Tope visual para que no se salga de la caja
-			                colorBarraGastos = '#991b1b'; // Rojo muy oscuro (sobregiro)
 			            }
 			        } else if (totalG > 0) {
-			            // Si no hay ingresos pero hay gastos, la barra explota al 100% en rojo oscuro
+			            // Si no hay ingresos pero hay gastos, la barra roja explota al 100%
 			            pctBarraGastos = 100;
-			            colorBarraGastos = '#991b1b';
 			        }
 
 			        containerGasto.innerHTML = `
@@ -751,11 +745,12 @@ async function refreshAll() {
 			                <span>Gastos: ${montoRealGasto}</span>
 			            </div>
 			            
-			            <div style="width: 100%; background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
-			                <div style="width: ${pctBarraGastos}%; background: ${colorBarraGastos}; height: 100%; border-radius: 6px; transition: width 1s ease, background-color 0.5s ease; position: absolute; left: 0; top: 0;"></div>
+			            <div style="width: 100%; background: #166534; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+			                
+			                <div style="width: ${pctBarraGastos}%; background: #ef4444; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
 			            </div>
 			            
-			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: ${colorBarraGastos}; margin-bottom: 20px;">
+			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #ef4444; margin-bottom: 20px;">
 			                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
 			            </div>
 
