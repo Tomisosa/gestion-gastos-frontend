@@ -1,11 +1,11 @@
 {
-  "name": "Gestión de Gastos",
-  "short_name": "Gastos",
-  "start_url": "index.html",
+  "name": "Finty",
+  "short_name": "Finty",
+  "start_url": "splash.html",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#0b1120",
   "theme_color": "#2ac9bb",
-  "description": "App personal de finanzas",
+  "description": "El control inteligente de tu dinero",
   "icons": [
     {
       "src": "icono.png",

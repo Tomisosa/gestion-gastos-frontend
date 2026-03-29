@@ -4,34 +4,129 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finty - Cargando...</title>
-  <link rel="stylesheet" href="css/styles.css">
   
   <style>
+    /* Fondo Azul Noche Profundo */
     body.splash-page {
-      background-color: #0b1120; /* Azul Noche Profundo de Finty */
+      background-color: #0b1120; 
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
       overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Contenedor central de la animación */
+    .animacion-centro {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 150px;
+      height: 150px;
+    }
+
+    /* Ondas expansivas (Efecto latido/sonar) */
+    .onda {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background-color: #2ac9bb;
+      border-radius: 50%;
+      opacity: 0;
+      animation: expandirOnda 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+    }
+
+    /* La segunda onda arranca un poquito después para hacer el efecto doble */
+    .onda:nth-child(2) {
+      animation-delay: 0.6s;
+    }
+
+    /* El logo de la F que aparece girando y flotando */
+    .logo-finty-splash {
+      position: relative;
+      z-index: 10;
+      font-size: 4rem;
+      font-weight: 900;
+      font-style: italic;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(42, 201, 187, 0.8);
+      opacity: 0;
+      animation: aparecerLogo 1.5s ease-out forwards;
+    }
+
+    /* El texto de bienvenida que sube suavemente */
+    .texto-bienvenida {
+      margin-top: 30px;
+      color: #2ac9bb;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      opacity: 0;
+      animation: subirTexto 1s ease-out 0.8s forwards;
+    }
+
+    /* --- LAS ANIMACIONES --- */
+    
+    @keyframes expandirOnda {
+      0% {
+        transform: scale(0.5);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(3.5);
+        opacity: 0;
+      }
+    }
+
+    @keyframes aparecerLogo {
+      0% {
+        opacity: 0;
+        transform: scale(0.2) rotate(-20deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes subirTexto {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body class="splash-page">
 
-  <div style="transform: scale(2.5); animation: splashLogoEntry 1.5s ease-out forwards;">
-      <div class="finty-logo-container">
-          <div class="finty-dot"></div>
-          <span class="finty-f">F</span>
-      </div>
+  <div class="animacion-centro">
+    <div class="onda"></div>
+    <div class="onda"></div>
+    
+    <div class="logo-finty-splash">F</div>
   </div>
+
+  <div class="texto-bienvenida">F I N T Y</div>
 
   <script>
     setTimeout(() => {
-      // MAGIA: Redirecciona al index.html (la portada oscura que ya armamos)
-      window.location.href = "index.html"; 
-    }, 3000); // 3000ms = 3 segundos
+      // Nos vamos al inicio con una transición suave
+      document.body.style.transition = "opacity 0.5s ease";
+      document.body.style.opacity = "0";
+      
+      setTimeout(() => {
+          window.location.href = "index.html"; 
+      }, 500); // Espera medio segundo a que se ponga en negro antes de saltar
+      
+    }, 2500); // A los 2.5 segundos empieza a irse
   </script>
 
 </body>
