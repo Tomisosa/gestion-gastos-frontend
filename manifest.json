@@ -8,15 +8,15 @@
   "description": "Tu plata, tus reglas. Control inteligente.",
   "icons": [
     {
-      "src": "icono.jpg",
+      "src": "icono.png",
       "sizes": "192x192",
-      "type": "image/jpg",
+      "type": "image/icono.png",
       "purpose": "any maskable"
     },
     {
-      "src": "icono.jpg",
+      "src": "icono.png",
       "sizes": "512x512",
-      "type": "image/jpg",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
