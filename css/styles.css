@@ -264,15 +264,23 @@ input, textarea, select {
 .nav-item:hover { background-color: var(--hover-izq); }
 .nav-item.active { background-color: var(--color-primario); color: #ffffff; font-weight: 600; }
 
-.main { flex: 1; background-color: var(--bg-derecha); display: flex; flex-direction: column; }
+.main { 
+    flex: 1; 
+    background-color: var(--bg-derecha); 
+    display: flex; 
+    flex-direction: column; 
+    min-width: 0; /* <-- MAGIA 1: Obliga al contenedor a respetar tu pantalla */
+}
 
 /* AQUÍ ESTÁ EL TRUCO DE ORO: padding-bottom grande para dejar scrollear de más */
 .content { 
     flex: 1; 
     overflow-y: auto; 
+    overflow-x: hidden; /* <-- MAGIA 2: Evita que la página se rompa hacia los costados */
     padding: 2rem; 
     padding-bottom: 120px; /* Esto permite scroll por encima del botón */
     position: relative; 
+}
 }
 
 /* Cabecera y fondo oscuro del móvil (ocultos en PC) */
