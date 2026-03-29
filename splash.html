@@ -48,20 +48,21 @@
 
     /* TU PROPIO LOGO GEOMÉTRICO FINTY (ANIMADO) */
     /* Esta es la etiqueta donde irá TU imagen */
-    .finty-logo-splash {
-      position: absolute; /* Para centrarlo */
-      z-index: 10;
-      width: 130px; /* Tamaño grande para que sea el rey */
-      height: auto;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1.6); /* Centrado y un 60% más grande */
-      opacity: 0;
-      /* Animación que lo hace aparecer, flotar y escalar un poquito */
-      animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
-      /* Brillo cian espectacular */
-      filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
-    }
+	.finty-logo-splash {
+	      position: absolute; 
+	      z-index: 10;
+	      width: 130px; 
+	      height: auto;
+	      top: 50%;
+	      left: 50%;
+	      transform: translate(-50%, -50%) scale(1.6); 
+	      opacity: 0;
+	      animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
+	      filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
+	      
+	      /* MAGIA: Esto hace que el fondo oscuro de tu JPG desaparezca */
+	      mix-blend-mode: screen; 
+	    }
 
     /* El texto de bienvenida que sube suavemente */
     .texto-bienvenida {
