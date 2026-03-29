@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finty - Cargando...</title>
   
+  <link rel="icon" href="icono.png" type="image/png">
+  <link rel="apple-touch-icon" href="icono.png">
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1120">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap" rel="stylesheet">
+  
   <style>
     /* Fondo Azul Noche Profundo */
     body.splash-page {
@@ -47,7 +55,7 @@
 
     /* El logo de la F que aparece girando y flotando */
     .logo-finty-splash {
-      position: relative;
+      position: absolute; /* Cambiado a absolute para que las ondas salgan desde el centro exacto */
       z-index: 10;
       font-size: 4rem;
       font-weight: 900;
@@ -64,7 +72,7 @@
       color: #2ac9bb;
       font-size: 1.2rem;
       font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: 4px; /* Un poco más de espacio entre letras para que quede más elegante */
       opacity: 0;
       animation: subirTexto 1s ease-out 0.8s forwards;
     }
@@ -123,6 +131,7 @@
       document.body.style.opacity = "0";
       
       setTimeout(() => {
+          // Asegurate de que este enlace apunta a tu index real
           window.location.href = "index.html"; 
       }, 500); // Espera medio segundo a que se ponga en negro antes de saltar
       
