@@ -6,15 +6,16 @@ const token = localStorage.getItem("token");
 const userId = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
-// Si no hay sesión → volver al login
-if (!token || !userId) {
-    window.location.href = "login.html";
+// 🚀 MAGIA ANTI-ERRORES: Comprobamos si la sesión es nula o dice "undefined" literalmente
+if (!token || !userId || token === "undefined" || userId === "undefined" || token === "null") {
+    localStorage.clear(); // Limpiamos cualquier basura guardada
+    window.location.replace("login.html");
 }
 
 // Crear objeto usuario
 let user = {
     id: Number(userId),
-    nombre: userName
+    nombre: userName !== "undefined" ? userName : "Usuario"
 };
 
 // --- VARIABLES GLOBALES ---
@@ -24,9 +25,9 @@ let globalIngresos = [];
 let globalTarjetas = []; 
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
-let saldosOcultos = true; // Por defecto arrancan tapados (DÉBITO)
-let saldosTarjetasOcultos = true; // Por defecto arrancan tapados (CRÉDITO)
-let saldosAhorrosOcultos = true; // Por defecto arrancan tapados (AHORROS)
+let saldosOcultos = true; 
+let saldosTarjetasOcultos = true; 
+let saldosAhorrosOcultos = true; 
 
 window.saldosActuales = {};
 
@@ -40,14 +41,37 @@ function authHeaders() {
 
 // --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
-    // Si la llave está vencida (401), cerramos sesión.
-    if (res.status === 401) {
-        localStorage.removeItem("token"); 
-        localStorage.removeItem("userId"); 
-        localStorage.removeItem("userName"); 
-        window.location.href = "login.html"; 
+    // Si la llave está vencida (401 o 403), cerramos sesión automáticamente.
+    if (res.status === 401 || res.status === 403) {
+        localStorage.clear(); 
+        window.location.replace("login.html"); 
         throw new Error("Sesión expirada");
     }
+}
+
+/* --- LLAMADAS API --- */
+async function fetchUserInfo() {
+  try {
+    const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
+    
+    // Si la base de datos rechaza el token, tiramos error directo
+    if (!res.ok) throw new Error("Token inválido");
+    
+    handleAuthError(res);
+    user = await res.json();
+    
+    const emailDiv = document.getElementById("userEmail");
+    if(emailDiv) {
+        // Aseguramos que nunca diga undefined
+        emailDiv.textContent = "👤 " + (user.email || user.nombre || "Usuario");
+        emailDiv.style.color = "#ffce56"; 
+        emailDiv.style.fontWeight = "bold";
+    }
+  } catch (e) { 
+    // Si falla por CUALQUIER motivo, limpiamos la basura y lo mandamos al login
+    localStorage.clear();
+    window.location.replace("login.html"); 
+  }
 }
 
 // --- FORMATO MONEDA ---
