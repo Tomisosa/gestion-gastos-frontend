@@ -962,43 +962,63 @@ select:focus, #filtroFechaMes:focus {
     }
 }
 
-/* === ARMONIZACIÓN DE SALDO NETO === */
+/* =========================================================
+   LIMPIEZA VISUAL: TARJETA DE SALDO NETO (DISEÑO CLEAN)
+   ========================================================= */
 
-#totalGastoWidget {
-    padding: 28px !important; /* Más aire interno */
-}
-
-/* El título "SALDO NETO" ahora tiene más presencia */
-#totalGastoWidget div[style*="font-size: 0.75rem"] {
-    font-size: 0.95rem !important; 
-    font-weight: 800 !important;
-    letter-spacing: 1px !important;
-    margin-bottom: 12px !important;
-}
-
-/* El número principal (Saldo) */
+/* 1. Saldo Neto - Ajuste de tamaño para que respire */
 #saldoNetoProtagonista {
-    font-size: 3rem !important; /* Lo hacemos más imponente */
+    font-size: clamp(2rem, 8vw, 2.6rem) !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -1px !important;
+}
+
+/* 2. Gastos e Ingresos: Uno debajo del otro (Formato Lista) */
+#totalGastoWidget > div:nth-child(3) {
+    display: flex !important;
+    flex-direction: column !important; /* Los pone en formato lista */
+    gap: 12px !important;
     margin-bottom: 20px !important;
 }
 
-/* Gastos e Ingresos secundarios */
-#totalGastoWidget div[style*="font-size: 0.85rem"] {
-    font-size: 1.05rem !important; /* Subimos de 0.85 a 1.05 */
-    font-weight: 700 !important;
+#totalGastoWidget > div:nth-child(3) span {
+    display: flex !important;
+    justify-content: space-between !important; /* Separa la palabra del número */
+    width: 100% !important;
+    font-size: 1.05rem !important;
     color: #475569 !important;
+    border-bottom: 1px solid #f1f5f9; /* Línea separadora muy sutil y elegante */
+    padding-bottom: 8px;
 }
 
-/* El texto de "consumido" y etiquetas de categorías */
-#totalGastoWidget div[style*="font-size: 0.75rem"]:last-child,
-#totalGastoWidget span[style*="font-size: 0.7rem"] {
-    font-size: 0.9rem !important;
+/* 3. Top Categorías: Prohibido saltar de renglón */
+#totalGastoWidget div[style*="display: flex; justify-content: space-between"] {
+    font-size: 0.95rem !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important; 
+    gap: 10px !important;
+}
+
+/* Nombre de la categoría (Ej: Consumos de Tarjeta) */
+#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:first-child {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* Si es muy largo pone "..." */
+    max-width: 50% !important; /* Le pone un límite para que no empuje el precio */
+    color: #334155 !important;
     font-weight: 700 !important;
 }
 
-/* Ajuste de categorías en la lista */
-#totalGastoWidget div[style*="font-size: 0.85rem"] span {
-    font-size: 1.1rem !important;
+/* Monto y porcentaje */
+#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:last-child {
+    white-space: nowrap !important;
+    text-align: right !important;
+    font-size: 0.95rem !important;
+}
+
+#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:last-child span {
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important;
 }
 
 /* =========================================================
