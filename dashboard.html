@@ -53,10 +53,17 @@
 
 		      <section class="content">
 		        
-		        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; background: var(--bg-saldos); padding: 10px; border-radius: 8px; width: fit-content;">
-		            <label style="color: #888; font-weight: bold;">📅 Mes:</label>
-		            <select id="filtroFechaMes" style="background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none;"></select>
-		        </div>
+				<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+				    <div style="display: flex; align-items: center; gap: 10px; background: var(--bg-saldos); padding: 10px; border-radius: 8px;">
+				        <label style="color: #888; font-weight: bold;">📅 Mes:</label>
+				        <select id="filtroFechaMes" style="background: #333; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none;"></select>
+				    </div>
+
+				    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
+				        <span class="material-icons" style="font-size: 22px;">category</span>
+				        <span id="countCategorias" style="position: absolute; top: -6px; right: -6px; background: #be123c; color: white; font-size: 0.65rem; font-weight: bold; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">0</span>
+				    </button>
+				</div>
 
 		        <div id="inicio" class="page visible">
 		            
@@ -67,28 +74,18 @@
                         </div>
 		            </div>
 
-					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px; width: 100%;">
-					                
-					                <div style="display: flex; align-items: center; gap: 8px;">
-					                    <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Billeteras/Cuentas</h3>
-					                    <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
-					                        <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
-					                    </button>
-					                </div>
-					                
-					                <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
-					                    
-					                    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
-					                        <span class="material-icons" style="font-size: 22px;">category</span>
-					                        <span id="countCategorias" style="position: absolute; top: -6px; right: -6px; background: #be123c; color: white; font-size: 0.65rem; font-weight: bold; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">0</span>
-					                    </button>
-
-					                    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" class="btn-cuadrado" title="Añadir Nueva Cuenta" style="background: var(--color-primario); border: none; color: #000; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;">
-					                        <span class="material-icons" style="font-size: 24px;">add_card</span>
-					                    </button>
-
-					                </div>
-					            </div>
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: nowrap; gap: 10px;">
+					    <div style="display: flex; align-items: center; gap: 8px;">
+					        <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Billeteras/Cuentas</h3>
+					        <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
+					            <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
+					        </button>
+					    </div>
+					    
+					    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" class="btn-cuadrado" title="Añadir Nueva Cuenta" style="background: var(--color-primario); border: none; color: #000; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;">
+					        <span class="material-icons" style="font-size: 24px;">add_card</span>
+					    </button>
+					</div>
 		          
 		            <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
 		          
@@ -515,6 +512,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=100"></script>
+  <script src="js/dashboard.js?v=101"></script>
 </body>
 </html>
