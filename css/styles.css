@@ -798,3 +798,10 @@ select:focus, #filtroFechaMes:focus {
     color: var(--color-primario) !important; /* Turquesa para ingresos */
     font-weight: bold;
 }
+
+/* --- PARCHE ANTIDESBORDE FORZADO --- */
+.main { min-width: 0 !important; }
+.content { overflow-x: hidden !important; max-width: 100% !important; }
+@media (min-width: 769px) { 
+    .mobile-header { display: none !important; } 
+}

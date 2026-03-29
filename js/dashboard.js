@@ -26,7 +26,8 @@ let globalTarjetas = [];
 let globalBilleteras = []; 
 let gastoEnEdicion = null; 
 let saldosOcultos = true; 
-let saldosTarjetasOcultos = true; 
+let saldosNetoOcultos = true;
+let saldosTarjetasOcultos = true;
 let saldosAhorrosOcultos = true; 
 
 window.saldosActuales = {};
@@ -768,45 +769,45 @@ async function refreshAll() {
 						            pctBarraGastos = 100;
 						        }
 
-			                    // Lógica del ojito de privacidad
-			                    const textoNetoMostrar = saldosOcultos ? "••••••" : montoRealNeto;
-			                    const textoGastoMostrar = saldosOcultos ? "••••••" : montoRealGasto;
-			                    const textoIngresoMostrar = saldosOcultos ? "••••••" : montoRealIngreso;
-			                    
-			                    const hoverLogic = saldosOcultos 
-			                        ? `onmouseover="this.textContent = '${montoRealNeto}'" onmouseout="this.textContent = '••••••'" ontouchstart="this.textContent = '${montoRealNeto}'" ontouchend="this.textContent = '••••••'" ontouchcancel="this.textContent = '••••••'"` 
-			                        : "";
-			                    const cursorLogic = saldosOcultos ? "cursor: pointer;" : "cursor: default;";
-			                    const iconoOjo = saldosOcultos ? "visibility_off" : "visibility";
+								// Lógica del ojito de privacidad (NUEVA VARIABLE)
+								const textoNetoMostrar = saldosNetoOcultos ? "••••••" : montoRealNeto;
+								const textoGastoMostrar = saldosNetoOcultos ? "••••••" : montoRealGasto;
+								const textoIngresoMostrar = saldosNetoOcultos ? "••••••" : montoRealIngreso;
 
-						        containerGasto.innerHTML = `
-			                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-			                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">SALDO NETO</div>
-			                            <button onclick="toggleSaldos()" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 0;" title="Ocultar/Mostrar saldos">
-			                                <span class="material-icons" style="font-size: 18px; transition: color 0.2s;">${iconoOjo}</span>
-			                            </button>
-			                        </div>
-						            
-			                        <div id="saldoNetoProtagonista" 
-						                 ${hoverLogic}
-						                 title="${saldosOcultos ? 'Mantené apretado para ver' : ''}"
-						                 style="font-size: clamp(2.2rem, 10vw, 3.5rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
-						            
-			                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px; flex-wrap: wrap; gap: 15px;">
-						                <span>Gastos: ${textoGastoMostrar}</span>
-						                <span>Ingresos: ${textoIngresoMostrar}</span>
-						            </div>
-						            
-						            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
-						                <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
-						            </div>
-						            
-						            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
-						                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
-						            </div>
+								const hoverLogic = saldosNetoOcultos 
+								    ? `onmouseover="this.textContent = '${montoRealNeto}'" onmouseout="this.textContent = '••••••'" ontouchstart="this.textContent = '${montoRealNeto}'" ontouchend="this.textContent = '••••••'" ontouchcancel="this.textContent = '••••••'"` 
+								    : "";
+								const cursorLogic = saldosNetoOcultos ? "cursor: pointer;" : "cursor: default;";
+								const iconoOjo = saldosNetoOcultos ? "visibility_off" : "visibility";
 
-						            ${htmlTopCats}
-						        `;
+								containerGasto.innerHTML = `
+								    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+								        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">SALDO NETO</div>
+								        <button onclick="toggleSaldosNeto()" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 0;" title="Ocultar/Mostrar saldos">
+								            <span class="material-icons" style="font-size: 18px; transition: color 0.2s;">${iconoOjo}</span>
+								        </button>
+								    </div>
+								    
+								    <div id="saldoNetoProtagonista" 
+								         ${hoverLogic}
+								         title="${saldosNetoOcultos ? 'Mantené apretado para ver' : ''}"
+								         style="font-size: clamp(2.2rem, 10vw, 3.5rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
+								    
+								    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px; flex-wrap: wrap; gap: 15px;">
+								        <span>Gastos: ${textoGastoMostrar}</span>
+								        <span>Ingresos: ${textoIngresoMostrar}</span>
+								    </div>
+								    
+								    <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+								        <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
+								    </div>
+								    
+								    <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
+								        ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
+								    </div>
+
+								    ${htmlTopCats}
+								`;
 						    }
 			    const elBal = document.getElementById("balanceTotal");
 			    if(elBal) {
@@ -2224,4 +2225,9 @@ window.generarSparkline = function(gastos, mes) {
             animation: { duration: 1000, easing: 'easeOutQuart' }
         }
     });
+};
+
+window.toggleSaldosNeto = function() {
+    saldosNetoOcultos = !saldosNetoOcultos; 
+    refreshAll();
 };
