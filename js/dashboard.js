@@ -633,15 +633,20 @@ async function refreshAll() {
 	  aplicarMagia(divARS, textoRealARS, saldosAhorrosOcultos);
 	  // ----------------------------------------------
   
-	  const totalG = gFiltradosMes.reduce((s,x) => {
+	  const totalG = gFiltradosMes.reduce((s, x) => {
 	      const monto = Number(x.monto) || 0;
 	      
-	      // Si el gasto ES VARIABLE (!x.esFijo) o si ES FIJO PERO ESTÁ PAGADO (x.pagado) -> Lo sumamos
-	      if (!x.esFijo || x.pagado) {
+	      // 1. Es un gasto variable "puro" (no es fijo Y no es una cuota de tarjeta)
+	      const esVariablePuro = !x.esFijo && !(x.descripcion && x.descripcion.includes("(Cuota"));
+	      
+	      // 2. Es un gasto fijo que ya tiene el tilde de Pagado
+	      const esFijoPagado = x.esFijo && x.pagado;
+
+	      // Si cumple alguna de las dos, lo sumamos al total del Inicio
+	      if (esVariablePuro || esFijoPagado) {
 	          return s + monto;
 	      }
 	      
-	      // Si es Fijo y NO está pagado, lo ignoramos para el inicio
 	      return s;
 	  }, 0);
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
