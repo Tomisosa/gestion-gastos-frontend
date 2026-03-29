@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finty - Cargando...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     /* Fondo Azul Noche Profundo Profundo Profundo Profundo Profundo */
@@ -25,8 +26,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 150px;
-      height: 150px;
+      width: 180px; /* Un poquito más grande para el logo detallado */
+      height: 180px;
     }
 
     /* Ondas expansivas (Efecto latido/sonar que querías) */
@@ -45,17 +46,19 @@
       animation-delay: 0.6s;
     }
 
-    /* NUEVO LOGO GEOMÉTRICO FINTY (ANIMADO) */
-    /* Reemplazamos la F vieja por este ícono complejo intrincado */
+    /* TU PROPIO LOGO GEOMÉTRICO FINTY (ANIMADO) */
+    /* Esta es la etiqueta donde irá TU imagen */
     .finty-logo-splash {
-      position: relative;
+      position: absolute; /* Para centrarlo */
       z-index: 10;
-      width: 80px; /* Tamaño grande para que sea el rey */
-      height: 80px;
+      width: 130px; /* Tamaño grande para que sea el rey */
+      height: auto;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1.6); /* Centrado y un 60% más grande */
       opacity: 0;
       /* Animación que lo hace aparecer, flotar y escalar un poquito */
       animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
-      transform-origin: center;
       /* Brillo cian espectacular */
       filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
     }
@@ -89,18 +92,18 @@
     @keyframes aparecerLogoComplex {
       0% {
         opacity: 0;
-        transform: scale(0.2) rotate(-20deg);
+        transform: translate(-50%, -50%) scale(0.2) rotate(-20deg);
       }
       100% {
         opacity: 1;
-        transform: scale(1.6) rotate(0deg); /* Central y un 60% más grande */
+        transform: translate(-50%, -50%) scale(1.6) rotate(0deg);
       }
     }
 
-    /* Flotado suave del logo */
+    /* Flotado suave del logo (ajustado para que el translate no se rompa) */
     @keyframes floatLogo {
-      0%, 100% { transform: translateY(0) scale(1.6); }
-      50% { transform: translateY(-5px) scale(1.6); }
+      0%, 100% { transform: translate(-50%, -50%) scale(1.6); }
+      50% { transform: translate(-50%, -50%) translateY(-5px) scale(1.6); }
     }
 
     /* Entrada suave del texto */
@@ -122,19 +125,7 @@
     <div class="onda"></div>
     <div class="onda"></div>
     
-    <svg class="finty-logo-splash" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="none" stroke="#2ac9bb" stroke-width="2"/>
-      <circle cx="50" cy="50" r="5" fill="#2ac9bb"/>
-      <path d="M50 5 L50 95 M5 50 L95 50 M18 18 L82 82 M18 82 L82 18" fill="none" stroke="#2ac9bb" stroke-width="2"/>
-      <circle cx="50" cy="12" r="3" fill="#2ac9bb"/>
-      <circle cx="50" cy="88" r="3" fill="#2ac9bb"/>
-      <circle cx="12" cy="50" r="3" fill="#2ac9bb"/>
-      <circle cx="88" cy="50" r="3" fill="#2ac9bb"/>
-      <circle cx="23" cy="23" r="3" fill="#2ac9bb"/>
-      <circle cx="77" cy="77" r="3" fill="#2ac9bb"/>
-      <circle cx="23" cy="77" r="3" fill="#2ac9bb"/>
-      <circle cx="77" cy="23" r="3" fill="#2ac9bb"/>
-    </svg>
+    <img src="icono.png" alt="Finty Logo" class="finty-logo-splash">
   </div>
 
   <div class="texto-bienvenida">F I N T Y</div>
