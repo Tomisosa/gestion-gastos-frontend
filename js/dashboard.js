@@ -791,7 +791,7 @@ async function refreshAll() {
 								    <div id="saldoNetoProtagonista" 
 								         ${hoverLogic}
 								         title="${saldosNetoOcultos ? 'Mantené apretado para ver' : ''}"
-								         style="font-size: clamp(2.2rem, 10vw, 3.5rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
+								         style="font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
 								    
 								    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 8px; flex-wrap: wrap; gap: 15px;">
 								        <span>Gastos: ${textoGastoMostrar}</span>
