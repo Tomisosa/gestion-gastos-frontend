@@ -1022,3 +1022,31 @@ select:focus, #filtroFechaMes:focus {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
+
+/* =========================================================
+   ARREGLO: ALINEACIÓN LOGO Y NOMBRE EN MENÚ LATERAL
+   ========================================================= */
+
+/* Forzamos que el contenedor de la marca sea una sola línea horizontal */
+.sidebar .brand {
+    display: flex !important;
+    flex-direction: row !important; /* Asegura que estén uno al lado del otro */
+    align-items: center !important; /* Los centra verticalmente entre sí */
+    justify-content: flex-start !important; /* Los pega hacia la izquierda */
+    gap: 12px !important; /* Espacio exacto entre el ícono y la letra */
+    margin-top: 10px !important;
+    margin-bottom: 30px !important;
+    padding-left: 5px !important; /* Un poquito de aire desde el borde izquierdo */
+}
+
+/* Ajustes para el texto "Finty" en el menú */
+.sidebar .brand h1 {
+    margin: 0 !important;
+    font-size: 1.8rem !important; /* Un tamaño elegante */
+    line-height: 1 !important; /* Evita espacios raros arriba o abajo del texto */
+}
+
+/* Aseguramos que el contenedor del ícono no se estire raro */
+.sidebar .brand .finty-logo-container {
+    flex-shrink: 0 !important; /* Evita que el cuadradito de la F se achique si falta espacio */
+}
