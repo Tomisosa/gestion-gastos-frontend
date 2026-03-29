@@ -973,12 +973,17 @@ select:focus, #filtroFechaMes:focus {
     letter-spacing: -1px !important;
 }
 
-/* 2. Gastos e Ingresos: Uno debajo del otro (Formato Lista) */
-#totalGastoWidget > div:nth-child(3) {
-    display: flex !important;
-    flex-direction: column !important; /* Los pone en formato lista */
-    gap: 12px !important;
-    margin-bottom: 20px !important;
+/* Gastos e Ingresos: Reemplazá este bloque para que no se corte el texto */
+#totalGastoWidget > div:nth-child(3) span {
+    display: block !important; /* MAGIA: Esto evita que el número se corte */
+    width: 100% !important;
+    font-size: 1.1rem !important;
+    color: #475569 !important;
+    border-bottom: 1px solid #e2e8f0 !important; 
+    padding-bottom: 8px !important;
+    text-align: left !important;
+    white-space: normal !important;
+
 }
 
 #totalGastoWidget > div:nth-child(3) span {
