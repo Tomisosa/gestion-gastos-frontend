@@ -713,7 +713,7 @@ async function refreshAll() {
 			        const montoRealIngreso = formatoMoneda(totalI);
 			        
 			        // Color para el Saldo Neto: Verde oscuro si te sobra plata, Rojo si estás en negativo
-			        const colorSaldoNeto = balanceNeto >= 0 ? '#166534' : '#dc2626'; 
+			        const colorSaldoNeto = balanceNeto >= 0 ? '#109363' : '#B80B0B'; 
 
 			        // Lógica de la barra (El fondo será verde oscuro, la barra que avanza será roja)
 			        let pctBarraGastos = 0;
