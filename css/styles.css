@@ -805,3 +805,92 @@ select:focus, #filtroFechaMes:focus {
 @media (min-width: 769px) { 
     .mobile-header { display: none !important; } 
 }
+
+/* =========================================================
+   NUEVO LOGO FINTY (ANIMADO)
+   ========================================================= */
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--texto-blanco);
+    letter-spacing: 0.5px;
+    text-shadow: none; /* Adiós a la sombra vieja */
+}
+
+.brand-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.brand-mobile h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+/* Contenedor del logo: Cuadrado moderno con bordes redondeados */
+.finty-logo-container {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    /* Degradado turquesa espectacular */
+    background: linear-gradient(135deg, var(--color-primario) 0%, #0f766e 100%);
+    border-radius: 12px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(42, 201, 187, 0.4);
+    overflow: hidden;
+}
+
+.finty-logo-container.mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+}
+
+/* La letra F central */
+.finty-f {
+    position: relative;
+    z-index: 2;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-style: italic; /* Le da un toque de velocidad/dinamismo */
+    padding-right: 2px;
+}
+
+.finty-logo-container.mini .finty-f {
+    font-size: 1.2rem;
+}
+
+/* El punto animado (Aura de luz interna que rebota) */
+.finty-dot {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    animation: moveGlow 3s infinite ease-in-out;
+}
+
+/* Animación: El brillo interno viaja por el cuadradito */
+@keyframes moveGlow {
+    0% { transform: translate(-20px, -20px) scale(1); }
+    50% { transform: translate(20px, 20px) scale(1.5); }
+    100% { transform: translate(-20px, -20px) scale(1); }
+}
