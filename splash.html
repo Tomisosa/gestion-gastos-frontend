@@ -7,135 +7,109 @@
   
   <link rel="icon" href="icono.png" type="image/png">
   <link rel="apple-touch-icon" href="icono.png">
-  
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b1120">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap" rel="stylesheet">
-  
   <style>
     /* Fondo Azul Noche Profundo */
-    body.splash-page {
+    body {
+      margin: 0;
+      padding: 0;
       background-color: #0b1120; 
+      height: 100vh;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
       overflow: hidden;
-      font-family: 'Inter', sans-serif;
     }
 
-    /* Contenedor central de la animación */
-    .animacion-centro {
+    /* Contenedor central donde ocurre la magia */
+    .splash-container {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 150px;
-      height: 150px;
     }
 
-    /* Ondas expansivas (Efecto latido/sonar) */
+    /* --- ANIMACIÓN DE ONDAS CONCÉNTRICAS --- */
     .onda {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      background-color: #2ac9bb;
+      border: 2px solid #2ac9bb; /* Color turquesa de Finty */
       border-radius: 50%;
       opacity: 0;
-      animation: expandirOnda 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+      /* Animación de 3 segundos infinita */
+      animation: expandirRadar 3s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
     }
 
-    /* La segunda onda arranca un poquito después para hacer el efecto doble */
-    .onda:nth-child(2) {
-      animation-delay: 0.6s;
-    }
+    /* Retrasamos cada onda para que salgan una atrás de la otra */
+    .onda:nth-child(1) { animation-delay: 0s; }
+    .onda:nth-child(2) { animation-delay: 0.6s; }
+    .onda:nth-child(3) { animation-delay: 1.2s; }
+    .onda:nth-child(4) { animation-delay: 1.8s; }
+    .onda:nth-child(5) { animation-delay: 2.4s; }
 
-    /* El logo de la F que aparece girando y flotando */
-    .logo-finty-splash {
-      position: absolute; /* Cambiado a absolute para que las ondas salgan desde el centro exacto */
-      z-index: 10;
-      font-size: 4rem;
-      font-weight: 900;
-      font-style: italic;
-      color: #ffffff;
-      text-shadow: 0 0 20px rgba(42, 201, 187, 0.8);
-      opacity: 0;
-      animation: aparecerLogo 1.5s ease-out forwards;
-    }
-
-    /* El texto de bienvenida que sube suavemente */
-    .texto-bienvenida {
-      margin-top: 30px;
-      color: #2ac9bb;
-      font-size: 1.2rem;
-      font-weight: 600;
-      letter-spacing: 4px; /* Un poco más de espacio entre letras para que quede más elegante */
-      opacity: 0;
-      animation: subirTexto 1s ease-out 0.8s forwards;
-    }
-
-    /* --- LAS ANIMACIONES --- */
-    
-    @keyframes expandirOnda {
+    @keyframes expandirRadar {
       0% {
-        transform: scale(0.5);
+        width: 60px;
+        height: 60px;
         opacity: 0.8;
+        border-width: 4px;
       }
       100% {
-        transform: scale(3.5);
+        width: 800px; /* Hasta dónde crece la onda */
+        height: 800px;
         opacity: 0;
+        border-width: 1px;
       }
     }
 
-    @keyframes aparecerLogo {
-      0% {
-        opacity: 0;
-        transform: scale(0.2) rotate(-20deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-      }
+    /* --- EL LOGO 'F' CENTRAL --- */
+    .logo-centro {
+      position: relative;
+      z-index: 10;
+      width: 110px;
+      height: 110px;
+      /* Brillo neón turquesa alrededor del logo */
+      filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.6));
+      /* Hacemos que la F "lata" suavemente al ritmo de las ondas */
+      animation: latidoLogo 3s infinite ease-in-out;
     }
 
-    @keyframes subirTexto {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @keyframes latidoLogo {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.6)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(42, 201, 187, 0.9)); }
     }
   </style>
 </head>
-<body class="splash-page">
+<body>
 
-  <div class="animacion-centro">
+  <div class="splash-container">
     <div class="onda"></div>
     <div class="onda"></div>
-    
-    <div class="logo-finty-splash">F</div>
+    <div class="onda"></div>
+    <div class="onda"></div>
+    <div class="onda"></div>
+
+    <svg class="logo-centro" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30,80 C30,80 25,35 50,20 C65,10 85,15 85,15" stroke="#2ac9bb" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M43,70 C43,70 40,45 55,33 C65,25 77,28 77,28" stroke="#2ac9bb" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M40,55 C50,55 60,50 73,38" stroke="#2ac9bb" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <polygon points="67,33 80,30 75,43" fill="#2ac9bb"/>
+    </svg>
   </div>
 
-  <div class="texto-bienvenida">F I N T Y</div>
-
   <script>
+    // Redirección automática después de 2.5 segundos
     setTimeout(() => {
-      // Nos vamos al inicio con una transición suave
+      // Efecto de desvanecimiento en negro
       document.body.style.transition = "opacity 0.5s ease";
       document.body.style.opacity = "0";
       
       setTimeout(() => {
-          // Asegurate de que este enlace apunta a tu index real
-          window.location.href = "index.html"; 
-      }, 500); // Espera medio segundo a que se ponga en negro antes de saltar
+          // ACÁ PONÉ LA PÁGINA A LA QUE DEBE IR (ej: index.html o login.html)
+          window.location.href = "login.html"; 
+      }, 500);
       
-    }, 2500); // A los 2.5 segundos empieza a irse
+    }, 2500); 
   </script>
 
 </body>
