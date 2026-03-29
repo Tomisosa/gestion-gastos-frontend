@@ -713,7 +713,7 @@ async function refreshAll() {
 	        const montoRealNeto = formatoMoneda(balanceNeto);
 
 	        containerGasto.innerHTML = `
-	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">TOTAL GASTADO</div>
+	            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">BALANCE DEL MES</div>
 	            
 	            <div id="totalGastado" 
 	                 onmouseover="this.textContent = '${montoRealGasto}'" 
