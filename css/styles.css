@@ -29,15 +29,16 @@ body.inicio, body.auth {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--bg-derecha); 
+    /* MAGIA: Le ponemos el mismo Azul Noche ultra premium del menú */
+    background-color: var(--bg-izquierda); 
     text-align: center;
     padding: 20px;
     overflow: hidden; 
 }
 
-/* --- Landing Page Premium (Index) --- */
+/* Efecto de luz de fondo para que no sea un color plano */
 body.premium-landing {
-    background: radial-gradient(circle at top, #ffffff 0%, var(--bg-derecha) 100%);
+    background: radial-gradient(circle at top, #162133 0%, var(--bg-izquierda) 100%);
 }
 
 .hero-container {
@@ -46,45 +47,6 @@ body.premium-landing {
     max-width: 450px;
     padding: 20px;
     margin-top: -30px;
-}
-
-.logo-icon {
-    font-size: 5.5rem;
-    margin-bottom: 35px;
-    display: inline-block;
-    filter: drop-shadow(0 4px 15px rgba(42, 201, 187, 0.3)); 
-    animation: float 4s ease-in-out infinite;
-}
-
-.premium-landing header h1 {
-    font-size: 3rem;
-    color: var(--texto-oscuro); 
-    margin: 0 0 30px 0;
-    letter-spacing: -1px;
-    line-height: 1.1;
-}
-
-.premium-landing header h1 span {
-    color: var(--color-primario);
-    display: block;
-    margin-top: 8px;
-}
-
-.premium-landing main h2 {
-    color: var(--texto-oscuro);
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 20px;
-    line-height: 1.4;
-}
-
-.premium-landing main p {
-    color: var(--texto-claro);
-    font-size: 1.05rem;
-    line-height: 1.6;
-    margin-bottom: 55px;
-    padding: 0 10px;
 }
 
 /* --- Botones Landing Premium --- */
@@ -106,15 +68,15 @@ body.premium-landing {
     font-weight: 700;
     font-size: 1.1rem;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 8px 20px rgba(42, 201, 187, 0.25);
     width: 100%;
     box-sizing: border-box;
     display: inline-block;
 }
 
+/* Botón secundario ajustado para fondo oscuro */
 .btn-secundario-new {
     background: transparent;
-    color: var(--texto-oscuro);
+    color: var(--texto-blanco); /* Letras blancas para contraste */
     padding: 18px;
     border-radius: 14px;
     text-decoration: none;
