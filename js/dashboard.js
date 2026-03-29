@@ -712,10 +712,10 @@ async function refreshAll() {
 			        const montoRealGasto = formatoMoneda(totalG);
 			        const montoRealIngreso = formatoMoneda(totalI);
 			        
-			        // ¡ACÁ ESTÁ EL CAMBIO! Color para el Saldo Neto: Turquesa del botón si sobra plata, Rojo si estás en negativo
+			        // Color para el Saldo Neto: Turquesa si sobra plata, Rojo Oscuro si estás en negativo
 			        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
 
-			        // Lógica de la barra (El fondo será turquesa, la barra que avanza será roja)
+			        // Lógica de la barra 
 			        let pctBarraGastos = 0;
 			        
 			        if (totalI > 0) {
@@ -724,7 +724,7 @@ async function refreshAll() {
 			                pctBarraGastos = 100; // Tope visual para que no se salga de la caja
 			            }
 			        } else if (totalG > 0) {
-			            // Si no hay ingresos pero hay gastos, la barra roja explota al 100%
+			            // Si no hay ingresos pero hay gastos, la barra explota al 100%
 			            pctBarraGastos = 100;
 			        }
 
@@ -740,17 +740,17 @@ async function refreshAll() {
 			                 title="Mantené apretado para ver"
 			                 style="font-size: 3rem; font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: 25px;">••••••</div>
 			            
-							 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
-							        <span>Gastos: ${montoRealGasto}</span>
-							        <span>Ingresos: ${montoRealIngreso}</span>
-							 </div>
+			            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+			                <span>Gastos: ${montoRealGasto}</span>
+			                <span>Ingresos: ${montoRealIngreso}</span>
+			            </div>
 			            
 			            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
 			                
-			                <div style="width: ${pctBarraGastos}%; background: #B80B0B; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
+			                <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
 			            </div>
 			            
-			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #B80B0B; margin-bottom: 20px;">
+			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
 			                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
 			            </div>
 
