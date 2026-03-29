@@ -3,9 +3,11 @@
   "short_name": "Finty",
   "start_url": "splash.html",
   "display": "standalone",
-  "background_color": "#0b1120",
-  "theme_color": "#2ac9bb",
-  "description": "El control inteligente de tu dinero",
+
+  "background_color": "#0b1120", 
+  
+  "theme_color": "#0b1120", 
+  "description": "Tu plata, tus reglas. Control inteligente.",
   "icons": [
     {
       "src": "icono.png",
