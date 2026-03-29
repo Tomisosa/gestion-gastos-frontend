@@ -745,12 +745,12 @@ async function refreshAll() {
 			                <span>Gastos: ${montoRealGasto}</span>
 			            </div>
 			            
-			            <div style="width: 100%; background: #166534; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+			            <div style="width: 100%; background: #109363; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
 			                
-			                <div style="width: ${pctBarraGastos}%; background: #ef4444; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
+			                <div style="width: ${pctBarraGastos}%; background: #B80B0B; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
 			            </div>
 			            
-			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #ef4444; margin-bottom: 20px;">
+			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #B80B0B; margin-bottom: 20px;">
 			                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
 			            </div>
 
