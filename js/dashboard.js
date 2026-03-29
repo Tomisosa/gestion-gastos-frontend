@@ -692,7 +692,7 @@ async function refreshAll() {
 		    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
 		    htmlTopCats += '</div>';
 
-			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA (COLORES CLÁSICOS) ---
+			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA ---
 			    let containerGasto = document.getElementById("totalGastoWidget");
 			    if(!containerGasto) {
 			        const oldP = document.getElementById("totalGastado");
@@ -712,10 +712,10 @@ async function refreshAll() {
 			        const montoRealGasto = formatoMoneda(totalG);
 			        const montoRealIngreso = formatoMoneda(totalI);
 			        
-			        // Color para el Saldo Neto: Verde oscuro si te sobra plata, Rojo si estás en negativo
-			        const colorSaldoNeto = balanceNeto >= 0 ? '#109363' : '#B80B0B'; 
+			        // ¡ACÁ ESTÁ EL CAMBIO! Color para el Saldo Neto: Turquesa del botón si sobra plata, Rojo si estás en negativo
+			        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
 
-			        // Lógica de la barra (El fondo será verde oscuro, la barra que avanza será roja)
+			        // Lógica de la barra (El fondo será turquesa, la barra que avanza será roja)
 			        let pctBarraGastos = 0;
 			        
 			        if (totalI > 0) {
@@ -740,12 +740,12 @@ async function refreshAll() {
 			                 title="Mantené apretado para ver"
 			                 style="font-size: 3rem; font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: 25px;">••••••</div>
 			            
-			            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
-			                <span>Ingresos: ${montoRealIngreso}</span>
-			                <span>Gastos: ${montoRealGasto}</span>
-			            </div>
+							 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+							        <span>Gastos: ${montoRealGasto}</span>
+							        <span>Ingresos: ${montoRealIngreso}</span>
+							 </div>
 			            
-			            <div style="width: 100%; background: #109363; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+			            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
 			                
 			                <div style="width: ${pctBarraGastos}%; background: #B80B0B; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
 			            </div>
