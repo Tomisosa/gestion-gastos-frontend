@@ -633,7 +633,17 @@ async function refreshAll() {
 	  aplicarMagia(divARS, textoRealARS, saldosAhorrosOcultos);
 	  // ----------------------------------------------
   
-    const totalG = gFiltradosMes.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+	  const totalG = gFiltradosMes.reduce((s,x) => {
+	      const monto = Number(x.monto) || 0;
+	      
+	      // Si el gasto ES VARIABLE (!x.esFijo) o si ES FIJO PERO ESTÁ PAGADO (x.pagado) -> Lo sumamos
+	      if (!x.esFijo || x.pagado) {
+	          return s + monto;
+	      }
+	      
+	      // Si es Fijo y NO está pagado, lo ignoramos para el inicio
+	      return s;
+	  }, 0);
     const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
     
 	// --- 1. CÁLCULOS PARA EL FLUJO DE CAJA Y TOP CATEGORÍAS ---
