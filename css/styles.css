@@ -961,3 +961,62 @@ select:focus, #filtroFechaMes:focus {
         transform: scale(2.5) translateY(0);
     }
 }
+
+/* =========================================================
+   ARMONÍA VISUAL: BALANCE DE TAMAÑOS (SALDO NETO)
+   ========================================================= */
+
+/* 1. Título "SALDO NETO" - Más presencia y elegancia */
+#totalGastoWidget > div > span:first-child, 
+#totalGastoWidget .text-muted,
+#totalGastoWidget h3 {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    color: #64748b !important;
+}
+
+/* 2. Gastos e Ingresos - Textos más grandes y sólidos */
+#totalGastoWidget p {
+    font-size: 1.15rem !important; 
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 8px 0 !important;
+}
+
+/* 3. Porcentaje consumido (el textito rojo) */
+#totalGastoWidget small, 
+#totalGastoWidget div[style*="font-size: 0.8"], 
+#totalGastoWidget div[style*="font-size: 0.7"] {
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+}
+
+/* 4. Título "TOP CATEGORÍAS" */
+#totalGastoWidget div[style*="font-weight: bold"],
+#totalGastoWidget h4 {
+    font-size: 1.15rem !important;
+    margin-top: 25px !important;
+    margin-bottom: 15px !important;
+    color: #475569 !important;
+}
+
+/* 5. Nombres de las categorías (Mascotas, Servicios) y sus montos */
+#totalGastoWidget div[style*="display: flex; justify-content: space-between"] {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 6px !important;
+}
+
+/* 6. Suavizamos un poco el título verde de Billeteras para que no resalte tanto */
+.titulo-dinero {
+    font-size: 1.3rem !important; 
+}
+
+/* 7. Ajustamos el selector de Mes para que sea un poco más fino */
+#filtroFechaMes {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 6px 10px !important;
+}
