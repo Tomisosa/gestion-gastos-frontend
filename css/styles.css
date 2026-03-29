@@ -281,7 +281,7 @@ input, textarea, select {
     padding-bottom: 120px; /* Esto permite scroll por encima del botón */
     position: relative; 
 }
-}
+
 
 /* Cabecera y fondo oscuro del móvil (ocultos en PC) */
 .mobile-header { display: none; }
