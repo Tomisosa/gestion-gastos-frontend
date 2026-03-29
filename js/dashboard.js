@@ -739,8 +739,8 @@ async function refreshAll() {
 						            const parent = oldP.closest('.card');
 						            if(parent) {
 						                parent.id = "totalGastoWidget";
-			                            // Tarjeta con tope de ancho pero alineada a la izquierda natural
-						                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px; max-width: 600px;";
+										// Tarjeta 100% responsive, ocupa todo el ancho disponible sin cortarse
+										parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px; width: 100%; box-sizing: border-box; overflow: hidden;";
 						            }
 						        }
 						    }
