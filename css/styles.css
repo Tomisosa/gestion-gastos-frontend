@@ -1000,3 +1000,25 @@ select:focus, #filtroFechaMes:focus {
 #totalGastoWidget div[style*="font-size: 0.85rem"] span {
     font-size: 1.1rem !important;
 }
+
+/* =========================================================
+   ARREGLO ANTI-DESBORDE: NÚMEROS LARGOS (MILLONES)
+   ========================================================= */
+
+/* 1. Saldo Neto Principal (Evita que el ,87 caiga al renglón de abajo) */
+#saldoNetoProtagonista {
+    /* clamp(mínimo, tamaño ideal según pantalla, máximo) */
+    font-size: clamp(1.8rem, 8vw, 2.8rem) !important; 
+    white-space: nowrap !important; /* MAGIA: Prohíbe terminantemente que se parta en dos líneas */
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important; /* Si el número es trillonario, pone "..." en vez de romper la app */
+    line-height: 1.2 !important;
+}
+
+/* 2. Monto de las Billeteras/Cuentas (Ej: Ualá) */
+.tarjeta-billetera p {
+    font-size: clamp(1.4rem, 6vw, 1.8rem) !important; /* Se ajusta solo al ancho de la tarjeta */
+    white-space: nowrap !important; /* Evita que los centavos se caigan */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
