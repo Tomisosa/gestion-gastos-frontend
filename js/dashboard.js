@@ -645,43 +645,52 @@ async function refreshAll() {
 	    if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; // Amarillo
 	    if (porcentajeGastado > 90) colorTermometro = '#ef4444'; // Rojo
 
-	    // Buscamos cuáles son tus 3 categorías en las que más gastaste este mes
-	    const gastosPorCategoria = {};
-	    gFiltradosMes.forEach(g => {
-	        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos") {
-	            gastosPorCategoria[g.categoriaNombre] = (gastosPorCategoria[g.categoriaNombre] || 0) + Number(g.monto);
-	        }
-	    });
-	    
-	    // Ordenamos de mayor a menor y sacamos el Top 3
-	    const topCats = Object.entries(gastosPorCategoria)
-	        .sort((a,b) => b[1] - a[1])
-	        .slice(0, 3);
+		// Buscamos cuáles son tus 3 categorías en las que más gastaste este mes
+		    const gastosPorCategoria = {};
+		    gFiltradosMes.forEach(g => {
+		        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos") {
+		            
+		            // Atrapamos el "null" desde la raíz y lo convertimos a algo prolijo
+		            let nombreCat = g.categoriaNombre;
+		            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
+		                nombreCat = "💳 Consumos de Tarjeta"; 
+		            }
+		            
+		            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + Number(g.monto);
+		        }
+		    });
+		    
+		    // Ordenamos de mayor a menor y sacamos el Top 3
+		    const topCats = Object.entries(gastosPorCategoria)
+		        .sort((a,b) => b[1] - a[1])
+		        .slice(0, 3);
 
-	    // Armamos el HTML de las barritas para las categorías
-	    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
-	    
-	    topCats.forEach(cat => {
-	        const nombreCat = cat[0] || 'Sin categoría';
-	        const montoCat = cat[1];
-	        // Calculamos qué porcentaje del total gastado representa esta categoría
-	        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
-	        
-	        htmlTopCats += `
-	            <div style="margin-bottom: 12px;">
-	                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-	                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
-	                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
-	                </div>
-	                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-	                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
-	                </div>
-	            </div>
-	        `;
-	    });
-	    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
-	    htmlTopCats += '</div>';
-
+		    // Armamos el HTML de las barritas para las categorías
+		    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
+		    
+		    topCats.forEach(cat => {
+		        // Como ya lo filtramos arriba, acá simplemente lo leemos
+		        const nombreCat = cat[0];
+		        const montoCat = cat[1];
+		        
+		        // Calculamos qué porcentaje del total gastado representa esta categoría
+		        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
+		        
+		        htmlTopCats += `
+		            <div style="margin-bottom: 12px;">
+		                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+		                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
+		                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
+		                </div>
+		                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+		                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
+		                </div>
+		            </div>
+		        `;
+		    });
+		    
+		    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
+		    htmlTopCats += '</div>';
 
 	    // --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA ---
 	    let containerGasto = document.getElementById("totalGastoWidget");
