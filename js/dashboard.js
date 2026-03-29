@@ -732,102 +732,113 @@ async function refreshAll() {
 		    htmlTopCats += '</div>';
 
 			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA ---
-			    let containerGasto = document.getElementById("totalGastoWidget");
-			    if(!containerGasto) {
-			        const oldP = document.getElementById("totalGastado");
-			        if(oldP) {
-			            const parent = oldP.closest('.card');
-			            if(parent) {
-			                parent.id = "totalGastoWidget";
-			                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
-			            }
-			        }
+						    let containerGasto = document.getElementById("totalGastoWidget");
+						    if(!containerGasto) {
+						        const oldP = document.getElementById("totalGastado");
+						        if(oldP) {
+						            const parent = oldP.closest('.card');
+						            if(parent) {
+						                parent.id = "totalGastoWidget";
+						                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px;";
+						            }
+						        }
+						    }
+						    
+						    containerGasto = document.getElementById("totalGastoWidget");
+						    if(containerGasto) {
+						        // Formateamos los números respetando los puntitos de privacidad
+						        const montoRealNeto = formatoMoneda(balanceNeto);
+						        const montoRealGasto = formatoMoneda(totalG);
+						        const montoRealIngreso = formatoMoneda(totalI);
+						        
+						        // Color para el Saldo Neto: Turquesa si sobra plata, Rojo Oscuro si estás en negativo
+						        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
+
+						        // Lógica de la barra 
+						        let pctBarraGastos = 0;
+						        
+						        if (totalI > 0) {
+						            pctBarraGastos = (totalG / totalI) * 100;
+						            if (pctBarraGastos > 100) {
+						                pctBarraGastos = 100; // Tope visual para que no se salga de la caja
+						            }
+						        } else if (totalG > 0) {
+						            // Si no hay ingresos pero hay gastos, la barra explota al 100%
+						            pctBarraGastos = 100;
+						        }
+
+			                    // 🚀 MAGIA DEL OJITO: Configuramos si mostramos plata o puntitos
+			                    const textoNetoMostrar = saldosOcultos ? "••••••" : montoRealNeto;
+			                    const textoGastoMostrar = saldosOcultos ? "••••••" : montoRealGasto;
+			                    const textoIngresoMostrar = saldosOcultos ? "••••••" : montoRealIngreso;
+			                    
+			                    const hoverLogic = saldosOcultos 
+			                        ? `onmouseover="this.textContent = '${montoRealNeto}'" onmouseout="this.textContent = '••••••'" ontouchstart="this.textContent = '${montoRealNeto}'" ontouchend="this.textContent = '••••••'" ontouchcancel="this.textContent = '••••••'"` 
+			                        : "";
+			                    const cursorLogic = saldosOcultos ? "cursor: pointer;" : "cursor: default;";
+			                    const iconoOjo = saldosOcultos ? "visibility_off" : "visibility";
+
+						        containerGasto.innerHTML = `
+			                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+			                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">SALDO NETO</div>
+			                            <button onclick="toggleSaldos()" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 0;" title="Ocultar/Mostrar saldos">
+			                                <span class="material-icons" style="font-size: 20px; transition: color 0.2s;">${iconoOjo}</span>
+			                            </button>
+			                        </div>
+						            
+									<div id="saldoNetoProtagonista" 
+									     ${hoverLogic}
+									     title="${saldosOcultos ? 'Mantené apretado para ver' : ''}"
+									     style="font-size: clamp(1.8rem, 8vw, 3rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word;">${textoNetoMostrar}</div>
+						            
+						            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
+						                <span>Gastos: ${textoGastoMostrar}</span>
+						                <span>Ingresos: ${textoIngresoMostrar}</span>
+						            </div>
+						            
+						            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+						                
+						                <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
+						            </div>
+						            
+						            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
+						                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
+						            </div>
+
+						            ${htmlTopCats}
+						        `;
+						    }
+			    const elBal = document.getElementById("balanceTotal");
+			    if(elBal) {
+			        const bal = totalI - totalG;
+			        elBal.textContent = formatoMoneda(bal);
+			        elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
 			    }
-			    
-			    containerGasto = document.getElementById("totalGastoWidget");
-			    if(containerGasto) {
-			        // Formateamos los números respetando los puntitos de privacidad
-			        const montoRealNeto = formatoMoneda(balanceNeto);
-			        const montoRealGasto = formatoMoneda(totalG);
-			        const montoRealIngreso = formatoMoneda(totalI);
-			        
-			        // Color para el Saldo Neto: Turquesa si sobra plata, Rojo Oscuro si estás en negativo
-			        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
+			  
+			    const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
+			    const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
 
-			        // Lógica de la barra 
-			        let pctBarraGastos = 0;
-			        
-			        if (totalI > 0) {
-			            pctBarraGastos = (totalG / totalI) * 100;
-			            if (pctBarraGastos > 100) {
-			                pctBarraGastos = 100; // Tope visual para que no se salga de la caja
-			            }
-			        } else if (totalG > 0) {
-			            // Si no hay ingresos pero hay gastos, la barra explota al 100%
-			            pctBarraGastos = 100;
+			    const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
+			    globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
+
+			    const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
+			  
+			    const totalesTarjetasARS = {};
+			    const totalesTarjetasUSD = {};
+			    let sumaTotalTarjetasARS = 0;
+			    let sumaTotalTarjetasUSD = 0;
+
+			    consumosTarjeta.forEach(g => {
+			        const m = g.medioPago || "Tarjeta Desconocida";
+			        const monto = Number(g.monto) || 0;
+			        if ((g.descripcion || "").includes("[USD]")) {
+			            totalesTarjetasUSD[m] = (totalesTarjetasUSD[m] || 0) + monto;
+			            sumaTotalTarjetasUSD += monto;
+			        } else {
+			            totalesTarjetasARS[m] = (totalesTarjetasARS[m] || 0) + monto;
+			            sumaTotalTarjetasARS += monto;
 			        }
-
-			        containerGasto.innerHTML = `
-			            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px;">SALDO NETO</div>
-			            
-			            <div id="saldoNetoProtagonista" 
-			                 onmouseover="this.textContent = '${montoRealNeto}'" 
-			                 onmouseout="this.textContent = '••••••'"
-			                 ontouchstart="this.textContent = '${montoRealNeto}'"
-			                 ontouchend="this.textContent = '••••••'"
-			                 ontouchcancel="this.textContent = '••••••'"
-			                 title="Mantené apretado para ver"
-			                 style="font-size: 3rem; font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-bottom: 25px;">••••••</div>
-			            
-			            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 8px;">
-			                <span>Gastos: ${montoRealGasto}</span>
-			                <span>Ingresos: ${montoRealIngreso}</span>
-			            </div>
-			            
-			            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
-			                
-			                <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
-			            </div>
-			            
-			            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
-			                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
-			            </div>
-
-			            ${htmlTopCats}
-			        `;
-			    }
-    const elBal = document.getElementById("balanceTotal");
-    if(elBal) {
-        const bal = totalI - totalG;
-        elBal.textContent = formatoMoneda(bal);
-        elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
-    }
-  
-    const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
-    const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
-
-    const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
-    globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
-
-    const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
-  
-    const totalesTarjetasARS = {};
-    const totalesTarjetasUSD = {};
-    let sumaTotalTarjetasARS = 0;
-    let sumaTotalTarjetasUSD = 0;
-
-    consumosTarjeta.forEach(g => {
-        const m = g.medioPago || "Tarjeta Desconocida";
-        const monto = Number(g.monto) || 0;
-        if ((g.descripcion || "").includes("[USD]")) {
-            totalesTarjetasUSD[m] = (totalesTarjetasUSD[m] || 0) + monto;
-            sumaTotalTarjetasUSD += monto;
-        } else {
-            totalesTarjetasARS[m] = (totalesTarjetasARS[m] || 0) + monto;
-            sumaTotalTarjetasARS += monto;
-        }
-    });
-
+			    });
 	// --- MAGIA HOVER PARA TARJETAS DE CRÉDITO DINÁMICAS ---
 	  globalTarjetas.forEach(t => {
 	      const idMonto = "monto-tarjeta-" + t.id;

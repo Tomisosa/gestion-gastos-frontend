@@ -8,6 +8,16 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="icon" href="icono.png" type="image/png">
+  
+  <style>
+      @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+      }
+      .animation-rotate {
+          animation: rotate 1s linear infinite;
+      }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -51,16 +61,16 @@
 		        <div id="inicio" class="page visible">
 		            
 		            <div class="cards" style="margin-bottom: 2rem;">
-		                <div class="card">
-		                    <h3>Saldo Neto</h3>
-		                    <p id="totalGastado" class="highlight">$0.00</p>
-		                </div>
+                        <div id="totalGastoWidget" class="card" style="padding: 1.5rem; text-align: center;">
+                            <p style="color: #64748b; font-weight: 600;">Cargando tus finanzas...</p>
+                            <span style="display:inline-block; margin-top:10px; font-size: 2rem; color: #2ac9bb;" class="material-icons animation-rotate">sync</span>
+                        </div>
 		            </div>
 
 					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px; width: 100%;">
 					                
 					                <div style="display: flex; align-items: center; gap: 8px;">
-					                    <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Dinero Disponible</h3>
+					                    <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Billeteras/Cuentas</h3>
 					                    <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
 					                        <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
 					                    </button>
@@ -93,6 +103,19 @@
                 <label>Filtrar por Categoría: <select id="filtroCategoriaSelect"><option value="all">Mostrar todas</option></select></label>
             </div>
 
+            <div class="panel" style="border-left: 5px solid #FF5454; margin-bottom: 2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🛒 Gastos VARIABLES</h3>
+                    <h3 id="totalVariables" style="color: #FF5454;">$0.00</h3>
+                </div>
+                <div class="table-wrapper tabla-con-scroll">
+                    <table id="tablaGastosVariables" class="table">
+                        <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
                     <h3>🔒 Gastos FIJOS</h3>
@@ -118,21 +141,7 @@
                     </table>
                 </div>
             </div>
-
-            <div class="panel" style="border-left: 5px solid #FF5454; margin-bottom: 2rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🛒 Gastos VARIABLES</h3>
-                    <h3 id="totalVariables" style="color: #FF5454;">$0.00</h3>
-                </div>
-                <div class="table-wrapper tabla-con-scroll">
-                    <table id="tablaGastosVariables" class="table">
-                        <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
             </div>
-
-        </div>
 
 		<div id="ver-ingresos" class="page">
 		          <div class="panel">
@@ -506,6 +515,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=90"></script>
+  <script src="js/dashboard.js?v=95"></script>
 </body>
 </html>
