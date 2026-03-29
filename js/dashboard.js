@@ -1001,7 +1001,7 @@ function renderGastosFijos(lista) {
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
-        <td style="font-weight: bold; color: #ffce56;">${textoMonto}</td>
+        <td class="monto-gasto">${textoMonto}</td>
         <td>${vto}</td>
         <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
         <td>${estadoPagado}</td>
@@ -1049,7 +1049,7 @@ function renderGastosVariables(lista) {
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
-        <td style="font-weight: bold; color: #2ac9bb;">${formatoMoneda(g.monto)}</td>
+        <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
         <td>${vto}</td>
         <td>${g.categoriaNombre||"-"}</td>
         <td>${estadoPagado}</td>
@@ -1070,7 +1070,7 @@ function renderIngresos(ingresos) {
   tbody.innerHTML = '';
   ingresos.forEach(i => {
     const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
-    tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td>${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
+    tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td class="monto-ingreso">${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
   });
 }
 
@@ -1126,7 +1126,7 @@ function renderConsumosCuotas(lista) {
           <td>${desc}</td>
           <td>${g.categoriaNombre || "-"}</td>
           <td>${badgeCuota}</td>
-          <td style="font-weight: bold;">${montoAMostrar}</td>
+          <td class="monto-gasto">${montoAMostrar}</td>
           <td>${acciones}</td>
       </tr>`;
     });
