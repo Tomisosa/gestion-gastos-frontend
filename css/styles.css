@@ -963,59 +963,93 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* =========================================================
-   LIMPIEZA VISUAL: TARJETA DE SALDO NETO (DISEÑO CLEAN)
+   DISEÑO EXACTO "TICKET PREMIUM" (COPIA DE LA FOTO)
    ========================================================= */
 
-/* 1. Saldo Neto - Ajuste de tamaño para que respire */
-#saldoNetoProtagonista {
-    font-size: clamp(2rem, 8vw, 2.6rem) !important;
-    margin-bottom: 20px !important;
-    letter-spacing: -1px !important;
-}
-
-/* =========================================================
-   NUEVO DISEÑO: INGRESOS ARRIBA (DER) Y GASTOS ABAJO (IZQ)
-   ========================================================= */
-
-/* Contenedor principal de los dos datos */
-#totalGastoWidget > div:nth-child(3) {
+/* Convertimos la tarjeta en un contenedor Flex para reordenar todo a nuestro antojo */
+#totalGastoWidget {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0 !important; /* Quitamos el hueco para controlarlo con los paddings */
+    padding: 24px 20px !important;
+}
+
+/* 1. Título "SALDO NETO" se queda primero */
+#totalGastoWidget > div:nth-child(1) {
+    order: 1 !important;
+}
+
+/* 2. El número gigante se queda segundo */
+#saldoNetoProtagonista {
+    order: 2 !important;
+    font-size: clamp(2rem, 8vw, 2.8rem) !important;
     margin-bottom: 25px !important;
-    width: 100% !important;
+    letter-spacing: -1px !important;
+    text-align: left !important;
+    white-space: nowrap !important; 
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important;
 }
 
-/* INGRESOS (Está 2do en el código, lo forzamos a ir 1ro, arriba a la derecha) */
-#totalGastoWidget > div:nth-child(3) span:last-child {
-    order: 1 !important; 
-    text-align: right !important; 
-    font-size: clamp(1rem, 5vw, 1.15rem) !important; /* Se achica solo si el número es larguísimo */
-    color: #475569 !important;
-    font-weight: 700 !important;
-    width: 100% !important;
-    border-bottom: 1px solid #cbd5e1 !important; /* LÍNEA SEPARADORA GRIS */
-    padding-bottom: 8px !important;
-    white-space: nowrap !important; /* Prohíbe que salte de renglón */
+/* 3. El % consumido (Texto Rojo) pasa al tercer lugar (Arriba a la derecha) */
+#totalGastoWidget > div:nth-child(5) {
+    order: 3 !important;
+    text-align: right !important;
+    margin-bottom: 5px !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    color: #ef4444 !important; 
 }
 
-/* GASTOS (Está 1ro en el código, lo forzamos a ir 2do, abajo a la izquierda) */
+/* ROMPEMOS LA CAJA DE GASTOS/INGRESOS PARA MANEJARLOS POR SEPARADO */
+#totalGastoWidget > div:nth-child(3) {
+    display: contents !important; /* MAGIA: Esto hace que Gastos e Ingresos queden sueltos */
+}
+
+/* 4. Gastos pasa al cuarto lugar (Izquierda, arriba de la barra) */
 #totalGastoWidget > div:nth-child(3) span:first-child {
-    order: 2 !important; 
-    text-align: left !important; 
-    font-size: clamp(1rem, 5vw, 1.15rem) !important;
-    color: #475569 !important;
-    font-weight: 700 !important;
+    order: 4 !important;
+    display: block !important;
     width: 100% !important;
-    padding-top: 8px !important;
-    white-space: nowrap !important; /* Prohíbe que salte de renglón */
+    text-align: left !important;
+    font-size: 1.15rem !important; 
+    font-weight: 800 !important; 
+    color: #1e293b !important; 
+    margin-bottom: 12px !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* 5. La Barra de progreso pasa al quinto lugar (Queda en el medio) */
+#totalGastoWidget > div:nth-child(4) {
+    order: 5 !important;
+    height: 10px !important; 
+    margin-bottom: 10px !important;
+    border-radius: 10px !important;
+}
+
+/* 6. Ingresos pasa al sexto lugar (Derecha, abajo de la barra) */
+#totalGastoWidget > div:nth-child(3) span:last-child {
+    order: 6 !important;
+    display: block !important;
+    width: 100% !important;
+    text-align: right !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: #475569 !important; 
+    margin-bottom: 25px !important;
+    padding-bottom: 20px !important;
+    border-bottom: 1px solid #e2e8f0 !important; /* Línea separadora final */
+}
+
+/* 7. El top de Categorías pasa al último lugar */
+#totalGastoWidget > div:nth-child(6) {
+    order: 7 !important;
 }
 
 /* =========================================================
    TOP CATEGORÍAS Y ANTI-DESBORDES
    ========================================================= */
 
-/* 3. Top Categorías: Prohibido saltar de renglón */
 #totalGastoWidget div[style*="display: flex; justify-content: space-between"] {
     font-size: 0.95rem !important;
     align-items: center !important;
@@ -1023,17 +1057,15 @@ select:focus, #filtroFechaMes:focus {
     gap: 10px !important;
 }
 
-/* Nombre de la categoría (Ej: Consumos de Tarjeta) */
 #totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:first-child {
     white-space: nowrap !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important; /* Si es muy largo pone "..." */
-    max-width: 50% !important; /* Le pone un límite para que no empuje el precio */
+    text-overflow: ellipsis !important;
+    max-width: 50% !important;
     color: #334155 !important;
     font-weight: 700 !important;
 }
 
-/* Monto y porcentaje */
 #totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:last-child {
     white-space: nowrap !important;
     text-align: right !important;
@@ -1045,20 +1077,9 @@ select:focus, #filtroFechaMes:focus {
     color: #94a3b8 !important;
 }
 
-/* 1. Saldo Neto Principal (Evita que el ,87 caiga al renglón de abajo) */
-#saldoNetoProtagonista {
-    /* clamp(mínimo, tamaño ideal según pantalla, máximo) */
-    font-size: clamp(1.8rem, 8vw, 2.8rem) !important; 
-    white-space: nowrap !important; /* MAGIA: Prohíbe terminantemente que se parta en dos líneas */
-    overflow: hidden !important; 
-    text-overflow: ellipsis !important; /* Si el número es trillonario, pone "..." en vez de romper la app */
-    line-height: 1.2 !important;
-}
-
-/* 2. Monto de las Billeteras/Cuentas (Ej: Ualá) */
 .tarjeta-billetera p {
-    font-size: clamp(1.4rem, 6vw, 1.8rem) !important; /* Se ajusta solo al ancho de la tarjeta */
-    white-space: nowrap !important; /* Evita que los centavos se caigan */
+    font-size: clamp(1.4rem, 6vw, 1.8rem) !important;
+    white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
@@ -1067,26 +1088,23 @@ select:focus, #filtroFechaMes:focus {
    ARREGLO: ALINEACIÓN LOGO Y NOMBRE EN MENÚ LATERAL
    ========================================================= */
 
-/* Forzamos que el contenedor de la marca sea una sola línea horizontal */
 .sidebar .brand {
     display: flex !important;
-    flex-direction: row !important; /* Asegura que estén uno al lado del otro */
-    align-items: center !important; /* Los centra verticalmente entre sí */
-    justify-content: flex-start !important; /* Los pega hacia la izquierda */
-    gap: 12px !important; /* Espacio exacto entre el ícono y la letra */
+    flex-direction: row !important; 
+    align-items: center !important; 
+    justify-content: flex-start !important; 
+    gap: 12px !important; 
     margin-top: 10px !important;
     margin-bottom: 30px !important;
-    padding-left: 5px !important; /* Un poquito de aire desde el borde izquierdo */
+    padding-left: 5px !important; 
 }
 
-/* Ajustes para el texto "Finty" en el menú */
 .sidebar .brand h1 {
     margin: 0 !important;
-    font-size: 1.8rem !important; /* Un tamaño elegante */
-    line-height: 1 !important; /* Evita espacios raros arriba o abajo del texto */
+    font-size: 1.8rem !important; 
+    line-height: 1 !important; 
 }
 
-/* Aseguramos que el contenedor del ícono no se estire raro */
 .sidebar .brand .finty-logo-container {
-    flex-shrink: 0 !important; /* Evita que el cuadradito de la F se achique si falta espacio */
+    flex-shrink: 0 !important; 
 }
