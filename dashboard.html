@@ -1,535 +1,549 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard - Gestión de Gastos</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="icon" href="icono.png" type="image/png">
-  
-  <style>
-      @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-      }
-      .animation-rotate {
-          animation: rotate 1s linear infinite;
-      }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard - Finty</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" href="icono.png" type="image/png">
+    
+    <style>
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animation-rotate {
+            animation: rotate 1s linear infinite;
+        }
+    </style>
 </head>
 <body>
-  <div class="app">
-    
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="app">
+        
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-    <aside class="sidebar" id="sidebar">
-		<div class="brand">
-		    <div class="finty-logo-container">
-		        <div class="finty-dot"></div>
-		        <span class="finty-f">F</span>
-		    </div>
-		    <h1>Finty</h1>
-		</div>
-      <nav>
-        <ul class="nav-list">
-          <li class="nav-item active" data-section="inicio">🏠 Inicio</li>
-          <li class="nav-item" data-section="ver-ingresos">💵 Ingresos</li>
-          <li class="nav-item" data-section="ver-gastos">💸 Gastos</li>
-          <li class="nav-item" data-section="proyeccion">🎯 Proyección</li>
-          <li class="nav-item" data-section="tarjetas">💳 Tarjetas</li>
-          <li class="nav-item" data-section="prestamos">🤝 Préstamos</li>
-          <li class="nav-item" data-section="ahorros">🐷 Ahorros</li>
-          <li class="nav-item" data-section="perfil">⚙️ Mi Perfil</li>
-          <li class="nav-item logout" id="logoutBtn">🚪 Cerrar sesión</li>
-        </ul>
-      </nav>
-      <footer class="sidebar-footer"><small id="userEmail">—</small></footer>
-    </aside>
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="finty-logo-container">
+                    <div class="finty-dot"></div>
+                    <span class="finty-f">F</span>
+                </div>
+                <h1>Finty</h1>
+            </div>
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item active" data-section="inicio">🏠 Inicio</li>
+                    <li class="nav-item" data-section="ver-ingresos">💵 Ingresos</li>
+                    <li class="nav-item" data-section="ver-gastos">💸 Gastos</li>
+                    <li class="nav-item" data-section="proyeccion">🎯 Proyección</li>
+                    <li class="nav-item" data-section="tarjetas">💳 Tarjetas</li>
+                    <li class="nav-item" data-section="prestamos">🤝 Préstamos</li>
+                    <li class="nav-item" data-section="ahorros">🐷 Ahorros</li>
+                    <li class="nav-item" data-section="perfil">⚙️ Mi Perfil</li>
+                    <li class="nav-item logout" id="logoutBtn">🚪 Cerrar sesión</li>
+                </ul>
+            </nav>
+            <footer class="sidebar-footer"><small id="userEmail">—</small></footer>
+        </aside>
 
-    <main class="main">
-      
-		<div class="mobile-header">
-		    <button id="menuToggle" class="menu-btn">
-		        <span class="material-icons">menu</span>
-		    </button>
-		    <div class="brand-mobile">
-		        <div class="finty-logo-container mini">
-		            <div class="finty-dot"></div>
-		            <span class="finty-f">F</span>
-		        </div>
-		        <h2>Finty</h2>
-		    </div>
-		</div>
-		      <section class="content">
-		        
-				<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
-				    
-				    <div style="display: flex; align-items: center; gap: 6px; background: var(--bg-saldos); padding: 6px 8px; border-radius: 10px; flex: 1; max-width: 260px;">
-				        
-				        <span style="font-size: 1.1rem; margin-left: 4px;">📅</span>
-				        
-				        <select id="filtroMes" style="flex: 1; min-width: 0; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-overflow: ellipsis;"></select>
-				        
-				        <select id="filtroAnio" style="flex: 0 0 auto; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-align: center;"></select>
-				    </div>
+        <main class="main">
+            
+            <div class="mobile-header">
+                <button id="menuToggle" class="menu-btn">
+                    <span class="material-icons">menu</span>
+                </button>
+                <div class="brand-mobile">
+                    <div class="finty-logo-container mini">
+                        <div class="finty-dot"></div>
+                        <span class="finty-f">F</span>
+                    </div>
+                    <h2>Finty</h2>
+                </div>
+            </div>
+            
+            <section class="content">
+                
+                <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 6px; background: var(--bg-saldos); padding: 6px 8px; border-radius: 10px; flex: 1; max-width: 260px;">
+                        <span style="font-size: 1.1rem; margin-left: 4px;">📅</span>
+                        <select id="filtroMes" style="flex: 1; min-width: 0; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-overflow: ellipsis;"></select>
+                        <select id="filtroAnio" style="flex: 0 0 auto; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-align: center;"></select>
+                    </div>
 
-				    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
-				        <span class="material-icons" style="font-size: 24px;">category</span>
-				        <span id="countCategorias" style="position: absolute; top: -5px; right: -5px; background: #be123c; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">0</span>
-				    </button>
-				</div>
+                    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
+                        <span class="material-icons" style="font-size: 24px;">category</span>
+                        <span id="countCategorias" style="position: absolute; top: -5px; right: -5px; background: #be123c; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">0</span>
+                    </button>
+                </div>
 
-		        <div id="inicio" class="page visible">
-		            
-		            <div class="cards" style="margin-bottom: 2rem;">
+                <div id="inicio" class="page visible">
+                    
+                    <div class="cards" style="margin-bottom: 2rem;">
                         <div id="totalGastoWidget" class="card" style="padding: 1.5rem; text-align: center;">
                             <p style="color: #64748b; font-weight: 600;">Cargando tus finanzas...</p>
                             <span style="display:inline-block; margin-top:10px; font-size: 2rem; color: #2ac9bb;" class="material-icons animation-rotate">sync</span>
                         </div>
-		            </div>
+                    </div>
 
-					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: nowrap; gap: 10px;">
-					    <div style="display: flex; align-items: center; gap: 8px;">
-					        <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Billeteras/Cuentas</h3>
-					        <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
-					            <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
-					        </button>
-					    </div>
-					    
-					    <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" class="btn-cuadrado" title="Añadir Nueva Cuenta" style="background: var(--color-primario); border: none; color: #000; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;">
-					        <span class="material-icons" style="font-size: 24px;">add_card</span>
-					    </button>
-					</div>
-		          
-		            <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
-		          
-		        </div>
-
-        <div id="ver-gastos" class="page">
-            <div class="panel" style="margin-bottom: 2rem;">
-                <h3>Gráfico de Gastos</h3>
-                <div style="position: relative; height: 220px; width: 100%; max-width: 500px; margin: auto;"><canvas id="gastosChart"></canvas></div>
-            </div>
-            <div class="filter-controls" style="margin-bottom: 1.5rem;">
-                <label>Filtrar por Categoría: <select id="filtroCategoriaSelect"><option value="all">Mostrar todas</option></select></label>
-            </div>
-
-            <div class="panel" style="border-left: 5px solid #FF5454; margin-bottom: 2rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3>🛒 Gastos VARIABLES</h3>
-                    <h3 id="totalVariables" style="color: #FF5454;">$0.00</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: nowrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 class="titulo-dinero" style="margin: 0; font-size: 1.3rem; color: var(--color-primario); font-weight: bold; white-space: nowrap;">💸 Billeteras/Cuentas</h3>
+                            <button id="btnToggleSaldos" onclick="toggleSaldos()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 0;">
+                                <span class="material-icons" id="iconoSaldos" style="font-size: 22px;">visibility_off</span>
+                            </button>
+                        </div>
+                        
+                        <button onclick="document.getElementById('modalBilletera').style.display = 'flex'" class="btn-cuadrado" title="Añadir Nueva Cuenta" style="background: var(--color-primario); border: none; color: #000; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0;">
+                            <span class="material-icons" style="font-size: 24px;">add_card</span>
+                        </button>
+                    </div>
+                    <div id="contenedorBilleteras" class="wallet-cards" style="display: flex; gap: 1.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 15px; width: 100%; box-sizing: border-box;"></div>
                 </div>
-                <div class="table-wrapper tabla-con-scroll">
-                    <table id="tablaGastosVariables" class="table">
-                        <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+
+                <div id="ver-gastos" class="page">
+                    <div class="panel" style="margin-bottom: 2rem;">
+                        <h3>Gráfico de Gastos</h3>
+                        <div style="position: relative; height: 220px; width: 100%; max-width: 500px; margin: auto;"><canvas id="gastosChart"></canvas></div>
+                    </div>
+                    
+                    <div class="filter-controls" style="margin-bottom: 1.5rem;">
+                        <label>Filtrar por Categoría: <select id="filtroCategoriaSelect"><option value="all">Mostrar todas</option></select></label>
+                    </div>
+
+                    <div class="panel" style="border-left: 5px solid #FF5454; margin-bottom: 2rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>🛒 Gastos VARIABLES</h3>
+                            <h3 id="totalVariables" style="color: #FF5454;">$0.00</h3>
+                        </div>
+                        <div class="table-wrapper tabla-con-scroll">
+                            <table id="tablaGastosVariables" class="table">
+                                <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem; overflow: hidden;">
+                        <div style="display:flex; flex-direction: column; gap: 15px;">
+                            <h3 style="margin: 0;">🔒 Gastos FIJOS</h3>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-around; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+                                <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
+                                    <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Total Fijos</span><br>
+                                    <strong id="totalFijos" style="color: #d97706; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
+                                </div>
+                                <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
+                                    <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Pagado ✅</span><br>
+                                    <strong id="totalFijosPagado" style="color: #0d9488; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
+                                </div>
+                                <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
+                                    <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Falta ⏳</span><br>
+                                    <strong id="totalFijosFalta" style="color: #e11d48; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
+                                </div>
+                            </div>
+
+                            <div class="table-wrapper tabla-con-scroll" style="margin-top: 15px;">
+                                <table id="tablaGastosFijos" class="table">
+                                    <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div> </div> </div> <div id="ver-ingresos" class="page">
+                    <div class="panel">
+                        <h3>Mis Ingresos</h3>
+                        <div class="table-wrapper tabla-con-scroll">
+                            <table id="tablaIngresos" class="table">
+                                <thead><tr><th>Fecha</th><th>Descripción</th><th>Medio</th><th>Categoría</th><th>Monto</th><th>Acciones</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-			<div class="panel" style="border-left: 5px solid #ffce56; margin-bottom: 2rem; overflow: hidden;">
-			    <div style="display:flex; flex-direction: column; gap: 15px;">
-			        <h3 style="margin: 0;">🔒 Gastos FIJOS</h3>
-			        
-					<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-around; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
-					    
-					    <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
-					        <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Total Fijos</span><br>
-					        <strong id="totalFijos" style="color: #d97706; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
-					    </div>
-					    
-					    <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
-					        <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Pagado ✅</span><br>
-					        <strong id="totalFijosPagado" style="color: #0d9488; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
-					    </div>
-					    
-					    <div style="text-align: center; flex: 1 1 30%; min-width: 100px;">
-					        <span style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: bold;">Falta ⏳</span><br>
-					        <strong id="totalFijosFalta" style="color: #e11d48; font-size: 1.1rem; word-break: break-word;">$0.00</strong>
-					    </div>
-					    
-					</div>
-
-				<div class="table-wrapper tabla-con-scroll" style="margin-top: 15px;">
-							        <table id="tablaGastosFijos" class="table">
-							            <thead><tr><th>Concepto</th><th>Monto</th><th>Vencimiento</th><th>Categoría</th><th>¿Pagado?</th><th>Fecha Pago</th><th>Medio</th><th>Acciones</th></tr></thead>
-							            <tbody></tbody>
-							        </table>
-							    </div>
-							</div> </div> <div id="ver-ingresos" class="page">
-		          <div class="panel">
-		            <h3>Mis Ingresos</h3>
-		            <div class="table-wrapper tabla-con-scroll">
-		                <table id="tablaIngresos" class="table">
-		                    <thead><tr><th>Fecha</th><th>Descripción</th><th>Medio</th><th>Categoría</th><th>Monto</th><th>Acciones</th></tr></thead>
-		                    <tbody></tbody>
-		                </table>
-		            </div>
-		          </div>
-		        </div>
         
-        <div id="prestamos" class="page">
-            <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="color: var(--color-primario); margin: 0;">🤝 Gestión de Préstamos</h2>
+                <div id="prestamos" class="page">
+                    <div class="panel">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h2 style="color: var(--color-primario); margin: 0;">🤝 Gestión de Préstamos</h2>
+                        </div>
+                        <p style="color: var(--texto-claro); margin-bottom: 25px;">Control de deudas y cuotas compartidas.</p>
+                        
+                        <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+                            <div class="card" style="background: #222; border-left: 4px solid #ffce56;">
+                                <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total a pagar por <span class="nombreDinamico">vos</span> este mes</h4>
+                                <p id="totalBelenPrestamos" style="font-size: 1.5rem; font-weight: bold; color: #ffce56; margin: 5px 0 0 0;">$ 0.00</p>
+                            </div>
+                        </div>
+
+                        <div id="contenedorTablasPrestamos"></div>
+
+                        <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalPrestamo').style.display = 'flex'">+ Crear Nuevo Préstamo (Múltiples Cuotas)</button>
+                    </div>
                 </div>
-                <p style="color: var(--texto-claro); margin-bottom: 25px;">Control de deudas y cuotas compartidas.</p>
+
+                <div id="ahorros" class="page">
+                    <div class="panel">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <h2 style="color: var(--color-primario); margin: 0;">Portafolio de Inversiones</h2>
+                            <button id="btnToggleSaldosAhorros" onclick="toggleSaldosAhorros()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
+                                <span class="material-icons" id="iconoSaldosAhorros" style="font-size: 20px;">visibility_off</span>
+                            </button>
+                        </div>
+                        <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                            <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
+                                <h3 style="color: #86efac; border: none; padding: 0; font-size: 0.9rem;">Total Dólares (MEP / Efectivo)</h3>
+                                <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">USD 0.00</div>
+                            </div>
+                            <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: none; position: relative; overflow: hidden;">
+                                <h3 style="color: #94a3b8; border: none; padding: 0; font-size: 0.9rem;">Total Pesos (Money Market / Cedears)</h3>
+                                <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">$ 0,00</div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Historial de Movimientos</h3>
+                        <div class="table-wrapper" style="max-height: 300px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
+                            <table class="table" id="tablaInversiones">
+                                <thead><tr><th>Fecha</th><th>Detalle de Inversión</th><th>Monto</th><th>Acciones</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalInversion').style.display = 'flex'">+ Registrar Nueva Inversión</button>
+                    </div>
+                </div>
+
+                <div id="tarjetas" class="page">
+                    <div class="panel">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h2 style="color: var(--color-secundario); margin: 0;">Gestión de Tarjetas de Crédito</h2>
+                                <button id="btnToggleSaldosTarjetas" onclick="toggleSaldosTarjetas()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
+                                    <span class="material-icons" id="iconoSaldosTarjetas" style="font-size: 20px;">visibility_off</span>
+                                </button>
+                            </div>
+                            <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-secundario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; height: fit-content;">💳 + Nueva</button>
+                        </div>
+                        
+                        <div style="background: transparent; padding: 12px 0; margin-bottom: 25px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 6px; margin-right: 10px;">
+                                <span class="material-icons" style="color: #64748b; font-size: 20px;">event_note</span>
+                                <span style="color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Fechas del Mes:</span>
+                            </div>
+                            
+                            <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
+                                Cierre: <input type="date" id="fechaCierreMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
+                            </label>
+                            
+                            <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
+                                Vencimiento: <input type="date" id="fechaVtoMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
+                            </label>
+                            
+                            <button onclick="guardarFechasTarjetas()" style="padding: 5px 12px; font-size: 0.85rem; border-radius: 4px; background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <span class="material-icons" style="font-size: 16px;">save</span> Guardar
+                            </button>
+                        </div>
+                        
+                        <div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="color: var(--texto-oscuro); font-size: 1.2rem; margin: 0;">Consumos para el mes seleccionado</h3>
+                            <select id="filtroTarjetaSelect" onchange="refreshAll()" style="background: #222; color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none; font-weight: bold;">
+                                <option value="all">💳 TODAS</option>
+                            </select>
+                        </div>
+                        <div class="table-wrapper" style="max-height: 350px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
+                            <table class="table" id="tablaTarjetas">
+                                <thead><tr><th>Fecha Compra</th><th>Descripción</th><th>Categoría</th><th>Cuota Actual</th><th>Monto Cuota</th><th>Acciones</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalTarjeta').style.display = 'flex'">+ Cargar Compra en Cuotas</button>
+                    </div>
+                </div>
+
+                <div id="perfil" class="page">
+                    <div class="panel">
+                        <h3>⚙️ Configuración de Seguridad</h3>
+                        <form id="formCambiarPass" class="form" style="max-width: 400px;">
+                            <label>Contraseña Actual</label><input type="password" id="currentPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <label>Nueva Contraseña</label><input type="password" id="newPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <label>Confirmar Contraseña</label><input type="password" id="confirmPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <button type="submit" class="btn">Actualizar Contraseña</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="fab-container" id="mainFabContainer">
+                    <div class="fab-options" id="fabOptions">
+                        <div class="fab-label-container" id="btnFabIngreso"><span class="fab-label">Agregar Ingreso</span><button class="fab-mini-btn" style="color: #2ac9bb;"><span class="material-icons">attach_money</span></button></div>
+                        <div class="fab-label-container" id="btnFabTarjeta" style="display: none;"><span class="fab-label">Cargar Compra</span><button class="fab-mini-btn" style="color: #00bcd4;"><span class="material-icons">credit_card</span></button></div>
+                        <div class="fab-label-container" id="btnFabGasto"><span class="fab-label">Agregar Gasto</span><button class="fab-mini-btn" style="color: #ff6384;"><span class="material-icons">shopping_cart</span></button></div>
+                    </div>
+                    <button class="fab-main" id="fabMain"><span class="material-icons" style="font-size: 32px;">add</span></button>
+                </div>
+
+                <div id="modalGasto" class="modal">
+                    <div class="modal-content"><span class="close" id="closeModal">&times;</span>
+                        <h3>Agregar Gasto</h3>
+                        <form id="formGasto" class="form">
+                            <input type="hidden" id="gastoId" value="">
+                            <div style="margin: 10px 0; background: #333; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="gastoEsFijo" style="width: 20px; height: 20px; accent-color: #ffce56;">
+                                <label for="gastoEsFijo" style="margin:0; cursor:pointer;">🔒 ¿Es Gasto FIJO?</label>
+                            </div>
+                            <div id="camposFijos" style="display:none; margin-top:10px; background:#222; padding:15px; border-radius:5px; border:1px solid #444;">
+                                <label>🔁 Tipo de repetición</label>
+                                <select id="tipoRepeticion">
+                                    <option value="mensual">📅 Todos los meses</option>
+                                    <option value="3meses">📆 Cada 3 meses</option>
+                                    <option value="6meses">🗓 Cada 6 meses</option>
+                                </select>
+                                <label style="margin-top:10px;">Cantidad de veces que se repetirá</label>
+                                <input type="number" id="gastoRepeticion" min="1" max="60" value="12">
+                                <p style="font-size:0.8rem; color:#888; margin-top:5px;">Ejemplo: 12 = se crearán gastos durante 12 períodos</p>
+                            </div>
+                            
+                            <label>Concepto <input id="gastoDescripcion" type="text" required /></label>
+                            <label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label>
+                            <label>Categoría <select id="gastoCategoria"></select></label>
+                            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+                            <label><span id="labelTextGasto">📅 Fecha del Gasto</span> <input id="gastoVencimiento" type="date" /></label>
+                            <div id="divMesImpacto" style="margin-top: 10px;">
+                                <label>Mes de impacto (Solo para gastos variables)</label>
+                                <input type="month" id="gastoMesImpacto">
+                            </div>
+                            <div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
+                                <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer;"><input type="checkbox" id="gastoPagado" style="width: 20px; height: 20px; accent-color: #2ac9bb;"> ✅ ¿Ya está pagado?</label>
+                                <div id="divFechaPagoReal" style="display: none; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                                    <label style="margin:0; color: #2ac9bb;">📅 ¿Qué día lo pagaste realmente? <input id="gastoFecha" type="date" style="margin-top: 5px;" /></label>
+                                    <label style="margin-top: 15px; color: #2ac9bb;">🏦 ¿De dónde salió la plata? <select id="gastoMedio" style="margin-top: 5px;"></select></label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
+                        </form>
+                    </div>
+                </div>
                 
-                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
-                    <div class="card" style="background: #222; border-left: 4px solid #ffce56;">
-                        <h4 style="color: #94a3b8; font-size: 0.85rem; margin: 0;">Total a pagar por <span class="nombreDinamico">vos</span> este mes</h4>
-                        <p id="totalBelenPrestamos" style="font-size: 1.5rem; font-weight: bold; color: #ffce56; margin: 5px 0 0 0;">$ 0.00</p>
+                <div id="modalIngreso" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalIngreso').style.display = 'none'">&times;</span>
+                        <h3>Agregar Ingreso</h3>
+                        <form id="formIngreso" class="form">
+                            <input type="hidden" id="ingresoId" value="">
+                            <label>Descripción <input id="ingresoDescripcion" type="text" /></label>
+                            <label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label>
+                            <label>Acreditar en (Cuentas Débito) <select id="ingresoMedio" required></select></label>
+                            <label>Categoría <select id="ingresoCategoria"></select></label>
+                            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+                            <label>📅 Fecha de cobro real <input id="ingresoFecha" type="date" required /></label>
+                            <label>Mes de impacto (Opcional) <input type="month" id="ingresoMesImpacto"></label>
+                            <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
+                        </form>
                     </div>
                 </div>
 
-                <div id="contenedorTablasPrestamos"></div>
-
-                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalPrestamo').style.display = 'flex'">+ Crear Nuevo Préstamo (Múltiples Cuotas)</button>
-            </div>
-        </div>
-
-		<div id="ahorros" class="page">
-		            <div class="panel">
-		                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-		                    <h2 style="color: var(--color-primario); margin: 0;">Portafolio de Inversiones</h2>
-		                    <button id="btnToggleSaldosAhorros" onclick="toggleSaldosAhorros()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
-		                        <span class="material-icons" id="iconoSaldosAhorros" style="font-size: 20px;">visibility_off</span>
-		                    </button>
-		                </div>
-		                <div class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-		                    <div class="card" style="background: linear-gradient(135deg, #166534 0%, #064e3b 100%); border: none; position: relative; overflow: hidden;">
-		                        <h3 style="color: #86efac; border: none; padding: 0; font-size: 0.9rem;">Total Dólares (MEP / Efectivo)</h3>
-		                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">USD 0.00</div>
-		                    </div>
-		                    <div class="card" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: none; position: relative; overflow: hidden;">
-		                        <h3 style="color: #94a3b8; border: none; padding: 0; font-size: 0.9rem;">Total Pesos (Money Market / Cedears)</h3>
-		                        <div class="highlight" style="color: #ffffff; font-size: 2.2rem; margin-top: 10px;">$ 0,00</div>
-		                    </div>
-		                </div>
-
-		                <h3 style="margin-top: 30px; margin-bottom: 15px; color: var(--texto-oscuro); font-size: 1.2rem;">Historial de Movimientos</h3>
-		                <div class="table-wrapper" style="max-height: 300px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
-		                    <table class="table" id="tablaInversiones">
-		                        <thead><tr><th>Fecha</th><th>Detalle de Inversión</th><th>Monto</th><th>Acciones</th></tr></thead>
-		                        <tbody></tbody>
-		                    </table>
-		                </div>
-
-		                <button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalInversion').style.display = 'flex'">+ Registrar Nueva Inversión</button>
-		            </div>
-		        </div>
-
-        <div id="tarjetas" class="page">
-            <div class="panel">
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-				    <div style="display: flex; align-items: center; gap: 10px;">
-				        <h2 style="color: var(--color-secundario); margin: 0;">Gestión de Tarjetas de Crédito</h2>
-				        <button id="btnToggleSaldosTarjetas" onclick="toggleSaldosTarjetas()" style="background: none; border: none; color: #888; cursor: pointer; display: flex; align-items: center; padding: 5px;">
-				            <span class="material-icons" id="iconoSaldosTarjetas" style="font-size: 20px;">visibility_off</span>
-				        </button>
-				    </div>
-				    <button onclick="document.getElementById('modalNuevaTarjeta').style.display = 'flex'" style="background: var(--color-secundario); border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; height: fit-content;">💳 + Nueva</button>
-				</div>
-				<div style="background: transparent; padding: 12px 0; margin-bottom: 25px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-				    
-				    <div style="display: flex; align-items: center; gap: 6px; margin-right: 10px;">
-				        <span class="material-icons" style="color: #64748b; font-size: 20px;">event_note</span>
-				        <span style="color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Fechas del Mes:</span>
-				    </div>
-				    
-				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
-				        Cierre: <input type="date" id="fechaCierreMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
-				    </label>
-				    
-				    <label style="margin: 0; display: flex; align-items: center; gap: 5px; color: #334155; font-size: 0.9rem; font-weight: bold;">
-				        Vencimiento: <input type="date" id="fechaVtoMes" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; background: #ffffff; color: #334155; outline: none; font-size: 0.85rem;">
-				    </label>
-				    
-				    <button onclick="guardarFechasTarjetas()" style="padding: 5px 12px; font-size: 0.85rem; border-radius: 4px; background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-				        <span class="material-icons" style="font-size: 16px;">save</span> Guardar
-				    </button>
-				</div>
-				<div id="contenedorMisTarjetas" class="cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));"></div>
-				<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-				    <h3 style="color: var(--texto-oscuro); font-size: 1.2rem; margin: 0;">Consumos para el mes seleccionado</h3>
-				    <select id="filtroTarjetaSelect" onchange="refreshAll()" style="background: #222; color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 5px; cursor: pointer; outline: none; font-weight: bold;">
-				        <option value="all">💳 TODAS</option>
-				    </select>
-				</div>
-				<div class="table-wrapper" style="max-height: 350px; overflow-y: auto; display: block; border-bottom: 1px solid #333;">
-				    <table class="table" id="tablaTarjetas">
-                        <thead><tr><th>Fecha Compra</th><th>Descripción</th><th>Categoría</th><th>Cuota Actual</th><th>Monto Cuota</th><th>Acciones</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                <div id="modalTarjeta" class="modal">
+                    <div class="modal-content">
+                        <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
+                        <h3>🛒 Cargar Compra con Tarjeta</h3>
+                        <form id="formTarjeta" class="form">
+                            <label>Descripción (Ej: Zapatillas) <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" /></label>
+                            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                                <label style="flex: 1;">Moneda
+                                    <select id="tarjetaMoneda" required style="width: 100%; padding: 10px; border-radius: 5px; background: #333; color: white; border: 1px solid #444;">
+                                        <option value="ARS">Pesos (ARS)</option>
+                                        <option value="USD">Dólares (USD)</option>
+                                    </select>
+                                </label>
+                                <label style="flex: 2;">Monto TOTAL <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="0.00" /></label>
+                            </div>
+                            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                                <label style="flex: 1;">Cuotas 
+                                    <select id="tarjetaCuotas" required>
+                                        <option value="1">1 cuota (Un pago)</option>
+                                        <option value="3">3 cuotas</option>
+                                        <option value="6">6 cuotas</option>
+                                        <option value="9">9 cuotas</option>
+                                        <option value="12">12 cuotas</option>
+                                        <option value="18">18 cuotas</option>
+                                        <option value="24">24 cuotas</option>
+                                    </select>
+                                </label>
+                                <label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label>
+                            </div>
+                            <label>Fecha exacta de la compra <input type="date" id="tarjetaFechaExacta" required></label>
+                            <label>Seleccionar Tarjeta de Crédito<select id="tarjetaTipo" required></select></label>
+                            <label>Categoría <select id="tarjetaCategoria"></select></label>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
+                        </form>
+                    </div>
                 </div>
-				<button class="btn" style="margin-top: 25px; max-width: 300px;" onclick="document.getElementById('modalTarjeta').style.display = 'flex'">+ Cargar Compra en Cuotas</button>
-            </div>
-        </div>
 
-		<div id="perfil" class="page">
-		  <div class="panel">
-		    <h3>⚙️ Configuración de Seguridad</h3>
-		    <form id="formCambiarPass" class="form" style="max-width: 400px;">
-              <label>Contraseña Actual</label><input type="password" id="currentPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
-              <label>Nueva Contraseña</label><input type="password" id="newPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
-              <label>Confirmar Contraseña</label><input type="password" id="confirmPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
-              <button type="submit" class="btn">Actualizar Contraseña</button>
-		    </form>
-		  </div>
-		</div>
-
-        <div class="fab-container" id="mainFabContainer">
-            <div class="fab-options" id="fabOptions">
-                <div class="fab-label-container" id="btnFabIngreso"><span class="fab-label">Agregar Ingreso</span><button class="fab-mini-btn" style="color: #2ac9bb;"><span class="material-icons">attach_money</span></button></div>
-                <div class="fab-label-container" id="btnFabTarjeta" style="display: none;"><span class="fab-label">Cargar Compra</span><button class="fab-mini-btn" style="color: #00bcd4;"><span class="material-icons">credit_card</span></button></div>
-                <div class="fab-label-container" id="btnFabGasto"><span class="fab-label">Agregar Gasto</span><button class="fab-mini-btn" style="color: #ff6384;"><span class="material-icons">shopping_cart</span></button></div>
-            </div>
-            <button class="fab-main" id="fabMain"><span class="material-icons" style="font-size: 32px;">add</span></button>
-        </div>
-
-		<div id="modalGasto" class="modal"><div class="modal-content"><span class="close" id="closeModal">&times;</span>
-		            <h3>Agregar Gasto</h3>
-		            <form id="formGasto" class="form">
-		                <input type="hidden" id="gastoId" value="">
-		                <div style="margin: 10px 0; background: #333; padding: 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px;">
-		                    <input type="checkbox" id="gastoEsFijo" style="width: 20px; height: 20px; accent-color: #ffce56;">
-		                    <label for="gastoEsFijo" style="margin:0; cursor:pointer;">🔒 ¿Es Gasto FIJO?</label>
-		                </div>
-						<div id="camposFijos" style="display:none; margin-top:10px; background:#222; padding:15px; border-radius:5px; border:1px solid #444;">
-						    <label>🔁 Tipo de repetición</label>
-						    <select id="tipoRepeticion">
-						      <option value="mensual">📅 Todos los meses</option>
-						      <option value="3meses">📆 Cada 3 meses</option>
-						      <option value="6meses">🗓 Cada 6 meses</option>
-						    </select>
-						    <label style="margin-top:10px;">Cantidad de veces que se repetirá</label>
-						    <input type="number" id="gastoRepeticion" min="1" max="60" value="12">
-						    <p style="font-size:0.8rem; color:#888; margin-top:5px;">Ejemplo: 12 = se crearán gastos durante 12 períodos</p>
-						</div>
-		                
-		                <label>Concepto <input id="gastoDescripcion" type="text" required /></label>
-		                <label>Monto <input id="gastoMonto" type="number" step="0.01" required /></label>
-		                <label>Categoría <select id="gastoCategoria"></select></label>
-		                
-		                <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-		                
-		                <label><span id="labelTextGasto">📅 Fecha del Gasto</span> <input id="gastoVencimiento" type="date" /></label>
-						<div id="divMesImpacto" style="margin-top: 10px;">
-						    <label>Mes de impacto (Solo para gastos variables)</label>
-						    <input type="month" id="gastoMesImpacto">
-						</div>
-		                
-		                <div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
-		                    <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer;"><input type="checkbox" id="gastoPagado" style="width: 20px; height: 20px; accent-color: #2ac9bb;"> ✅ ¿Ya está pagado?</label>
-		                    
-		                    <div id="divFechaPagoReal" style="display: none; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
-		                        <label style="margin:0; color: #2ac9bb;">📅 ¿Qué día lo pagaste realmente? <input id="gastoFecha" type="date" style="margin-top: 5px;" /></label>
-		                        <label style="margin-top: 15px; color: #2ac9bb;">🏦 ¿De dónde salió la plata? <select id="gastoMedio" style="margin-top: 5px;"></select></label>
-		                    </div>
-		                </div>
-		                <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
-		            </form>
-		        </div></div>
-        
-		<div id="modalIngreso" class="modal">
-		    <div class="modal-content">
-		        <span class="close" onclick="document.getElementById('modalIngreso').style.display = 'none'">&times;</span>
-		        <h3>Agregar Ingreso</h3>
-		        <form id="formIngreso" class="form">
-		            <input type="hidden" id="ingresoId" value="">
-		            <label>Descripción <input id="ingresoDescripcion" type="text" /></label>
-		            <label>Monto <input id="ingresoMonto" type="number" step="0.01" required /></label>
-		            <label>Acreditar en (Cuentas Débito) <select id="ingresoMedio" required></select></label>
-		            <label>Categoría <select id="ingresoCategoria"></select></label>
-		            
-		            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-		            
-		            <label>📅 Fecha de cobro real <input id="ingresoFecha" type="date" required /></label>
-		            <label>Mes de impacto (Opcional) <input type="month" id="ingresoMesImpacto"></label>
-		            
-		            <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
-		        </form>
-		    </div>
-		</div>
-
-		<div id="modalTarjeta" class="modal">
-		    <div class="modal-content">
-		        <span class="close" id="closeModalTarjeta" onclick="document.getElementById('modalTarjeta').style.display = 'none'">&times;</span>
-		        <h3>🛒 Cargar Compra con Tarjeta</h3>
-		        <form id="formTarjeta" class="form">
-		            <label>Descripción (Ej: Zapatillas) <input id="tarjetaDescripcion" type="text" required placeholder="¿Qué compraste?" /></label>
-		            
-		            <div style="display: flex; gap: 15px; margin-top: 10px;">
-		                <label style="flex: 1;">Moneda
-		                    <select id="tarjetaMoneda" required style="width: 100%; padding: 10px; border-radius: 5px; background: #333; color: white; border: 1px solid #444;">
-		                        <option value="ARS">Pesos (ARS)</option>
-		                        <option value="USD">Dólares (USD)</option>
-		                    </select>
-		                </label>
-		                <label style="flex: 2;">Monto TOTAL 
-		                    <input id="tarjetaMontoTotal" type="number" step="0.01" required placeholder="0.00" />
-		                </label>
-		            </div>
-
-		            <div style="display: flex; gap: 15px; margin-top: 10px;">
-		                <label style="flex: 1;">Cuotas 
-		                    <select id="tarjetaCuotas" required>
-		                        <option value="1">1 cuota (Un pago)</option>
-		                        <option value="3">3 cuotas</option>
-		                        <option value="6">6 cuotas</option>
-		                        <option value="9">9 cuotas</option>
-		                        <option value="12">12 cuotas</option>
-		                        <option value="18">18 cuotas</option>
-		                        <option value="24">24 cuotas</option>
-		                    </select>
-		                </label>
-		                <label style="flex: 1;">Mes de la 1° Cuota <input id="tarjetaPrimeraCuota" type="month" required /></label>
-		            </div>
-		            
-		            <label>Fecha exacta de la compra <input type="date" id="tarjetaFechaExacta" required></label>
-		            
-		            <label>Seleccionar Tarjeta de Crédito<select id="tarjetaTipo" required></select></label>
-		            <label>Categoría <select id="tarjetaCategoria"></select></label>
-		            
-		            <button type="submit" class="btn" style="margin-top: 20px;">Calcular y Guardar Cuotas</button>
-		        </form>
-		    </div>
-		</div>
-
-        <div id="modalPrestamo" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
-                <h3>🤝 Crear Nuevo Préstamo</h3>
-                <p style="font-size: 0.8rem; color: #888;">Esto generará las cuotas vacías. Mes a mes podrás llenarlas con el monto exacto.</p>
-                <form id="formPrestamo" class="form">
-                    <label>Nombre del Préstamo (Ej: Auto, Heladera) <input id="prestamoNombre" type="text" required /></label>
-                    <label>Pertenece a: 
-                        <select id="prestamoPertenece" required>
-                            <option value="Mamá">Mamá</option>
-                            <option value="Papá">Papá</option>
-                            <option value="Ambos">Ambos (Mamá y Papá)</option>
-                        </select>
-                    </label>
-                    <div style="display: flex; gap: 15px; margin-top: 10px;">
-                        <label style="flex: 1;">Total de Cuotas <input id="prestamoTotalCuotas" type="number" min="1" required placeholder="Ej: 36" /></label>
-                        <label style="flex: 1;">1° Cuota empieza en: <input id="prestamoMesInicio" type="month" required /></label>
+                <div id="modalPrestamo" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalPrestamo').style.display = 'none'">&times;</span>
+                        <h3>🤝 Crear Nuevo Préstamo</h3>
+                        <p style="font-size: 0.8rem; color: #888;">Esto generará las cuotas vacías. Mes a mes podrás llenarlas con el monto exacto.</p>
+                        <form id="formPrestamo" class="form">
+                            <label>Nombre del Préstamo (Ej: Auto, Heladera) <input id="prestamoNombre" type="text" required /></label>
+                            <label>Pertenece a: 
+                                <select id="prestamoPertenece" required>
+                                    <option value="Mamá">Mamá</option>
+                                    <option value="Papá">Papá</option>
+                                    <option value="Ambos">Ambos (Mamá y Papá)</option>
+                                </select>
+                            </label>
+                            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                                <label style="flex: 1;">Total de Cuotas <input id="prestamoTotalCuotas" type="number" min="1" required placeholder="Ej: 36" /></label>
+                                <label style="flex: 1;">1° Cuota empieza en: <input id="prestamoMesInicio" type="month" required /></label>
+                            </div>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Generar Cuotas</button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn" style="margin-top: 20px;">Generar Cuotas</button>
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <div id="modalEditarPrestamo" class="modal">
-            <div class="modal-content" style="max-width: 400px;">
-                <span class="close" onclick="document.getElementById('modalEditarPrestamo').style.display = 'none'">&times;</span>
-                <h3 id="tituloEditarPrestamo">📝 Cargar montos del mes</h3>
-                <form id="formEditarPrestamo" class="form">
-                    <input type="hidden" id="editPrestamoId">
-                    <input type="hidden" id="editPrestamoMesString">
-                    
-                    <label style="color: #ffce56;">Monto TOTAL de la Cuota ($) <input id="editPrestamoTotal" type="number" step="0.01" required /></label>
-                    <label style="color: #2ac9bb;">Lo que paga <span class="nombreDinamico">vos</span> ($) <input id="editPrestamoBelen" type="number" step="0.01" required /></label>
-                    
-                    <div style="background: #222; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center;">
-                        <p style="margin: 0; font-size: 0.8rem; color: #888;">El otro aportará automáticamente:</p>
-                        <h3 id="calculoAportado" style="margin: 5px 0 0 0; color: #fff;">$ 0.00</h3>
+                <div id="modalEditarPrestamo" class="modal">
+                    <div class="modal-content" style="max-width: 400px;">
+                        <span class="close" onclick="document.getElementById('modalEditarPrestamo').style.display = 'none'">&times;</span>
+                        <h3 id="tituloEditarPrestamo">📝 Cargar montos del mes</h3>
+                        <form id="formEditarPrestamo" class="form">
+                            <input type="hidden" id="editPrestamoId">
+                            <input type="hidden" id="editPrestamoMesString">
+                            <label style="color: #ffce56;">Monto TOTAL de la Cuota ($) <input id="editPrestamoTotal" type="number" step="0.01" required /></label>
+                            <label style="color: #2ac9bb;">Lo que paga <span class="nombreDinamico">vos</span> ($) <input id="editPrestamoBelen" type="number" step="0.01" required /></label>
+                            <div style="background: #222; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center;">
+                                <p style="margin: 0; font-size: 0.8rem; color: #888;">El otro aportará automáticamente:</p>
+                                <h3 id="calculoAportado" style="margin: 5px 0 0 0; color: #fff;">$ 0.00</h3>
+                            </div>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Guardar Montos</button>
+                        </form>
                     </div>
-                    
-                    <button type="submit" class="btn" style="margin-top: 20px;">Guardar Montos</button>
-                </form>
-            </div>
-        </div>
-        
-        <div id="modalCategorias" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalCategorias').style.display = 'none'">&times;</span><h3>Categorías</h3><div class="categoria-form"><input id="nuevaCategoriaInput" placeholder="Nueva categoría" /><button onclick="crearCategoria()" class="btn">Crear</button></div><ul id="listaCategoriasGestion" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul></div></div>
+                </div>
+                
+                <div id="modalCategorias" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalCategorias').style.display = 'none'">&times;</span>
+                        <h3>Categorías</h3>
+                        <div class="categoria-form">
+                            <input id="nuevaCategoriaInput" placeholder="Nueva categoría" />
+                            <button onclick="crearCategoria()" class="btn">Crear</button>
+                        </div>
+                        <ul id="listaCategoriasGestion" class="list" style="list-style: none; margin-top: 15px; padding: 0;"></ul>
+                    </div>
+                </div>
 
-       <div id="modalNuevaTarjeta" class="modal"><div class="modal-content"><span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span><h3>💳 Agregar Tarjeta de Crédito</h3><form id="formNuevaTarjeta" class="form"><label>Nombre (Ej: Visa, Mastercard) <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label><label>Color de fondo para la cajita <select id="nuevaTarjetaColor" required><option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option><option value="rojo">Rojo</option></select></label><button type="submit" class="btn" style="margin-top: 20px;">Guardar Crédito</button></form></div></div>
+                <div id="modalNuevaTarjeta" class="modal">
+                    <div class="modal-content">
+                        <span class="close" id="closeModalNuevaTarjeta" onclick="document.getElementById('modalNuevaTarjeta').style.display = 'none'">&times;</span>
+                        <h3>💳 Agregar Tarjeta de Crédito</h3>
+                        <form id="formNuevaTarjeta" class="form">
+                            <label>Nombre (Ej: Visa, Mastercard) <input id="nuevaTarjetaNombre" type="text" required placeholder="¿Cómo se llama?" /></label>
+                            <label>Color de fondo para la cajita <select id="nuevaTarjetaColor" required><option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option><option value="rojo">Rojo</option></select></label>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Guardar Crédito</button>
+                        </form>
+                    </div>
+                </div>
 
-	   <div id="modalBilletera" class="modal">
-	       <div class="modal-content">
-	           <span class="close" onclick="document.getElementById('modalBilletera').style.display = 'none'">&times;</span>
-	           <h3>🏦 Agregar Nueva Cuenta</h3>
-	           <form id="formBilletera" class="form">
-	               <label>Nombre de la Cuenta <input id="billeteraNombre" type="text" required placeholder="Ej: Ualá, Galicia" /></label>
-	               <label>Color de fondo 
-	                   <select id="billeteraColor" required>
-	                       <option value="azul">Azul Oscuro</option>
-	                       <option value="naranja">Naranja</option>
-	                       <option value="violeta">Violeta</option>
-	                       <option value="celeste">Celeste</option>
-	                       <option value="verde">Verde</option>
-	                       <option value="bna">Verde Agua</option>
-	                       <option value="negro">Negro</option>
-	                       <option value="rojo">Rojo</option>
-	                   </select>
-	               </label>
-	               <button type="submit" class="btn" style="margin-top: 20px;">Crear Cuenta</button>
-	           </form>
-	       </div>
-	   </div>
+                <div id="modalBilletera" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalBilletera').style.display = 'none'">&times;</span>
+                        <h3>🏦 Agregar Nueva Cuenta</h3>
+                        <form id="formBilletera" class="form">
+                            <label>Nombre de la Cuenta <input id="billeteraNombre" type="text" required placeholder="Ej: Ualá, Galicia" /></label>
+                            <label>Color de fondo 
+                                <select id="billeteraColor" required>
+                                    <option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option><option value="rojo">Rojo</option>
+                                </select>
+                            </label>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Crear Cuenta</button>
+                        </form>
+                    </div>
+                </div>
 
-	   <div id="modalEditarBilletera" class="modal">
-	       <div class="modal-content">
-	           <span class="close" onclick="document.getElementById('modalEditarBilletera').style.display = 'none'">&times;</span>
-	           <h3>✏️ Editar Cuenta</h3>
-	           <form id="formEditarBilletera" class="form">
-	               <input type="hidden" id="editBilleteraId">
-	               <label>Nombre de la Cuenta <input id="editBilleteraNombre" type="text" required /></label>
-	               <label>Color de fondo 
-	                   <select id="editBilleteraColor" required>
-	                       <option value="azul">Azul Oscuro</option>
-	                       <option value="naranja">Naranja</option>
-	                       <option value="violeta">Violeta</option>
-	                       <option value="celeste">Celeste</option>
-	                       <option value="verde">Verde</option>
-	                       <option value="bna">Verde Agua</option>
-	                       <option value="negro">Negro</option>
-	                       <option value="rojo">Rojo</option>
-	                   </select>
-	               </label>
-	               <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
-	           </form>
-	       </div>
-	   </div>
+                <div id="modalEditarBilletera" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalEditarBilletera').style.display = 'none'">&times;</span>
+                        <h3>✏️ Editar Cuenta</h3>
+                        <form id="formEditarBilletera" class="form">
+                            <input type="hidden" id="editBilleteraId">
+                            <label>Nombre de la Cuenta <input id="editBilleteraNombre" type="text" required /></label>
+                            <label>Color de fondo 
+                                <select id="editBilleteraColor" required>
+                                    <option value="azul">Azul Oscuro</option><option value="naranja">Naranja</option><option value="violeta">Violeta</option><option value="celeste">Celeste</option><option value="verde">Verde</option><option value="bna">Verde Agua</option><option value="negro">Negro</option><option value="rojo">Rojo</option>
+                                </select>
+                            </label>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
 
-        <div id="modalInversion" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span><h3>📈 Nueva Inversión / Ahorro</h3><form id="formInversion" class="form"><label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label><label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label><div style="display: flex; gap: 15px;"><label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label><label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label></div><button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button></form></div></div>
+                <div id="modalInversion" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalInversion').style.display = 'none'">&times;</span>
+                        <h3>📈 Nueva Inversión / Ahorro</h3>
+                        <form id="formInversion" class="form">
+                            <label>Lugar (Ej: BALANZ, UALÁ) <input id="invLugar" type="text" required placeholder="¿Dónde está la plata?" /></label>
+                            <label>Instrumento <input id="invInstrumento" type="text" required placeholder="¿En qué invertiste?" /></label>
+                            <div style="display: flex; gap: 15px;">
+                                <label style="flex: 1;">Moneda <select id="invMoneda"><option value="ARS">Pesos ($)</option><option value="USD">Dólares (USD)</option></select></label>
+                                <label style="flex: 1;">Monto <input id="invMonto" type="number" step="0.01" required placeholder="0.00" /></label>
+                            </div>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Guardar en Portafolio</button>
+                        </form>
+                    </div>
+                </div>
 
-        <div id="modalProyeccion" class="modal"><div class="modal-content" style="max-width: 600px;"><span class="close" id="closeProyeccion" onclick="document.getElementById('modalProyeccion').style.display = 'none'">&times;</span><h3>🎯 Proyección Mensual</h3><table class="table" style="margin-bottom: 20px;"><thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead><tbody id="tablaProyeccionBody"></tbody></table><div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion"></div></div></div>
+                <div id="modalProyeccion" class="modal">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <span class="close" id="closeProyeccion" onclick="document.getElementById('modalProyeccion').style.display = 'none'">&times;</span>
+                        <h3>🎯 Proyección Mensual</h3>
+                        <table class="table" style="margin-bottom: 20px;">
+                            <thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead>
+                            <tbody id="tablaProyeccionBody"></tbody>
+                        </table>
+                        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion"></div>
+                    </div>
+                </div>
 
-      <div id="message" class="toast"></div>
-	  
-	  <div id="modalEditarCuota" class="modal"><div class="modal-content"><span class="close" onclick="document.getElementById('modalEditarCuota').style.display = 'none'">&times;</span>
-	              <h3>✏️ Editar Cuota</h3>
-	              <form id="formEditarCuota" class="form">
-	                  <input type="hidden" id="editCuotaId">
-	                  <input type="hidden" id="editCuotaMedio">
-	                  <label>Fecha Compra <input id="editCuotaFecha" type="date" required /></label>
-	                  <label>Descripción <input id="editCuotaDescripcion" type="text" required /></label>
-	                  <label>Categoría <select id="editCuotaCategoria"></select></label>
-	                  <div style="display: flex; gap: 15px; margin-top: 10px;">
-	                      <label style="flex: 1;">Cuota Actual <input id="editCuotaInfo" type="text" required placeholder="Ej: 1/3" /></label>
-	                      <label style="flex: 1;">Monto Cuota <input id="editCuotaMonto" type="number" step="0.01" required /></label>
-	                  </div>
-	                  <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
-	              </form>
-	          </div></div>
-			  <div id="modalPagarGasto" class="modal">
-			              <div class="modal-content" style="max-width: 400px;">
-			                  <span class="close" onclick="document.getElementById('modalPagarGasto').style.display = 'none'">&times;</span>
-			                  <h3>✅ Confirmar Pago</h3>
-			                  <p style="color: #94a3b8; margin-bottom: 15px;">Estás por pagar: <strong id="pagoGastoDesc" style="color: #fff;"></strong></p>
-			                  <form id="formPagarGasto" class="form">
-			                      <input type="hidden" id="pagoGastoId">
-			                      <label>📅 ¿Qué día lo pagaste? <input id="pagoGastoFecha" type="date" required /></label>
-			                      <label>🏦 ¿De dónde salió la plata? <select id="pagoGastoMedio" required></select></label>
-			                      <button type="submit" class="btn" style="margin-top: 15px;">Registrar Pago</button>
-			                  </form>
-			              </div>
-			          </div>
-      </section>
-    </main>
-  </div>
-  <script src="js/dashboard.js?v=133"></script>
+                <div id="message" class="toast"></div>
+                
+                <div id="modalEditarCuota" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="document.getElementById('modalEditarCuota').style.display = 'none'">&times;</span>
+                        <h3>✏️ Editar Cuota</h3>
+                        <form id="formEditarCuota" class="form">
+                            <input type="hidden" id="editCuotaId">
+                            <input type="hidden" id="editCuotaMedio">
+                            <label>Fecha Compra <input id="editCuotaFecha" type="date" required /></label>
+                            <label>Descripción <input id="editCuotaDescripcion" type="text" required /></label>
+                            <label>Categoría <select id="editCuotaCategoria"></select></label>
+                            <div style="display: flex; gap: 15px; margin-top: 10px;">
+                                <label style="flex: 1;">Cuota Actual <input id="editCuotaInfo" type="text" required placeholder="Ej: 1/3" /></label>
+                                <label style="flex: 1;">Monto Cuota <input id="editCuotaMonto" type="number" step="0.01" required /></label>
+                            </div>
+                            <button type="submit" class="btn" style="margin-top: 20px;">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div id="modalPagarGasto" class="modal">
+                    <div class="modal-content" style="max-width: 400px;">
+                        <span class="close" onclick="document.getElementById('modalPagarGasto').style.display = 'none'">&times;</span>
+                        <h3>✅ Confirmar Pago</h3>
+                        <p style="color: #94a3b8; margin-bottom: 15px;">Estás por pagar: <strong id="pagoGastoDesc" style="color: #fff;"></strong></p>
+                        <form id="formPagarGasto" class="form">
+                            <input type="hidden" id="pagoGastoId">
+                            <label>📅 ¿Qué día lo pagaste? <input id="pagoGastoFecha" type="date" required /></label>
+                            <label>🏦 ¿De dónde salió la plata? <select id="pagoGastoMedio" required></select></label>
+                            <button type="submit" class="btn" style="margin-top: 15px;">Registrar Pago</button>
+                        </form>
+                    </div>
+                </div>
+                
+            </section>
+        </main>
+    </div>
+    <script src="js/dashboard.js?v=134"></script>
 </body>
 </html>
