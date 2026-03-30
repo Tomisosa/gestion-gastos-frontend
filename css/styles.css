@@ -1045,6 +1045,21 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* =========================================================
+   REFINAMIENTO PARA COMPUTADORAS (PC)
+   ========================================================= */
+@media (min-width: 768px) {
+    /* Evita que el botón del mes se estire al infinito en la PC */
+    #filtroMes {
+        flex: 0 0 150px !important;
+    }
+
+    /* Le pone un límite de ancho a la tarjeta principal para que se lea mejor en monitores grandes */
+    #totalGastoWidget {
+        max-width: 900px !important; 
+        margin: 0 auto !important; 
+    }
+}
+/* =========================================================
    TOP CATEGORÍAS Y ANTI-DESBORDES
    ========================================================= */
 
