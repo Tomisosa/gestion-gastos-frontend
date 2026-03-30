@@ -8,10 +8,16 @@
   "description": "Tu plata, tus reglas. Control inteligente.",
   "icons": [
     {
-      "src": "/finty-logo.png",
-      "sizes": "452x460 any",
+      "src": "finty-logo.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "finty-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
