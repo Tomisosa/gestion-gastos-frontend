@@ -54,24 +54,23 @@ function handleAuthError(res) {
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
-    
-    // Si la base de datos rechaza el token, tiramos error directo
+
     if (!res.ok) throw new Error("Token inválido");
-    
+
     handleAuthError(res);
+
     user = await res.json();
-    
+
     const emailDiv = document.getElementById("userEmail");
-    if(emailDiv) {
-        // Aseguramos que nunca diga undefined
-        emailDiv.textContent = "👤 " + (user.email || user.nombre || "Usuario");
-        emailDiv.style.color = "#ffce56"; 
-        emailDiv.style.fontWeight = "bold";
+    if (emailDiv) {
+      emailDiv.textContent = "👤 " + (user.email || user.nombre || "Usuario");
+      emailDiv.style.color = "#ffce56";
+      emailDiv.style.fontWeight = "bold";
     }
-  } catch (e) { 
-    // Si falla por CUALQUIER motivo, limpiamos la basura y lo mandamos al login
+
+  } catch (e) {
     localStorage.clear();
-    window.location.replace("login.html"); 
+    window.location.replace("login.html");
   }
 }
 
