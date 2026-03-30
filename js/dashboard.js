@@ -265,49 +265,93 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 			    });
 	}
 	// REEMPLAZAR LA FUNCIÓN ENTERA POR ESTA:
+
 	function cargarSelectorFechas() {
-	    const selectMes = document.getElementById("filtroMes");
-	    const selectAnio = document.getElementById("filtroAnio");
-	    if (!selectMes || !selectAnio) return;
 
-	    const meses = [
-	        { val: "01", text: "Enero" }, { val: "02", text: "Febrero" }, { val: "03", text: "Marzo" },
-	        { val: "04", text: "Abril" }, { val: "05", text: "Mayo" }, { val: "06", text: "Junio" },
-	        { val: "07", text: "Julio" }, { val: "08", text: "Agosto" }, { val: "09", text: "Septiembre" },
-	        { val: "10", text: "Octubre" }, { val: "11", text: "Noviembre" }, { val: "12", text: "Diciembre" }
-	    ];
+	const selectMes = document.getElementById("filtroMes");
 
-	    // Automáticamente te va a cargar este año, uno para atrás y 4 para adelante
-	    const hoy = new Date();
-	    const anioActual = hoy.getFullYear();
-	    const anios = [anioActual - 1, anioActual, anioActual + 1, anioActual + 2, anioActual + 3];
+	const selectAnio = document.getElementById("filtroAnio");
 
-	    // Cargar selector de Meses
-	    selectMes.innerHTML = "";
-	    meses.forEach(m => {
-	        const option = document.createElement("option");
-	        option.value = m.val;
-	        option.textContent = m.text;
-	        selectMes.appendChild(option);
-	    });
+	if (!selectMes || !selectAnio) return;
 
-	    // Cargar selector de Años
-	    selectAnio.innerHTML = "";
-	    anios.forEach(a => {
-	        const option = document.createElement("option");
-	        option.value = a;
-	        option.textContent = a;
-	        selectAnio.appendChild(option);
-	    });
 
-	    // ¡LA MAGIA!: Obliga a la app a pararse en el mes exacto del día de hoy
-	    const mesActualStr = String(hoy.getMonth() + 1).padStart(2, '0');
-	    selectMes.value = mesActualStr;
-	    selectAnio.value = anioActual;
 
-	    // Si tocás cualquiera de los dos botones, actualiza la plata
-	    selectMes.onchange = () => refreshAll();
-	    selectAnio.onchange = () => refreshAll();
+	const meses = [
+
+	{ val: "01", text: "Enero" }, { val: "02", text: "Febrero" }, { val: "03", text: "Marzo" },
+
+	{ val: "04", text: "Abril" }, { val: "05", text: "Mayo" }, { val: "06", text: "Junio" },
+
+	{ val: "07", text: "Julio" }, { val: "08", text: "Agosto" }, { val: "09", text: "Septiembre" },
+
+	{ val: "10", text: "Octubre" }, { val: "11", text: "Noviembre" }, { val: "12", text: "Diciembre" }
+
+	];
+
+
+
+	// Automáticamente te va a cargar este año, uno para atrás y 4 para adelante
+
+	const hoy = new Date();
+
+	const anioActual = hoy.getFullYear();
+
+	const anios = [anioActual - 1, anioActual, anioActual + 1, anioActual + 2, anioActual + 3];
+
+
+
+	// Cargar selector de Meses
+
+	selectMes.innerHTML = "";
+
+	meses.forEach(m => {
+
+	const option = document.createElement("option");
+
+	option.value = m.val;
+
+	option.textContent = m.text;
+
+	selectMes.appendChild(option);
+
+	});
+
+
+
+	// Cargar selector de Años
+
+	selectAnio.innerHTML = "";
+
+	anios.forEach(a => {
+
+	const option = document.createElement("option");
+
+	option.value = a;
+
+	option.textContent = a;
+
+	selectAnio.appendChild(option);
+
+	});
+
+
+
+	// ¡LA MAGIA!: Obliga a la app a pararse en el mes exacto del día de hoy
+
+	const mesActualStr = String(hoy.getMonth() + 1).padStart(2, '0');
+
+	selectMes.value = mesActualStr;
+
+	selectAnio.value = anioActual;
+
+
+
+	// Si tocás cualquiera de los dos botones, actualiza la plata
+
+	selectMes.onchange = () => refreshAll();
+
+	selectAnio.onchange = () => refreshAll();
+
 	}
 /* --- LLAMADAS API --- */
 async function fetchUserInfo() {
