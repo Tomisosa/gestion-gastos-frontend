@@ -64,15 +64,18 @@
 		</div>
 		      <section class="content">
 		        
-				<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 15px;">
+				<div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
 				    
-				    <div style="display: flex; align-items: center; gap: 8px; background: var(--bg-saldos); padding: 8px 12px; border-radius: 8px; width: fit-content;">
-				        <label style="color: #888; font-weight: bold; white-space: nowrap; margin-bottom: 0;">📅 Fecha:</label>
-				        <select id="filtroMes" style="background: #333; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif;"></select>
-				        <select id="filtroAnio" style="background: #333; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif;"></select>
+				    <div style="display: flex; align-items: center; gap: 6px; background: var(--bg-saldos); padding: 6px 8px; border-radius: 10px; flex: 1; min-width: 0;">
+				        
+				        <span style="font-size: 1.1rem; margin-left: 4px;">📅</span>
+				        
+				        <select id="filtroMes" style="flex: 1; min-width: 0; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-overflow: ellipsis;"></select>
+				        
+				        <select id="filtroAnio" style="flex: 0 0 auto; background: #333; color: white; border: none; padding: 6px 4px; border-radius: 6px; cursor: pointer; outline: none; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 0.9rem; text-align: center;"></select>
 				    </div>
 
-				    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
+				    <button id="btnGestionarCategorias" class="btn-cuadrado" title="Gestionar Categorías" style="background: #222; border: 1px solid #444; color: white; border-radius: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0;">
 				        <span class="material-icons" style="font-size: 24px;">category</span>
 				        <span id="countCategorias" style="position: absolute; top: -5px; right: -5px; background: #be123c; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">0</span>
 				    </button>
@@ -525,6 +528,6 @@
       </section>
     </main>
   </div>
-  <script src="js/dashboard.js?v=127"></script>
+  <script src="js/dashboard.js?v=128"></script>
 </body>
 </html>
