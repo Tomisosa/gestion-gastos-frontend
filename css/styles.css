@@ -1113,3 +1113,35 @@ select:focus, #filtroFechaMes:focus {
 vercel-live-feedback {
     display: none !important;
 }
+
+/* =========================================================
+   EFECTO "ASOMO" DE LA APP EN EL INDEX
+   ========================================================= */
+.app-preview-container {
+    width: 100vw; /* Ocupa el ancho total disponible */
+    max-width: 800px; /* En la compu no crece más que esto para que se vea nítido */
+    margin: 50px auto -20px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+    animation: floatApp 5s ease-in-out infinite; /* Animación de flotar */
+}
+
+.app-preview-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 16px 16px 0 0; /* Bordes redondos solo arriba */
+    box-shadow: 0 -15px 40px rgba(42, 201, 187, 0.15); /* Brillo turquesa arriba */
+    border: 2px solid #1e293b;
+    border-bottom: none;
+    display: block;
+    
+    /* El truco maestro: difuminar la parte de abajo para que se funda con el fondo azul */
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+/* La animación que hace que respire suavemente hacia arriba y abajo */
+@keyframes floatApp {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
