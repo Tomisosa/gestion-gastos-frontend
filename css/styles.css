@@ -963,7 +963,7 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* =========================================================
-   DISEÑO EXACTO "TICKET PREMIUM" (COPIA DE LA FOTO)
+   DISEÑO EXACTO "TICKET PREMIUM" (A PRUEBA DE CELULARES)
    ========================================================= */
 
 /* Convertimos la tarjeta en un contenedor Flex para reordenar todo a nuestro antojo */
@@ -991,7 +991,7 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* 3. El % consumido (Texto Rojo) pasa al tercer lugar (Arriba a la derecha) */
-#totalGastoWidget > div:nth-child(5) {
+#totalGastoWidget > div:nth-child(6) { /* CAMBIÓ A 6 PORQUE AGREGAMOS UNA CAJA */
     order: 3 !important;
     text-align: right !important;
     margin-bottom: 5px !important;
@@ -1000,65 +1000,48 @@ select:focus, #filtroFechaMes:focus {
     color: #ef4444 !important; 
 }
 
-/* ROMPEMOS LA CAJA DE GASTOS/INGRESOS PARA MANEJARLOS POR SEPARADO */
-#totalGastoWidget > div:nth-child(3) {
-    display: contents !important; /* MAGIA: Esto hace que Gastos e Ingresos queden sueltos */
-}
-
-/* 4. Gastos pasa al cuarto lugar (Izquierda, arriba de la barra) */
-#totalGastoWidget > div:nth-child(3) span:first-child {
+/* 4. GASTOS pasa al cuarto lugar (Izquierda, arriba de la barra) */
+#caja-gastos-finty {
     order: 4 !important;
     display: block !important;
     width: 100% !important;
     text-align: left !important;
-    
     font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
     font-weight: 700 !important; 
     color: #334155 !important; 
-    
     margin-bottom: 12px !important;
-    padding: 0 !important;
-    border: none !important;
-
-    /* MAGIA ANTI-PUNTITOS: Fuerza a mostrar todo el número */
-    white-space: normal !important; /* Permite saltos de línea */
-    word-break: break-all !important; /* Permite partir el número si es enorme */
-    overflow: visible !important; /* Le prohíbe esconder el texto */
-    text-overflow: clip !important; /* Desactiva los "..." */
+    white-space: normal !important;
+    word-break: break-all !important;
+    overflow: visible !important;
 }
 
 /* 5. La Barra de progreso pasa al quinto lugar (Queda en el medio) */
-#totalGastoWidget > div:nth-child(4) {
+#totalGastoWidget > div:nth-child(5) { /* CAMBIÓ A 5 PORQUE AGREGAMOS UNA CAJA */
     order: 5 !important;
     height: 10px !important; 
     margin-bottom: 10px !important;
     border-radius: 10px !important;
 }
 
-/* 6. Ingresos pasa al sexto lugar (Derecha, abajo de la barra) */
-#totalGastoWidget > div:nth-child(3) span:last-child {
+/* 6. INGRESOS pasa al sexto lugar (Derecha, abajo de la barra) */
+#caja-ingresos-finty {
     order: 6 !important;
     display: block !important;
     width: 100% !important;
     text-align: right !important;
-    
     font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
     font-weight: 700 !important; 
     color: #334155 !important; 
-    
     margin-bottom: 25px !important;
     padding-bottom: 20px !important;
     border-bottom: 1px solid #e2e8f0 !important; 
-    
-    /* MAGIA ANTI-PUNTITOS: Fuerza a mostrar todo el número */
-    white-space: normal !important; /* Permite saltos de línea */
-    word-break: break-all !important; /* Permite partir el número si es enorme */
-    overflow: visible !important; /* Le prohíbe esconder el texto */
-    text-overflow: clip !important; /* Desactiva los "..." */
+    white-space: normal !important;
+    word-break: break-all !important;
+    overflow: visible !important;
 }
 
 /* 7. El top de Categorías pasa al último lugar */
-#totalGastoWidget > div:nth-child(6) {
+#totalGastoWidget > div:nth-child(7) { /* CAMBIÓ A 7 PORQUE AGREGAMOS UNA CAJA */
     order: 7 !important;
 }
 
