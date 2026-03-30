@@ -183,7 +183,14 @@ body.premium-landing {
 }
 
 html, body {
-  display: block;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-derecha);
+  color: var(--texto-oscuro);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden; 
+  max-width: 100vw;
 }
 
 input, textarea, select {
@@ -1104,15 +1111,7 @@ select:focus, #filtroFechaMes:focus {
 /* =========================================================
    ARREGLO: DISEÑO PREMIUM PARA COMPUTADORAS (PC)
    ========================================================= */
-   .content {
-       max-width: 1300px;
-       margin: 0 auto;
-       padding: 2rem;
-   }
-
-/* =========================================================
-   OCULTAR BOTÓN DE COMENTARIOS DE VERCEL
-   ========================================================= */
-vercel-live-feedback {
-    display: none !important;
+.content {
+    max-width: 1000px !important; /* Evita que la app se estire infinitamente */
+    margin: 0 auto !important;    /* Centra todo prolijamente en el medio de la pantalla */
 }
