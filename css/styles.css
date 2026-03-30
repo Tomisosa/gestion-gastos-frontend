@@ -1011,12 +1011,19 @@ select:focus, #filtroFechaMes:focus {
     display: block !important;
     width: 100% !important;
     text-align: left !important;
-    font-size: 1.15rem !important; 
-    font-weight: 800 !important; 
-    color: #1e293b !important; 
+    
+    /* MAGIA: Misma tipografía, color y tamaño dinámico más chico */
+    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
+    font-weight: 700 !important; 
+    color: #334155 !important; 
+    
     margin-bottom: 12px !important;
     padding: 0 !important;
     border: none !important;
+    
+    /* PROHIBIDO CORTAR EL NÚMERO CON PUNTITOS */
+    white-space: normal !important; 
+    overflow: visible !important;
 }
 
 /* 5. La Barra de progreso pasa al quinto lugar (Queda en el medio) */
@@ -1033,12 +1040,19 @@ select:focus, #filtroFechaMes:focus {
     display: block !important;
     width: 100% !important;
     text-align: right !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    color: #475569 !important; 
+    
+    /* MAGIA: Misma tipografía, color y tamaño dinámico más chico */
+    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
+    font-weight: 700 !important; 
+    color: #334155 !important; 
+    
     margin-bottom: 25px !important;
     padding-bottom: 20px !important;
-    border-bottom: 1px solid #e2e8f0 !important; /* Línea separadora final */
+    border-bottom: 1px solid #e2e8f0 !important; 
+    
+    /* PROHIBIDO CORTAR EL NÚMERO CON PUNTITOS */
+    white-space: normal !important; 
+    overflow: visible !important;
 }
 
 /* 7. El top de Categorías pasa al último lugar */
