@@ -3,24 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro</title>
+  <title>Crear cuenta - Finty</title>
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json?v=2">
+  <meta name="theme-color" content="#0b1120">
   <link rel="icon" href="finty-logo.png" type="image/png">
   <link rel="apple-touch-icon" href="finty-logo.png">
 </head>
-<body class="auth">
-  <div class="form-container">
-    <h2>Crear cuenta</h2>
+<body class="auth premium-landing">
+  <div class="form-container" style="background: transparent; border: none; box-shadow: none; padding: 20px;">
+    
+    <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+        <div class="finty-logo-container mini">
+            <div class="finty-dot"></div>
+            <span class="finty-f">F</span>
+        </div>
+    </div>
 
-    <form id="formRegistro">
-      <input type="text" id="nombre" placeholder="Nombre completo" required>
-      <input type="email" id="email" placeholder="Correo electrónico" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
-      <button type="submit" class="btn">Registrarme</button>
+    <h2 style="color: #ffffff; text-align: center; margin-bottom: 30px;">Crear tu cuenta</h2>
+
+    <form id="formRegistro" style="display: flex; flex-direction: column; gap: 20px;">
+      <input type="text" id="nombre" placeholder="Nombre completo" required style="background: #1e293b; border: 1px solid #334155; color: white;">
+      <input type="email" id="email" placeholder="Correo electrónico" required style="background: #1e293b; border: 1px solid #334155; color: white;">
+      <input type="password" id="password" placeholder="Contraseña" required style="background: #1e293b; border: 1px solid #334155; color: white;">
+      
+      <button type="submit" class="btn-principal" style="box-shadow: 0 8px 25px rgba(42, 201, 187, 0.3); margin-top: 10px;">Registrarme</button>
     </form>
 
-    <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+    <p style="text-align: center; color: #cbd5e1; margin-top: 40px;">
+        ¿Ya tenés cuenta? <a href="login.html" style="color: var(--color-primario);">Iniciá sesión</a>
+    </p>
   </div>
 
   <script src="js/registro.js"></script>

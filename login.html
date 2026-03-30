@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sesión - Gestión de Gastos</title>
+  <title>Iniciar sesión - Finty</title>
   <link rel="stylesheet" href="css/styles.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2ac9bb">
+  <link rel="manifest" href="manifest.json?v=2">
+  <meta name="theme-color" content="#0b1120">
   <link rel="icon" href="finty-logo.png" type="image/png">
   <link rel="apple-touch-icon" href="finty-logo.png">
   
@@ -17,33 +17,44 @@
     }
   </script>
 </head>
-<body class="auth">
-  <div class="form-container">
-    <h2>Iniciar sesión</h2>
+<body class="auth premium-landing">
+  <div class="form-container" style="background: transparent; border: none; box-shadow: none; padding: 20px;">
     
-    <div class="form-group">
-      <input type="email" id="email" placeholder="Correo">
+    <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+        <div class="finty-logo-container mini">
+            <div class="finty-dot"></div>
+            <span class="finty-f">F</span>
+        </div>
     </div>
 
-    <div class="form-group" style="position: relative;">
-      <input type="password" id="password" placeholder="Contraseña" style="padding-right: 45px; width: 100%; box-sizing: border-box;">
-      <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer;">
-        <span class="material-icons">visibility</span>
-      </button>
+    <h2 style="color: #ffffff; text-align: center; margin-bottom: 30px;">Bienvenido a Finty</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div class="form-group" style="width: 100%;">
+        <input type="email" id="email" placeholder="Correo electrónico" style="background: #1e293b; border: 1px solid #334155; color: white;">
+      </div>
+
+      <div class="form-group" style="position: relative; width: 100%;">
+        <input type="password" id="password" placeholder="Contraseña" style="background: #1e293b; border: 1px solid #334155; color: white; padding-right: 45px; width: 100%; box-sizing: border-box;">
+        <button type="button" id="togglePassword" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer;">
+          <span class="material-icons">visibility</span>
+        </button>
+      </div>
+
+      <button id="btnLogin" class="btn-principal" style="box-shadow: 0 8px 25px rgba(42, 201, 187, 0.3); margin-top: 10px;">Entrar a mi cuenta</button>
+    </div>
+    
+    <div style="text-align: center; margin-top: 25px;">
+        <a href="#" onclick="alert('Para recuperar tu contraseña, comunicate con el administrador (Tomás). Pronto habilitaremos el blanqueo automático por email.')" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: normal;">¿Olvidaste tu contraseña?</a>
     </div>
 
-    <button id="btnLogin" class="btn">Entrar</button>
-    
-    <p style="margin-top: 15px;">
-      <a href="#" onclick="alert('Para recuperar tu contraseña, comunicate con el administrador (Tomás). Pronto habilitaremos el blanqueo automático por email.')" style="color: #2ac9bb; text-decoration: none; font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+    <p style="text-align: center; color: #cbd5e1; margin-top: 40px;">
+      ¿No tenés cuenta? <a href="registro.html" style="color: var(--color-primario);">Regístrate acá</a>
     </p>
-
-    <p>¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
   </div>
 
   <script src="js/login.js"></script>
   <script>
-    // Lógica para mostrar/ocultar contraseña
     document.getElementById('togglePassword').addEventListener('click', function () {
       const passwordInput = document.getElementById('password');
       const icon = this.querySelector('.material-icons');
