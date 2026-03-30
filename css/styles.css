@@ -1115,3 +1115,10 @@ select:focus, #filtroFechaMes:focus {
     max-width: 1000px !important; /* Evita que la app se estire infinitamente */
     margin: 0 auto !important;    /* Centra todo prolijamente en el medio de la pantalla */
 }
+
+/* =========================================================
+   OCULTAR BOTÓN DE COMENTARIOS DE VERCEL
+   ========================================================= */
+vercel-live-feedback {
+    display: none !important;
+}

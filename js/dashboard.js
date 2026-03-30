@@ -564,8 +564,12 @@ async function refreshAll() {
 
     globalBilleteras = billeteras || [];
   
-    const selector = document.getElementById("filtroFechaMes");
-    const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+	// MAGIA: LEEMOS LOS DOS SELECTORES NUEVOS (MES Y AÑO)
+	    const selectMes = document.getElementById("filtroMes");
+	    const selectAnio = document.getElementById("filtroAnio");
+	    
+	    // Si los selectores existen, armamos la fecha ("2026-03"). Si no, usamos la de hoy.
+	    const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
 
     // --- MAGIA: LEER FECHAS DESDE LA BD ---
     let textoVencimientoTarjetas = "Según tarjeta"; // Por defecto
