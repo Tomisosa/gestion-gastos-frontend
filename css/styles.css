@@ -1107,3 +1107,11 @@ select:focus, #filtroFechaMes:focus {
 .sidebar .brand .finty-logo-container {
     flex-shrink: 0 !important; 
 }
+
+/* =========================================================
+   ARREGLO: DISEÑO PREMIUM PARA COMPUTADORAS (PC)
+   ========================================================= */
+.content {
+    max-width: 1000px !important; /* Evita que la app se estire infinitamente */
+    margin: 0 auto !important;    /* Centra todo prolijamente en el medio de la pantalla */
+}
