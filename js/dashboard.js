@@ -2154,10 +2154,14 @@ window.toggleSaldosAhorros = function() {
 
 // --- GUARDAR FECHAS DE TARJETAS EN LA BASE DE DATOS (FANTASMA) ---
 window.guardarFechasTarjetas = async function() {
-    const selector = document.getElementById("filtroFechaMes");
-    const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+    // MAGIA: Usamos los selectores separados acá también
+    const selectMes = document.getElementById("filtroMes");
+    const selectAnio = document.getElementById("filtroAnio");
+    const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
+    
     const cierre = document.getElementById("fechaCierreMes") ? document.getElementById("fechaCierreMes").value : "";
     const vto = document.getElementById("fechaVtoMes") ? document.getElementById("fechaVtoMes").value : "";
+    
     
     // Armamos el texto secreto que va a ir a la base de datos
     const descString = `[CONFIG_TC] ${mesSeleccionado} | C:${cierre} | V:${vto}`;

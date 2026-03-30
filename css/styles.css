@@ -961,7 +961,6 @@ select:focus, #filtroFechaMes:focus {
         transform: scale(2.5) translateY(0);
     }
 }
-
 /* =========================================================
    DISEÑO EXACTO "TICKET PREMIUM" (A PRUEBA DE CELULARES)
    ========================================================= */
@@ -991,7 +990,7 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* 3. El % consumido (Texto Rojo) pasa al tercer lugar (Arriba a la derecha) */
-#totalGastoWidget > div:nth-child(6) { /* CAMBIÓ A 6 PORQUE AGREGAMOS UNA CAJA */
+#totalGastoWidget > div:nth-child(6) { 
     order: 3 !important;
     text-align: right !important;
     margin-bottom: 5px !important;
@@ -1016,7 +1015,7 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* 5. La Barra de progreso pasa al quinto lugar (Queda en el medio) */
-#totalGastoWidget > div:nth-child(5) { /* CAMBIÓ A 5 PORQUE AGREGAMOS UNA CAJA */
+#totalGastoWidget > div:nth-child(5) { 
     order: 5 !important;
     height: 10px !important; 
     margin-bottom: 10px !important;
@@ -1041,7 +1040,7 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* 7. El top de Categorías pasa al último lugar */
-#totalGastoWidget > div:nth-child(7) { /* CAMBIÓ A 7 PORQUE AGREGAMOS UNA CAJA */
+#totalGastoWidget > div:nth-child(7) { 
     order: 7 !important;
 }
 
@@ -1109,9 +1108,8 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* =========================================================
-   ARREGLO: DISEÑO PREMIUM PARA COMPUTADORAS (PC)
+   OCULTAR BOTÓN DE COMENTARIOS DE VERCEL
    ========================================================= */
-.content {
-    max-width: 1000px !important; /* Evita que la app se estire infinitamente */
-    margin: 0 auto !important;    /* Centra todo prolijamente en el medio de la pantalla */
+vercel-live-feedback {
+    display: none !important;
 }
