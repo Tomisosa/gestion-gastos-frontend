@@ -264,32 +264,51 @@ function calcularSaldosPorCuenta(gastos, ingresos) {
 			        </div>`;
 			    });
 	}
-// --- FIN DE LA CORRECCIÓN ---
+	// REEMPLAZAR LA FUNCIÓN ENTERA POR ESTA:
+	function cargarSelectorFechas() {
+	    const selectMes = document.getElementById("filtroMes");
+	    const selectAnio = document.getElementById("filtroAnio");
+	    if (!selectMes || !selectAnio) return;
 
-function cargarSelectorFechas() {
-  const selector = document.getElementById("filtroFechaMes");
-  if (!selector) return;
-  
-  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-  const anios = [2025, 2026, 2027, 2028]; 
-  
-  selector.innerHTML = "";
-  anios.forEach(anio => {
-    meses.forEach((mes, index) => {
-      const option = document.createElement("option");
-      const mesNum = (index + 1).toString().padStart(2, '0');
-      option.value = `${anio}-${mesNum}`;
-      option.textContent = `${mes} ${anio}`;
-      selector.appendChild(option);
-    });
-  });
-  
-  const hoy = new Date();
-  const mesActual = (hoy.getMonth() + 1).toString().padStart(2, '0');
-  selector.value = `${hoy.getFullYear()}-${mesActual}`;
-  selector.onchange = () => refreshAll();
-}
+	    const meses = [
+	        { val: "01", text: "Enero" }, { val: "02", text: "Febrero" }, { val: "03", text: "Marzo" },
+	        { val: "04", text: "Abril" }, { val: "05", text: "Mayo" }, { val: "06", text: "Junio" },
+	        { val: "07", text: "Julio" }, { val: "08", text: "Agosto" }, { val: "09", text: "Septiembre" },
+	        { val: "10", text: "Octubre" }, { val: "11", text: "Noviembre" }, { val: "12", text: "Diciembre" }
+	    ];
 
+	    // Automáticamente te va a cargar este año, uno para atrás y 4 para adelante
+	    const hoy = new Date();
+	    const anioActual = hoy.getFullYear();
+	    const anios = [anioActual - 1, anioActual, anioActual + 1, anioActual + 2, anioActual + 3];
+
+	    // Cargar selector de Meses
+	    selectMes.innerHTML = "";
+	    meses.forEach(m => {
+	        const option = document.createElement("option");
+	        option.value = m.val;
+	        option.textContent = m.text;
+	        selectMes.appendChild(option);
+	    });
+
+	    // Cargar selector de Años
+	    selectAnio.innerHTML = "";
+	    anios.forEach(a => {
+	        const option = document.createElement("option");
+	        option.value = a;
+	        option.textContent = a;
+	        selectAnio.appendChild(option);
+	    });
+
+	    // ¡LA MAGIA!: Obliga a la app a pararse en el mes exacto del día de hoy
+	    const mesActualStr = String(hoy.getMonth() + 1).padStart(2, '0');
+	    selectMes.value = mesActualStr;
+	    selectAnio.value = anioActual;
+
+	    // Si tocás cualquiera de los dos botones, actualiza la plata
+	    selectMes.onchange = () => refreshAll();
+	    selectAnio.onchange = () => refreshAll();
+	}
 /* --- LLAMADAS API --- */
 async function fetchUserInfo() {
   try {
@@ -933,8 +952,9 @@ async function refreshAll() {
       // Inyectamos el nombre en las tarjetas del HTML
       document.querySelectorAll('.nombreDinamico').forEach(el => el.textContent = minombre);
 
-      const selector = document.getElementById("filtroFechaMes");
-      const mesSeleccionado = selector ? selector.value : new Date().toISOString().slice(0, 7);
+	  const selectMes = document.getElementById("filtroMes");
+	  const selectAnio = document.getElementById("filtroAnio");
+	  const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
 
       // Filtramos solo los de este mes
       const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
