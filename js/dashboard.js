@@ -927,7 +927,7 @@ if (formPrestamo) {
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
 
                 const body = {
-                    mesCuota: `${yyyy}-${mm}`,
+                    mesCuota: `${yyyy}-${mm}-01`, // <-- ¡LA MAGIA! Le agregamos el -01 para que Java no llore
                     nombre: nombre,
                     perteneceA: pertenece,
                     cuotaActual: i,
@@ -937,7 +937,12 @@ if (formPrestamo) {
                     aporteOtro: 0,
                     usuario: { id: user.id }
                 };
-                const res = await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                
+                const res = await fetch(`${API}/prestamos`, { 
+                    method: "POST", 
+                    headers: authHeaders(), 
+                    body: JSON.stringify(body) 
+                });
                 
                 // ATRAPAMOS SI HAY ERROR EN LA BASE DE DATOS
                 if (!res.ok) {
@@ -951,7 +956,7 @@ if (formPrestamo) {
             formPrestamo.reset();
             await refreshAll();
             
-            // AVISO INTELIGENTE: Le avisamos que busque el mes si no las ve
+            // AVISO INTELIGENTE
             alert(`¡Se generaron ${totalCuotas} cuotas con éxito!\n\n(Revisá el selector de meses arriba para verlas si elegiste un mes que no sea este)`);
             
         } catch(err) {
