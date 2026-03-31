@@ -577,9 +577,9 @@ function renderPrestamos(prestamos) {
 
       document.querySelectorAll('.nombreDinamico').forEach(el => el.textContent = minombre);
 
-	  const selectMes = document.getElementById("filtroMes");
-	  const selectAnio = document.getElementById("filtroAnio");
-	  const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
+      const selectMes = document.getElementById("filtroMes");
+      const selectAnio = document.getElementById("filtroAnio");
+      const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
 
       const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
       
@@ -613,25 +613,36 @@ function renderPrestamos(prestamos) {
 
           let filas = "";
           grupos[grupo].forEach(g => {
+              // Diseño claro y limpio para las filas de la tabla
               filas += `<tr>
-                  <td><strong style="color: #f8fafc;">${g.nombre}</strong></td>
-                  <td><span style="background:var(--color-primario); color:#000; padding:2px 6px; border-radius:10px; font-size:0.8rem; font-weight:bold;">${g.cuotaActual}/${g.cuotaTotal}</span></td>
-                  <td>${formatoMoneda(g.totalCuotaDinero)}</td>
-                  <td style="color:#ffce56; font-weight:bold;">${formatoMoneda(g.aBelen)}</td>
-                  <td style="color:#94a3b8;">${formatoMoneda(g.aOtro)}</td>
+                  <td><strong style="color: #334155;">${g.nombre}</strong></td>
+                  <td><span style="background: #f0fdfa; color: #0d9488; border: 1px solid #ccfbf1; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700;">${g.cuotaActual} / ${g.cuotaTotal}</span></td>
+                  <td style="color: #64748b; font-weight: 600;">${formatoMoneda(g.totalCuotaDinero)}</td>
+                  <td style="color: #d97706; font-weight: 800; font-size: 1.05rem;">${formatoMoneda(g.aBelen)}</td>
+                  <td style="color: #94a3b8; font-weight: 600;">${formatoMoneda(g.aOtro)}</td>
                   <td>
-                      <button onclick="abrirEditarPrestamo(${g.id}, ${g.totalCuotaDinero}, ${g.aBelen})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✏️</button>
-                      <button onclick="eliminarPrestamo(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>
+                      <button onclick="abrirEditarPrestamo(${g.id}, ${g.totalCuotaDinero}, ${g.aBelen})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.2rem; margin-right: 5px;">✏️</button>
+                      <button onclick="eliminarPrestamo(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">🗑️</button>
                   </td>
               </tr>`;
           });
 
+          // Contenedor principal de la tabla (Fondo blanco, sombra suave)
           contenedor.innerHTML += `
-          <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
-              <h3 style="margin-top: 0; color: #00aae4; border-bottom: 1px solid #333; padding-bottom: 5px;">Pertenece a: ${grupo}</h3>
-              <div class="table-wrapper tabla-con-scroll">
+          <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+              <h3 style="margin-top: 0; color: #0f766e; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; font-size: 1.2rem;">🤝 Pertenece a: ${grupo}</h3>
+              <div class="table-wrapper tabla-con-scroll" style="margin-top: 10px;">
                   <table class="table">
-                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th style="color:#ffce56;">${minombre}</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
+                      <thead>
+                          <tr>
+                              <th style="color: #475569;">Préstamo</th>
+                              <th style="color: #475569;">Cuota</th>
+                              <th style="color: #475569;">Total Cuota</th>
+                              <th style="color: #d97706; font-weight: 800; font-size: 0.95rem;">Tu parte (${minombre})</th>
+                              <th style="color: #475569;">La otra parte</th>
+                              <th style="color: #475569;">Acciones</th>
+                          </tr>
+                      </thead>
                       <tbody>${filas}</tbody>
                   </table>
               </div>
