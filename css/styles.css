@@ -1114,302 +1114,222 @@ vercel-live-feedback {
     display: none !important;
 }
 
-/* =========================================================
-   DISEÑO SPLIT (MITAD Y MITAD) Y MOVIMIENTO PREMIUN EN INDEX
+//* =========================================================
+   DISEÑO INDEX (TEXTO ARRIBA, 3 IMÁGENES ABAJO)
    ========================================================= */
 
-/* Contenedor principal que envuelve todo */
+/* Contenedor principal */
 .landing-split {
     display: flex;
-    flex-direction: column; /* Apilado en celulares */
+    flex-direction: column; /* SIEMPRE apilado (Texto arriba, imágenes abajo) */
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     width: 100%;
-    max-width: 1200px;
     margin: 0 auto;
     min-height: 100vh;
-    padding: 30px;
+    padding: 40px 20px 0 20px;
     gap: 40px;
 }
 
-/* --- ESTILOS COMPARTIDOS (Móvil y PC) --- */
-
-/* Contenedor del texto (Alineado a la izquierda) */
+/* --- TEXTO SUPERIOR --- */
 .hero-left {
     display: flex;
     flex-direction: column;
-    align-items: center; /* En celu, todo centrado */
+    align-items: center; /* Siempre centrado */
     text-align: center;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
     animation: fadeIn 1.2s ease-out;
+    margin-top: 20px;
 }
 
-/* BRANDING: Tipografía Estilo FinTech (Minimalista, Seria y Elegante) */
+/* BRANDING: Tipografía Estilo FinTech */
 .finty-brand-motion {
-    font-size: 4.5rem; /* Más proporcionado para celular */
+    font-size: 5rem;
     font-weight: 800;
-    font-style: normal; /* Letra recta, adiós cursiva */
+    font-style: normal;
     font-family: 'Inter', sans-serif;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     position: relative;
     letter-spacing: -2px;
-    
-    /* Efecto de reflejo metálico sutil (estilo Apple) */
     background: linear-gradient(110deg, #ffffff 40%, var(--color-primario) 50%, #ffffff 60%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: shineElegante 6s linear infinite; /* Animación lenta y premium */
-    
-    /* Chau al resplandor neón */
+    animation: shineElegante 6s linear infinite;
     text-shadow: none; 
-}
-
-/* Apagamos el círculo de luz borroso de atrás */
-.finty-brand-motion .motion-glow {
-    display: none !important;
 }
 
 .hero-left h2 {
     color: var(--color-primario);
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-top: 0;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .hero-desc {
     color: #cbd5e1;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     line-height: 1.6;
     margin-bottom: 40px;
-    padding: 0 10px;
 }
 
-/* Botones Landing Premium */
+/* --- BOTONES --- */
 .acciones {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
     width: 100%;
-    max-width: 320px; /* Ancho máximo para que no queden muy largos en el celu */
-    margin: 0 auto; /* Centrar los botones apilados */
+    max-width: 350px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.btn-principal, .btn-secundario-new {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
     box-sizing: border-box;
-    align-items: center; /* Centrar el contenido de los botones en el celu */
 }
 
 .btn-principal {
     background: var(--color-primario);
     color: #ffffff;
-    padding: 18px;
-    border-radius: 14px;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-    width: 100%; /* Ocupa todo el ancho en el celu */
-    box-sizing: border-box;
-    display: inline-block;
-    text-align: center;
-}
-
-.shadow-btn {
     box-shadow: 0 8px 25px rgba(42, 201, 187, 0.3);
 }
 
-/* Botón secundario ajustado para fondo oscuro */
 .btn-secundario-new {
     background: transparent;
-    color: var(--texto-blanco); /* Letras blancas para contraste */
-    padding: 18px;
-    border-radius: 14px;
+    color: var(--texto-blanco);
     text-decoration: none;
-    font-weight: 600;
-    font-size: 1.1rem;
     border: 2px solid var(--color-primario);
-    transition: background 0.3s, transform 0.2s;
-    width: 100%; /* Ocupa todo el ancho en el celu */
-    box-sizing: border-box;
-    display: inline-block;
-    text-align: center;
 }
 
-.btn-principal:hover {
-    background: #1eb3a5;
-    transform: translateY(-3px);
-}
+.btn-principal:hover { background: #1eb3a5; transform: translateY(-3px); }
+.btn-secundario-new:hover { background: var(--color-primario); color: #ffffff; }
+.btn-principal:active, .btn-secundario-new:active { transform: scale(0.96); }
 
-.btn-secundario-new:hover {
-    background: var(--color-primario);
-    color: #ffffff;
-}
-
-.btn-principal:active, .btn-secundario-new:active {
-    transform: scale(0.96);
-}
-
-/* La imagen asomándose (A prueba de celulares) */
-.app-preview-container {
-    width: 100%;
-    max-width: 800px;
-    animation: floatApp 5s ease-in-out infinite;
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-}
-
-.app-preview-container img {
-    width: 100%;
-    height: auto;
-    border-radius: 16px;
-    box-shadow: 0 -10px 40px rgba(42, 201, 187, 0.15), 0 10px 40px rgba(0, 0, 0, 0.5);
-    border: 2px solid #1e293b;
-    /* Difuminado suave abajo */
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-}
-
-/* --- Animaciones --- */
+/* --- ANIMACIONES GLOBALES --- */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes floatApp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes shineElegante { 0% { background-position: 200% center; } 100% { background-position: -50% center; } }
 
-/* Animación del reflejo barriendo el texto suavemente */
-@keyframes shineElegante {
-    0% { background-position: 200% center; }
-    100% { background-position: -50% center; }
-}
-
-
-/* --------------------------------------------------------- */
-/* 2. ADAPTACIÓN PARA COMPUTADORAS (PANTALLA GRANDE) */
-/* Todo lo que esté adentro de esta llave solo afecta a la PC */
-/* --------------------------------------------------------- */
-@media (min-width: 900px) {
-    
-    .landing-split {
-        flex-direction: row; /* Los pone uno al lado del otro */
-        justify-content: space-between;
-        align-items: center; /* Los centra verticalmente */
-        text-align: left;
-        gap: 60px; /* Separación entre el texto y la foto */
-    }
-
-    /* El texto y logo se van a la izquierda */
-    .hero-left {
-        align-items: flex-start; /* Alinea todo a la izquierda */
-        text-align: left;
-        flex: 1; /* Ocupa la mitad del espacio disponible */
-    }
-
-    .finty-brand-motion {
-        font-size: 5.5rem; /* Tamaño perfecto para PC */
-        margin-left: 0; /* Sin ajustes raros */
-    }
-
-    .hero-desc {
-        padding: 0; /* Le sacamos el padding porque ya no hace falta en PC */
-    }
-
-    /* Botones uno al lado del otro en PC */
-    .acciones {
-        flex-direction: row !important; 
-        width: 100%;
-        max-width: 100%;
-        gap: 15px;
-        padding: 0;
-        justify-content: flex-start; /* Alineados a la izquierda */
-    }
-
-    .acciones a {
-        width: auto !important; /* Deja que los botones tomen su propio ancho */
-        padding: 18px 30px;
-    }
-
-    /* La imagen se va a la derecha */
-    .app-preview-container {
-        flex: 1.3; /* Le damos un poquito más de espacio a la foto que al texto */
-        /* Efecto 3D sutil: un poco girada y escalada */
-        transform: perspective(1200px) rotateY(-18deg) scale(1.12); 
-    }
-}
 
 /* =========================================================
-   EFECTO "ASOMO" DE LAS 3 APPS EN EL INDEX
+   LAS 3 TARJETAS ASOMÁNDOSE (CARRUSEL MÓVIL / GRILLA PC)
    ========================================================= */
+
 .app-previews-container {
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 1.5rem;
-    margin-top: 50px;
-    margin-bottom: -150px; /* Esconder un poco más la base de las tarjetas */
-    width: 100vw;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    overflow-x: auto; /* Scroll horizontal si no entran en pantalla */
+    justify-content: flex-start; /* Clave para el scroll móvil */
+    align-items: flex-start;
+    gap: 20px;
+    width: 100vw; /* Ocupa toda la pantalla a lo ancho */
+    padding: 0 20px 40px 20px;
+    margin-top: 10px;
+    
+    /* Configuración para que se pueda deslizar en celular */
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
+    scroll-padding: 20px;
 }
+
+/* Ocultar la barra de scroll (opcional pero queda más limpio) */
+.app-previews-container::-webkit-scrollbar { display: none; }
 
 .app-preview-card {
-    flex: 0 0 250px; /* Ancho fijo para cada tarjeta en el scroll */
-    width: 250px;
-    height: 400px; /* Altura máxima de la tarjeta */
-    border-radius: 16px 16px 0 0;
+    flex: 0 0 260px; /* Ancho fijo de cada tarjeta */
+    height: auto;
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 -15px 40px rgba(42, 201, 187, 0.15); /* Brillo turquesa arriba */
-    border: 2px solid #1e293b;
-    border-bottom: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    scroll-snap-align: center; /* Centrar al hacer scroll */
-    animation: floatApps 6s ease-in-out infinite; /* Animación de flotar (más lenta) */
-}
-
-/* Título de la tarjeta flotando */
-.preview-title {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
-    color: var(--texto-blanco);
-    background-color: rgba(0,0,0,0.5);
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    font-weight: 700;
+    box-shadow: 0 -5px 30px rgba(0,0,0,0.4); /* Sombra para despegar del fondo */
+    border: 1px solid #334155;
+    scroll-snap-align: center; /* Se frena en el medio al deslizar */
+    animation: floatApps 5s ease-in-out infinite;
 }
 
 .app-preview-card img {
     width: 100%;
-    height: 100%;
-    object-fit: cover; /* Ajustar la imagen a la tarjeta */
+    height: auto;
     display: block;
-    
-    /* El truco maestro: difuminar la parte de abajo para que se fundue con el fondo azul */
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    /* Difuminado suave hacia abajo */
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
 }
 
-/* Animaciones de flotar (una para cada tarjeta) */
+/* Títulos flotantes de cada sección */
+.preview-title {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+    color: #ffffff;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--color-primario);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
 @keyframes floatApps {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+    50% { transform: translateY(-10px); }
 }
 
-/* Retrasar la animación de las tarjetas laterales para un efecto más natural */
-.left-card { animation-delay: 0.5s; }
-.right-card { animation-delay: 1s; }
+/* Retrasos para que floten a destiempo */
+.left-card { animation-delay: 0s; }
+.center-card { animation-delay: 1.5s; }
+.right-card { animation-delay: 0.7s; }
 
-/* Adaptación para PC */
+/* ---------------------------------------------------------
+   ADAPTACIÓN PARA COMPUTADORAS (PC)
+   --------------------------------------------------------- */
 @media (min-width: 900px) {
+    .finty-brand-motion { font-size: 6.5rem; }
+    
+    .acciones {
+        flex-direction: row; /* Botones uno al lado del otro */
+        max-width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-principal, .btn-secundario-new {
+        width: auto;
+        padding: 16px 35px;
+    }
+
+    /* En la compu, las 3 tarjetas se centran y no hay scroll horizontal */
     .app-previews-container {
-        gap: 2.5rem; /* Más espacio entre tarjetas en PC */
-        margin-bottom: -100px; /* Esconder menos la base en PC */
+        justify-content: center;
+        overflow-x: visible;
+        max-width: 1200px;
+        padding: 0;
+        margin-top: 30px;
+    }
+
+    .app-preview-card {
+        flex: 1; /* Se estiran para ocupar todo el espacio */
+        max-width: 350px; /* Pero con un límite para que no se deformen */
+        border-radius: 16px 16px 0 0; /* Solo bordes arriba */
+        /* Efecto 3D para que parezcan pantallas apoyadas */
+        transform: perspective(1000px) rotateX(15deg);
+        transform-origin: bottom;
+        transition: transform 0.4s ease;
+    }
+    
+    .app-preview-card:hover {
+        transform: perspective(1000px) rotateX(0deg) translateY(-20px);
+        z-index: 100;
+        box-shadow: 0 -10px 40px rgba(42, 201, 187, 0.3);
     }
 }
