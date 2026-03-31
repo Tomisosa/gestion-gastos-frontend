@@ -2024,21 +2024,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
 
-            const btnIngreso = document.getElementById('btnFabIngreso');
-            const btnGasto = document.getElementById('btnFabGasto');
-            const btnTarjeta = document.getElementById('btnFabTarjeta'); 
-            const fabContainer = document.querySelector('.fab-container'); 
+			const btnIngreso = document.getElementById('btnFabIngreso');
+			            const btnGasto = document.getElementById('btnFabGasto');
+			            const fabContainer = document.querySelector('.fab-container'); 
 
-            if (btnIngreso && btnGasto && btnTarjeta && fabContainer) {
-                if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
-                    fabContainer.style.display = 'none';
-                } else {
-                    fabContainer.style.display = 'flex';
-                    btnIngreso.style.display = 'flex';
-                    btnGasto.style.display = 'flex';
-                    btnTarjeta.style.display = 'flex'; 
-                }
-            }
+			            if (btnIngreso && btnGasto && fabContainer) {
+			                if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
+			                    fabContainer.style.display = 'none';
+			                } else {
+			                    fabContainer.style.display = 'flex';
+			                    btnIngreso.style.display = 'flex';
+			                    btnGasto.style.display = 'flex';
+			      }
+			  }
         };
     });
 
