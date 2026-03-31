@@ -1334,3 +1334,82 @@ vercel-live-feedback {
         transform: perspective(1200px) rotateY(-18deg) scale(1.12); 
     }
 }
+
+/* =========================================================
+   EFECTO "ASOMO" DE LAS 3 APPS EN EL INDEX
+   ========================================================= */
+.app-previews-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-top: 50px;
+    margin-bottom: -150px; /* Esconder un poco más la base de las tarjetas */
+    width: 100vw;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto; /* Scroll horizontal si no entran en pantalla */
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+
+.app-preview-card {
+    flex: 0 0 250px; /* Ancho fijo para cada tarjeta en el scroll */
+    width: 250px;
+    height: 400px; /* Altura máxima de la tarjeta */
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 -15px 40px rgba(42, 201, 187, 0.15); /* Brillo turquesa arriba */
+    border: 2px solid #1e293b;
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    scroll-snap-align: center; /* Centrar al hacer scroll */
+    animation: floatApps 6s ease-in-out infinite; /* Animación de flotar (más lenta) */
+}
+
+/* Título de la tarjeta flotando */
+.preview-title {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    color: var(--texto-blanco);
+    background-color: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.app-preview-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ajustar la imagen a la tarjeta */
+    display: block;
+    
+    /* El truco maestro: difuminar la parte de abajo para que se fundue con el fondo azul */
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+/* Animaciones de flotar (una para cada tarjeta) */
+@keyframes floatApps {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+/* Retrasar la animación de las tarjetas laterales para un efecto más natural */
+.left-card { animation-delay: 0.5s; }
+.right-card { animation-delay: 1s; }
+
+/* Adaptación para PC */
+@media (min-width: 900px) {
+    .app-previews-container {
+        gap: 2.5rem; /* Más espacio entre tarjetas en PC */
+        margin-bottom: -100px; /* Esconder menos la base en PC */
+    }
+}
