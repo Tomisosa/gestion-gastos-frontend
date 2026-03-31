@@ -962,302 +962,111 @@ select:focus, #filtroFechaMes:focus {
     }
 }
 /* =========================================================
-   DISEÑO EXACTO "TICKET PREMIUM" (A PRUEBA DE CELULARES)
+   DISEÑO INDEX PREMIUM (EFECTO FOCO CENTRAL COMO LA FOTO)
    ========================================================= */
 
-/* Convertimos la tarjeta en un contenedor Flex para reordenar todo a nuestro antojo */
-#totalGastoWidget {
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 24px 20px !important;
-}
-
-/* 1. Título "SALDO NETO" se queda primero */
-#totalGastoWidget > div:nth-child(1) {
-    order: 1 !important;
-}
-
-/* 2. El número gigante se queda segundo */
-#saldoNetoProtagonista {
-    order: 2 !important;
-    font-size: clamp(2rem, 8vw, 2.8rem) !important;
-    margin-bottom: 25px !important;
-    letter-spacing: -1px !important;
-    text-align: left !important;
-    white-space: nowrap !important; 
-    overflow: hidden !important; 
-    text-overflow: ellipsis !important;
-}
-
-/* 3. El % consumido (Texto Rojo) pasa al tercer lugar (Arriba a la derecha) */
-#totalGastoWidget > div:nth-child(6) { 
-    order: 3 !important;
-    text-align: right !important;
-    margin-bottom: 5px !important;
-    font-size: 0.85rem !important;
-    font-weight: 800 !important;
-    color: #ef4444 !important; 
-}
-
-/* 4. GASTOS pasa al cuarto lugar (Izquierda, arriba de la barra) */
-#caja-gastos-finty {
-    order: 4 !important;
-    display: block !important;
-    width: 100% !important;
-    text-align: left !important;
-    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
-    font-weight: 700 !important; 
-    color: #334155 !important; 
-    margin-bottom: 12px !important;
-    white-space: normal !important;
-    word-break: break-all !important;
-    overflow: visible !important;
-}
-
-/* 5. La Barra de progreso pasa al quinto lugar (Queda en el medio) */
-#totalGastoWidget > div:nth-child(5) { 
-    order: 5 !important;
-    height: 10px !important; 
-    margin-bottom: 10px !important;
-    border-radius: 10px !important;
-}
-
-/* 6. INGRESOS pasa al sexto lugar (Derecha, abajo de la barra) */
-#caja-ingresos-finty {
-    order: 6 !important;
-    display: block !important;
-    width: 100% !important;
-    text-align: right !important;
-    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
-    font-weight: 700 !important; 
-    color: #334155 !important; 
-    margin-bottom: 25px !important;
-    padding-bottom: 20px !important;
-    border-bottom: 1px solid #e2e8f0 !important; 
-    white-space: normal !important;
-    word-break: break-all !important;
-    overflow: visible !important;
-}
-
-/* 7. El top de Categorías pasa al último lugar */
-#totalGastoWidget > div:nth-child(7) { 
-    order: 7 !important;
-}
-
-/* =========================================================
-   TOP CATEGORÍAS Y ANTI-DESBORDES
-   ========================================================= */
-
-#totalGastoWidget div[style*="display: flex; justify-content: space-between"] {
-    font-size: 0.95rem !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important; 
-    gap: 10px !important;
-}
-
-#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:first-child {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-width: 50% !important;
-    color: #334155 !important;
-    font-weight: 700 !important;
-}
-
-#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:last-child {
-    white-space: nowrap !important;
-    text-align: right !important;
-    font-size: 0.95rem !important;
-}
-
-#totalGastoWidget div[style*="display: flex; justify-content: space-between"] > span:last-child span {
-    font-size: 0.75rem !important;
-    color: #94a3b8 !important;
-}
-
-.tarjeta-billetera p {
-    font-size: clamp(1.4rem, 6vw, 1.8rem) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-/* =========================================================
-   ARREGLO: ALINEACIÓN LOGO Y NOMBRE EN MENÚ LATERAL
-   ========================================================= */
-
-.sidebar .brand {
-    display: flex !important;
-    flex-direction: row !important; 
-    align-items: center !important; 
-    justify-content: flex-start !important; 
-    gap: 12px !important; 
-    margin-top: 10px !important;
-    margin-bottom: 30px !important;
-    padding-left: 5px !important; 
-}
-
-.sidebar .brand h1 {
-    margin: 0 !important;
-    font-size: 1.8rem !important; 
-    line-height: 1 !important; 
-}
-
-.sidebar .brand .finty-logo-container {
-    flex-shrink: 0 !important; 
-}
-
-/* =========================================================
-   OCULTAR BOTÓN DE COMENTARIOS DE VERCEL
-   ========================================================= */
-vercel-live-feedback {
-    display: none !important;
-}
-
-//* =========================================================
-   DISEÑO INDEX (TEXTO ARRIBA, 3 IMÁGENES ABAJO)
-   ========================================================= */
-
-/* Contenedor principal */
-.landing-split {
-    display: flex;
-    flex-direction: column; /* SIEMPRE apilado (Texto arriba, imágenes abajo) */
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    margin: 0 auto;
-    min-height: 100vh;
-    padding: 40px 20px 0 20px;
-    gap: 40px;
-}
-
-/* --- TEXTO SUPERIOR --- */
-.hero-left {
+body.premium-landing {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Siempre centrado */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #1a2639 0%, var(--bg-izquierda) 100%);
+    margin: 0;
+    padding: 50px 20px 20px 20px;
+    overflow-x: hidden;
+}
+
+/* --- TEXTOS CENTRALES --- */
+.landing-content {
     text-align: center;
-    width: 100%;
     max-width: 600px;
-    animation: fadeIn 1.2s ease-out;
-    margin-top: 20px;
+    margin-bottom: 50px;
+    animation: fadeIn 1s ease-out;
+    z-index: 20;
 }
 
-/* BRANDING: Tipografía Estilo FinTech */
-.finty-brand-motion {
-    font-size: 5rem;
+.landing-content h1 {
+    font-size: 4.5rem;
+    color: #ffffff;
+    margin: 0 0 10px 0;
     font-weight: 800;
-    font-style: normal;
-    font-family: 'Inter', sans-serif;
-    margin-bottom: 15px;
-    position: relative;
-    letter-spacing: -2px;
-    background: linear-gradient(110deg, #ffffff 40%, var(--color-primario) 50%, #ffffff 60%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shineElegante 6s linear infinite;
-    text-shadow: none; 
+    letter-spacing: -1px;
 }
 
-.hero-left h2 {
+.landing-content h2 {
     color: var(--color-primario);
     font-size: 1.5rem;
     font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 20px;
+    margin: 0 0 25px 0;
 }
 
-.hero-desc {
+.landing-content p {
     color: #cbd5e1;
     font-size: 1.15rem;
     line-height: 1.6;
-    margin-bottom: 40px;
+    margin-bottom: 35px;
 }
 
-/* --- BOTONES --- */
+/* --- BOTONES EN LÍNEA --- */
 .acciones {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    max-width: 350px;
-    margin: 0 auto;
-    align-items: center;
+    justify-content: center;
+    gap: 20px;
 }
 
 .btn-principal, .btn-secundario-new {
-    width: 100%;
-    padding: 16px;
+    padding: 16px 35px;
     border-radius: 12px;
     font-weight: 700;
     font-size: 1.1rem;
+    text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 180px;
     text-align: center;
-    box-sizing: border-box;
 }
 
 .btn-principal {
     background: var(--color-primario);
     color: #ffffff;
-    text-decoration: none;
     box-shadow: 0 8px 25px rgba(42, 201, 187, 0.3);
 }
 
 .btn-secundario-new {
     background: transparent;
     color: var(--texto-blanco);
-    text-decoration: none;
     border: 2px solid var(--color-primario);
 }
 
 .btn-principal:hover { background: #1eb3a5; transform: translateY(-3px); }
-.btn-secundario-new:hover { background: var(--color-primario); color: #ffffff; }
-.btn-principal:active, .btn-secundario-new:active { transform: scale(0.96); }
-
-/* --- ANIMACIONES GLOBALES --- */
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes shineElegante { 0% { background-position: 200% center; } 100% { background-position: -50% center; } }
+.btn-secundario-new:hover { background: var(--color-primario); color: #ffffff; transform: translateY(-3px); }
 
 
-/* =========================================================
-   LAS 3 TARJETAS ASOMÁNDOSE (EFECTO PREMIUM 3D)
-   ========================================================= */
-
+/* --- CONTENEDOR DE TARJETAS --- */
 .app-previews-container {
+    position: relative;
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 20px;
-    width: 100vw; 
-    padding: 0 20px 40px 20px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
     margin-top: 10px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 20px;
-    perspective: 1200px; /* Activa la magia 3D */
 }
 
-.app-previews-container::-webkit-scrollbar { display: none; }
-
-/* El "Marco" de la ventana */
 .app-preview-card {
-    flex: 0 0 280px; 
-    height: auto;
+    background-color: #1e293b;
     border-radius: 12px;
     overflow: hidden;
-    position: relative;
-    background-color: #1e293b; /* Color de fondo de la "ventana" */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Borde de cristal */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-    scroll-snap-align: center; 
-    animation: floatApps 6s ease-in-out infinite;
-    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease;
 }
 
-/* La barrita superior tipo Mac */
+.app-preview-card img {
+    width: 100%;
+    display: block;
+}
+
+/* Barrita estilo Mac */
 .mockup-bar {
     height: 32px;
     background: rgba(0, 0, 0, 0.4);
@@ -1268,16 +1077,8 @@ vercel-live-feedback {
     position: relative;
 }
 
-.mac-dots {
-    display: flex;
-    gap: 6px;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
+.mac-dots { display: flex; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
 .dot.red { background-color: #ff5f56; }
 .dot.yellow { background-color: #ffbd2e; }
 .dot.green { background-color: #27c93f; }
@@ -1290,84 +1091,83 @@ vercel-live-feedback {
     font-size: 0.75rem;
     font-weight: 700;
     color: #94a3b8;
-    letter-spacing: 1px;
     text-transform: uppercase;
-    pointer-events: none;
 }
 
-.app-preview-card img {
-    width: 100%;
-    height: auto;
-    display: block;
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-}
-
-@keyframes floatApps {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
-/* ---------------------------------------------------------
-   ADAPTACIÓN PARA COMPUTADORAS (EFECTO FOCO 3D)
-   --------------------------------------------------------- */
+/* =========================================================
+   COMPUTADORA: EFECTO SUPERPUESTO (COMO LA FOTO)
+   ========================================================= */
 @media (min-width: 900px) {
-    .finty-brand-motion { font-size: 6.5rem; }
-    
+    .app-previews-container {
+        height: 350px; /* Altura fija para que floten absolutas */
+    }
+
+    /* La del medio: Grande, Brillante y al Frente */
+    .center-card {
+        position: relative;
+        z-index: 10;
+        width: 60%; 
+        max-width: 600px;
+        border: 2px solid var(--color-primario); /* Borde neón */
+        box-shadow: 0 0 50px rgba(42, 201, 187, 0.35), 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    /* Izquierda y Derecha: Más chicas, atrás y oscurecidas */
+    .left-card, .right-card {
+        position: absolute;
+        width: 45%; 
+        z-index: 5;
+        opacity: 0.6;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    }
+
+    .left-card {
+        left: 0;
+        transform: scale(0.85);
+        transform-origin: left center;
+    }
+
+    .right-card {
+        right: 0;
+        transform: scale(0.85);
+        transform-origin: right center;
+    }
+}
+
+/* =========================================================
+   CELULAR: CARRUSEL DESLIZABLE
+   ========================================================= */
+@media (max-width: 899px) {
     .acciones {
-        flex-direction: row; 
-        max-width: 100%;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
     }
     
     .btn-principal, .btn-secundario-new {
-        width: auto;
-        padding: 16px 35px;
+        width: 100%;
+        max-width: 300px;
     }
 
+    .landing-content h1 { font-size: 3.5rem; }
+
+    /* En celu se transforma en un carrusel */
     .app-previews-container {
-        justify-content: center;
-        align-items: center; /* Alinea al centro para el efecto 3D */
-        overflow-x: visible;
-        max-width: 1100px;
-        padding: 0;
-        margin-top: 50px;
-    }
-
-    /* Tarjeta Central (INICIO): Más grande, al frente y brillando */
-    .center-card {
-        flex: 0 0 450px;
-        z-index: 10;
-        transform: scale(1.05) translateY(-20px);
-        box-shadow: 0 20px 50px rgba(42, 201, 187, 0.2); /* Resplandor turquesa */
-        border: 1px solid rgba(42, 201, 187, 0.3);
-    }
-
-    /* Tarjeta Izquierda (GASTOS): Inclinada hacia atrás */
-    .left-card {
-        flex: 0 0 350px;
-        z-index: 5;
-        transform: rotateY(15deg) translateZ(-50px) translateX(30px);
-        opacity: 0.7;
-        box-shadow: -15px 10px 30px rgba(0,0,0,0.6);
-    }
-
-    /* Tarjeta Derecha (TARJETAS): Inclinada hacia atrás */
-    .right-card {
-        flex: 0 0 350px;
-        z-index: 5;
-        transform: rotateY(-15deg) translateZ(-50px) translateX(-30px);
-        opacity: 0.7;
-        box-shadow: 15px 10px 30px rgba(0,0,0,0.6);
+        justify-content: flex-start;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding: 10px 20px 40px 20px;
+        gap: 20px;
     }
     
-    /* Al pasar el mouse, la tarjeta que toques se viene al frente */
-    .app-preview-card:hover {
-        transform: rotateY(0deg) translateZ(20px) scale(1.1);
-        z-index: 20;
-        opacity: 1;
-        box-shadow: 0 20px 40px rgba(42, 201, 187, 0.4);
-        border-color: rgba(42, 201, 187, 0.8);
-        cursor: pointer;
+    .app-previews-container::-webkit-scrollbar { display: none; }
+
+    .app-preview-card {
+        flex: 0 0 280px; 
+        scroll-snap-align: center; 
+    }
+
+    .center-card {
+        border: 2px solid var(--color-primario);
+        box-shadow: 0 0 30px rgba(42, 201, 187, 0.3);
     }
 }
