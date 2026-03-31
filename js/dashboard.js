@@ -1232,11 +1232,10 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-	  let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
-
-	        let esDolar = (g.descripcion || "").includes("[USD]");
-	        // ¡ACÁ ESTÁ EL CAMBIO DE COLOR AL VERDE ESMERALDA #059669!
-	        let montoAMostrar = esDolar ? `<span style="color:#059669;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
+      
+      let esDolar = (g.descripcion || "").includes("[USD]");
+      let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
       tbody.innerHTML += `
       <tr>
