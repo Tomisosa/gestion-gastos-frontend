@@ -922,45 +922,48 @@ if (formPrestamo) {
             const [year, month] = mesInicio.split('-');
             let fechaActual = new Date(year, month - 1, 1);
 
-            for (let i = 1; i <= totalCuotas; i++) {
-                const yyyy = fechaActual.getFullYear();
-                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+			for (let i = 1; i <= totalCuotas; i++) {
+			                const yyyy = fechaActual.getFullYear();
+			                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+			                
+			                // Le agregamos el "-01" para que Java lo entienda como Fecha (LocalDate)
+			                const fechaPerfecta = `${yyyy}-${mm}-01`;
 
-                const body = {
-                    mesCuota: `${yyyy}-${mm}-01`, // <-- ¡LA MAGIA! Le agregamos el -01 para que Java no llore
-                    nombre: nombre,
-                    perteneceA: pertenece,
-                    cuotaActual: i,
-                    cuotaTotal: totalCuotas,
-                    montoTotal: 0,
-                    aporteBelen: 0,
-                    aporteOtro: 0,
-                    usuario: { id: user.id }
-                };
-                
-                const res = await fetch(`${API}/prestamos`, { 
-                    method: "POST", 
-                    headers: authHeaders(), 
-                    body: JSON.stringify(body) 
-                });
-                
-                // ATRAPAMOS SI HAY ERROR EN LA BASE DE DATOS
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText);
-                }
-                
-                fechaActual.setMonth(fechaActual.getMonth() + 1);
-            }
+			                const body = {
+			                    mesCuota: fechaPerfecta,
+			                    nombre: nombre,
+			                    perteneceA: pertenece,
+			                    cuotaActual: i,
+			                    cuotaTotal: totalCuotas,
+			                    montoTotal: 0.0,  // Agregamos .0 para que Java lo entienda como Double
+			                    aporteBelen: 0.0,
+			                    aporteOtro: 0.0,
+			                    usuario: { id: user.id } // Única forma correcta de pasar la relación
+			                };
+			                
+			                const res = await fetch(`${API}/prestamos`, { 
+			                    method: "POST", 
+			                    headers: authHeaders(), 
+			                    body: JSON.stringify(body) 
+			                });
+			                
+			                // Atrapamos el error si Java lo rechaza para saber exactamente por qué
+			                if (!res.ok) {
+			                    const errText = await res.text();
+			                    throw new Error(`Java rechazó los datos: ${errText}`);
+			                }
+			                
+			                fechaActual.setMonth(fechaActual.getMonth() + 1);
+			            }
             document.getElementById("modalPrestamo").style.display = "none";
             formPrestamo.reset();
             await refreshAll();
             
-            // AVISO INTELIGENTE
-            alert(`¡Se generaron ${totalCuotas} cuotas con éxito!\n\n(Revisá el selector de meses arriba para verlas si elegiste un mes que no sea este)`);
+            // Aviso inteligente para que tu hermana sepa que tiene que buscar el mes
+            alert(`¡Se generaron ${totalCuotas} cuotas con éxito!\n\n(Revisá el selector de meses arriba para verlas si elegiste un mes futuro)`);
             
         } catch(err) {
-            alert("Error al generar préstamo: " + err.message);
+            alert("Error al conectar con la base de datos: " + err.message);
             console.error(err);
         } finally {
             btnSubmit.disabled = false;
