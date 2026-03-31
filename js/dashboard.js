@@ -414,6 +414,13 @@ function renderGastosVariables(lista) {
   tbody.innerHTML = "";
   let total = 0;
   
+  // MAGIA 1: Ordenar por Fecha (De más antiguo a más nuevo)
+  lista.sort((a, b) => {
+      let fechaA = new Date(a.fecha || a.fechaVencimiento || 0);
+      let fechaB = new Date(b.fecha || b.fechaVencimiento || 0);
+      return fechaA - fechaB;
+  });
+  
   lista.forEach(g => {
     total += (Number(g.monto) || 0);
     const acciones = `
@@ -421,30 +428,16 @@ function renderGastosVariables(lista) {
         <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
     `;
     
-    let estadoPagado = "";
-    let fechaPagoReal = "-";
-    let medioPagoReal = "-";
-
-    if (g.pagado) {
-        estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
-        fechaPagoReal = g.fecha || "-";
-        medioPagoReal = g.medioPago || "EFECTIVO";
-    } else {
-        estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPago(${g.id})" title="Tildar para pagar">`;
-        fechaPagoReal = "-";
-        medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
-    }
-    
-    const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
+    // MAGIA 2: Solo tomamos la fecha real de pago y simplificamos
+    const fechaPagoReal = g.fecha || g.fechaVencimiento || "-";
+    const medioPagoReal = g.medioPago || "EFECTIVO";
 
     tbody.innerHTML += `<tr>
-        <td>${g.descripcion||"-"}</td>
+        <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
+        <td style="font-weight: bold; color: #334155;">${g.descripcion||"-"}</td>
+        <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${g.categoriaNombre||"-"}</span></td>
+        <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
         <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
-        <td>${vto}</td>
-        <td>${g.categoriaNombre||"-"}</td>
-        <td>${estadoPagado}</td>
-        <td>${fechaPagoReal}</td>
-        <td>${medioPagoReal}</td>
         <td>${acciones}</td>
     </tr>`;
   });
@@ -944,15 +937,26 @@ if (formPrestamo) {
                     aporteOtro: 0,
                     usuario: { id: user.id }
                 };
-                await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                const res = await fetch(`${API}/prestamos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+                
+                // ATRAPAMOS SI HAY ERROR EN LA BASE DE DATOS
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText);
+                }
+                
                 fechaActual.setMonth(fechaActual.getMonth() + 1);
             }
             document.getElementById("modalPrestamo").style.display = "none";
             formPrestamo.reset();
             await refreshAll();
-            alert(`¡Se generaron ${totalCuotas} cuotas con éxito!`);
+            
+            // AVISO INTELIGENTE: Le avisamos que busque el mes si no las ve
+            alert(`¡Se generaron ${totalCuotas} cuotas con éxito!\n\n(Revisá el selector de meses arriba para verlas si elegiste un mes que no sea este)`);
+            
         } catch(err) {
-            alert("Error al generar préstamo.");
+            alert("Error al generar préstamo: " + err.message);
+            console.error(err);
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Generar Cuotas";
