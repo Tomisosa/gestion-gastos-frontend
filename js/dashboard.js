@@ -860,8 +860,10 @@ async function refreshAll() {
 								         title="${saldosNetoOcultos ? 'Mantené apretado para ver' : ''}"
 								         style="font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
 								    
-										 <div id="caja-gastos-finty">Gastos: ${textoGastoMostrar}</div>
-										 <div id="caja-ingresos-finty">Ingresos: ${textoIngresoMostrar}</div>
+										 <div class="info-barra">
+										     <div id="caja-gastos-finty">Gastos: ${textoGastoMostrar}</div>
+										     <div id="caja-ingresos-finty">Ingresos: ${textoIngresoMostrar}</div>
+										 </div>
 								    
 								    <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
 								        <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>

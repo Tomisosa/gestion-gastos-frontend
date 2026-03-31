@@ -1171,3 +1171,69 @@ body.premium-landing {
         box-shadow: 0 0 30px rgba(42, 201, 187, 0.3);
     }
 }
+
+/* =========================================================
+   DISEÑO EXACTO "TICKET PREMIUM" (SALDO NETO)
+   ========================================================= */
+
+#totalGastoWidget {
+    display: block !important; 
+    padding: 24px 20px !important;
+}
+
+#totalGastoWidget > div:nth-child(1) {
+    margin-bottom: 8px !important;
+}
+
+#saldoNetoProtagonista {
+    font-size: clamp(2rem, 8vw, 2.8rem) !important;
+    margin-bottom: 25px !important;
+    letter-spacing: -1px !important;
+    text-align: left !important;
+    white-space: nowrap !important; 
+    overflow: hidden !important; 
+    text-overflow: ellipsis !important;
+}
+
+/* CONTENEDOR NUEVO PARA GASTOS E INGRESOS */
+.info-barra {
+    display: flex !important;
+    flex-direction: row !important; /* Forzamos fila, no columna */
+    justify-content: space-between !important; /* Empuja a los extremos */
+    align-items: flex-end !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+}
+
+#caja-gastos-finty {
+    text-align: left !important;
+    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
+    font-weight: 700 !important; 
+    color: #334155 !important; 
+    margin: 0 !important; 
+}
+
+#caja-ingresos-finty {
+    text-align: right !important;
+    font-size: clamp(0.9rem, 4.5vw, 1.05rem) !important; 
+    font-weight: 700 !important; 
+    color: #334155 !important; 
+    margin: 0 !important;
+}
+
+/* La Barra de progreso */
+#totalGastoWidget > div:nth-child(5) { 
+    height: 10px !important; 
+    margin-bottom: 10px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+}
+
+/* El % consumido */
+#totalGastoWidget > div:nth-child(6) { 
+    text-align: right !important;
+    margin-bottom: 25px !important; 
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    color: #ef4444 !important; 
+}
