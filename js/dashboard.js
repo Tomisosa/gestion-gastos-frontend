@@ -922,44 +922,43 @@ if (formPrestamo) {
             const [year, month] = mesInicio.split('-');
             let fechaActual = new Date(year, month - 1, 1);
 
-			for (let i = 1; i <= totalCuotas; i++) {
-			                const yyyy = fechaActual.getFullYear();
-			                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
-			                
-			                // Le agregamos el "-01" para que Java lo entienda como Fecha (LocalDate)
-			                const fechaPerfecta = `${yyyy}-${mm}-01`;
+            for (let i = 1; i <= totalCuotas; i++) {
+                const yyyy = fechaActual.getFullYear();
+                const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+                
+                // Formato exacto que espera tu Java ("YYYY-MM")
+                const fechaParaJava = `${yyyy}-${mm}`;
 
-			                const body = {
-			                    mesCuota: fechaPerfecta,
-			                    nombre: nombre,
-			                    perteneceA: pertenece,
-			                    cuotaActual: i,
-			                    cuotaTotal: totalCuotas,
-			                    montoTotal: 0.0,  // Agregamos .0 para que Java lo entienda como Double
-			                    aporteBelen: 0.0,
-			                    aporteOtro: 0.0,
-			                    usuario: { id: user.id } // Única forma correcta de pasar la relación
-			                };
-			                
-			                const res = await fetch(`${API}/prestamos`, { 
-			                    method: "POST", 
-			                    headers: authHeaders(), 
-			                    body: JSON.stringify(body) 
-			                });
-			                
-			                // Atrapamos el error si Java lo rechaza para saber exactamente por qué
-			                if (!res.ok) {
-			                    const errText = await res.text();
-			                    throw new Error(`Java rechazó los datos: ${errText}`);
-			                }
-			                
-			                fechaActual.setMonth(fechaActual.getMonth() + 1);
-			            }
+                const body = {
+                    mesCuota: fechaParaJava,
+                    nombre: nombre,
+                    perteneceA: pertenece,
+                    cuotaActual: i,
+                    cuotaTotal: totalCuotas,
+                    montoTotal: 0.0,  // Obligamos a que sea un Double válido para Java
+                    aporteBelen: 0.0, // Obligamos a que sea un Double válido para Java
+                    aporteOtro: 0.0,  // Obligamos a que sea un Double válido para Java
+                    usuario: { id: user.id } // La relación exacta que espera tu Hibernate
+                };
+                
+                const res = await fetch(`${API}/prestamos`, { 
+                    method: "POST", 
+                    headers: authHeaders(), 
+                    body: JSON.stringify(body) 
+                });
+                
+                // Atrapamos el error si Java lo rechaza
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`Java rechazó los datos: ${errText}`);
+                }
+                
+                fechaActual.setMonth(fechaActual.getMonth() + 1);
+            }
             document.getElementById("modalPrestamo").style.display = "none";
             formPrestamo.reset();
             await refreshAll();
             
-            // Aviso inteligente para que tu hermana sepa que tiene que buscar el mes
             alert(`¡Se generaron ${totalCuotas} cuotas con éxito!\n\n(Revisá el selector de meses arriba para verlas si elegiste un mes futuro)`);
             
         } catch(err) {
