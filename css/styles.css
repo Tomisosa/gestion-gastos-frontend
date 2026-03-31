@@ -1222,83 +1222,100 @@ vercel-live-feedback {
 
 
 /* =========================================================
-   LAS 3 TARJETAS ASOMÁNDOSE (CARRUSEL MÓVIL / GRILLA PC)
+   LAS 3 TARJETAS ASOMÁNDOSE (EFECTO PREMIUM 3D)
    ========================================================= */
 
 .app-previews-container {
     display: flex;
-    justify-content: flex-start; /* Clave para el scroll móvil */
+    justify-content: flex-start;
     align-items: flex-start;
     gap: 20px;
-    width: 100vw; /* Ocupa toda la pantalla a lo ancho */
+    width: 100vw; 
     padding: 0 20px 40px 20px;
     margin-top: 10px;
-    
-    /* Configuración para que se pueda deslizar en celular */
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x mandatory;
     scroll-padding: 20px;
+    perspective: 1200px; /* Activa la magia 3D */
 }
 
-/* Ocultar la barra de scroll (opcional pero queda más limpio) */
 .app-previews-container::-webkit-scrollbar { display: none; }
 
+/* El "Marco" de la ventana */
 .app-preview-card {
-    flex: 0 0 260px; /* Ancho fijo de cada tarjeta */
+    flex: 0 0 280px; 
     height: auto;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 -5px 30px rgba(0,0,0,0.4); /* Sombra para despegar del fondo */
-    border: 1px solid #334155;
-    scroll-snap-align: center; /* Se frena en el medio al deslizar */
-    animation: floatApps 5s ease-in-out infinite;
+    background-color: #1e293b; /* Color de fondo de la "ventana" */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Borde de cristal */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    scroll-snap-align: center; 
+    animation: floatApps 6s ease-in-out infinite;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* La barrita superior tipo Mac */
+.mockup-bar {
+    height: 32px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.mac-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.dot.red { background-color: #ff5f56; }
+.dot.yellow { background-color: #ffbd2e; }
+.dot.green { background-color: #27c93f; }
+
+.mockup-title {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    left: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    pointer-events: none;
 }
 
 .app-preview-card img {
     width: 100%;
     height: auto;
     display: block;
-    /* Difuminado suave hacia abajo */
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-}
-
-/* Títulos flotantes de cada sección */
-.preview-title {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    z-index: 10;
-    color: #ffffff;
-    background-color: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--color-primario);
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 1px;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
 
 @keyframes floatApps {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-8px); }
 }
 
-/* Retrasos para que floten a destiempo */
-.left-card { animation-delay: 0s; }
-.center-card { animation-delay: 1.5s; }
-.right-card { animation-delay: 0.7s; }
-
 /* ---------------------------------------------------------
-   ADAPTACIÓN PARA COMPUTADORAS (PC)
+   ADAPTACIÓN PARA COMPUTADORAS (EFECTO FOCO 3D)
    --------------------------------------------------------- */
 @media (min-width: 900px) {
     .finty-brand-motion { font-size: 6.5rem; }
     
     .acciones {
-        flex-direction: row; /* Botones uno al lado del otro */
+        flex-direction: row; 
         max-width: 100%;
         justify-content: center;
     }
@@ -1308,28 +1325,49 @@ vercel-live-feedback {
         padding: 16px 35px;
     }
 
-    /* En la compu, las 3 tarjetas se centran y no hay scroll horizontal */
     .app-previews-container {
         justify-content: center;
+        align-items: center; /* Alinea al centro para el efecto 3D */
         overflow-x: visible;
-        max-width: 1200px;
+        max-width: 1100px;
         padding: 0;
-        margin-top: 30px;
+        margin-top: 50px;
     }
 
-    .app-preview-card {
-        flex: 1; /* Se estiran para ocupar todo el espacio */
-        max-width: 350px; /* Pero con un límite para que no se deformen */
-        border-radius: 16px 16px 0 0; /* Solo bordes arriba */
-        /* Efecto 3D para que parezcan pantallas apoyadas */
-        transform: perspective(1000px) rotateX(15deg);
-        transform-origin: bottom;
-        transition: transform 0.4s ease;
+    /* Tarjeta Central (INICIO): Más grande, al frente y brillando */
+    .center-card {
+        flex: 0 0 450px;
+        z-index: 10;
+        transform: scale(1.05) translateY(-20px);
+        box-shadow: 0 20px 50px rgba(42, 201, 187, 0.2); /* Resplandor turquesa */
+        border: 1px solid rgba(42, 201, 187, 0.3);
+    }
+
+    /* Tarjeta Izquierda (GASTOS): Inclinada hacia atrás */
+    .left-card {
+        flex: 0 0 350px;
+        z-index: 5;
+        transform: rotateY(15deg) translateZ(-50px) translateX(30px);
+        opacity: 0.7;
+        box-shadow: -15px 10px 30px rgba(0,0,0,0.6);
+    }
+
+    /* Tarjeta Derecha (TARJETAS): Inclinada hacia atrás */
+    .right-card {
+        flex: 0 0 350px;
+        z-index: 5;
+        transform: rotateY(-15deg) translateZ(-50px) translateX(-30px);
+        opacity: 0.7;
+        box-shadow: 15px 10px 30px rgba(0,0,0,0.6);
     }
     
+    /* Al pasar el mouse, la tarjeta que toques se viene al frente */
     .app-preview-card:hover {
-        transform: perspective(1000px) rotateX(0deg) translateY(-20px);
-        z-index: 100;
-        box-shadow: 0 -10px 40px rgba(42, 201, 187, 0.3);
+        transform: rotateY(0deg) translateZ(20px) scale(1.1);
+        z-index: 20;
+        opacity: 1;
+        box-shadow: 0 20px 40px rgba(42, 201, 187, 0.4);
+        border-color: rgba(42, 201, 187, 0.8);
+        cursor: pointer;
     }
 }
