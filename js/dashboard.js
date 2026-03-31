@@ -614,7 +614,7 @@ function renderPrestamos(prestamos) {
           let filas = "";
           grupos[grupo].forEach(g => {
               filas += `<tr>
-                  <td><strong>${g.nombre}</strong></td>
+                  <td><strong style="color: #f8fafc;">${g.nombre}</strong></td>
                   <td><span style="background:var(--color-primario); color:#000; padding:2px 6px; border-radius:10px; font-size:0.8rem; font-weight:bold;">${g.cuotaActual}/${g.cuotaTotal}</span></td>
                   <td>${formatoMoneda(g.totalCuotaDinero)}</td>
                   <td style="color:#ffce56; font-weight:bold;">${formatoMoneda(g.aBelen)}</td>
