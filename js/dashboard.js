@@ -1,7 +1,9 @@
-// --- CONFIGURACIÓN API ---
+/* ==========================================================================
+   1. CONFIGURACIÓN, SESIÓN Y VARIABLES GLOBALES
+   ========================================================================== */
+
 const API = "https://backend-gastos-definitivo-production.up.railway.app/api";
 
-// --- DATOS DE SESIÓN ---
 const token = localStorage.getItem("token");
 const userId = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
@@ -32,7 +34,11 @@ let saldosAhorrosOcultos = true;
 
 window.saldosActuales = {};
 
-// --- HEADERS PARA API ---
+
+/* ==========================================================================
+   2. FUNCIONES UTILITARIAS (Helpers, Auth, Formateo, Colores)
+   ========================================================================== */
+
 function authHeaders() {
   return { 
     "Content-Type": "application/json", 
@@ -40,9 +46,7 @@ function authHeaders() {
   };
 }
 
-// --- CONTROL DE SESIÓN EXPIRADA ---
 function handleAuthError(res) {
-    // Si la llave está vencida (401 o 403), cerramos sesión automáticamente.
     if (res.status === 401 || res.status === 403) {
         localStorage.clear(); 
         window.location.replace("login.html"); 
@@ -50,32 +54,6 @@ function handleAuthError(res) {
     }
 }
 
-/* --- LLAMADAS API --- */
-async function fetchUserInfo() {
-  try {
-    const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
-    
-    // Si la base de datos rechaza el token, tiramos error directo
-    if (!res.ok) throw new Error("Token inválido");
-    
-    handleAuthError(res);
-    user = await res.json();
-    
-    const emailDiv = document.getElementById("userEmail");
-    if(emailDiv) {
-        // Aseguramos que nunca diga undefined
-        emailDiv.textContent = "👤 " + (user.email || user.nombre || "Usuario");
-        emailDiv.style.color = "#ffce56"; 
-        emailDiv.style.fontWeight = "bold";
-    }
-  } catch (e) { 
-    // Si falla por CUALQUIER motivo, limpiamos la basura y lo mandamos al login
-    localStorage.clear();
-    window.location.replace("login.html"); 
-  }
-}
-
-// --- FORMATO MONEDA ---
 function formatoMoneda(valor) {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -84,322 +62,91 @@ function formatoMoneda(valor) {
   }).format(valor);
 }
 
-// --- NUEVOS COLORES Y DISEÑO MODERNO ---
 function getBgColor(color) {
-    // Nuevos degradados más vibrantes y modernos
     const m = {
         naranja: "linear-gradient(135deg, #f97316 0%, #7c2d12 100%)",
         azul: "linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)",
         violeta: "linear-gradient(135deg, #8b5cf6 0%, #4c1d95 100%)",
         celeste: "linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)",
         verde: "linear-gradient(135deg, #22c55e 0%, #166534 100%)",
-        bna: "linear-gradient(135deg, #2ac9bb 0%, #0f766e 100%)", // Mantenemos el BNA clásico
+        bna: "linear-gradient(135deg, #2ac9bb 0%, #0f766e 100%)",
         rojo: "linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%)",
-        uala: "linear-gradient(135deg, #ef4444 0%, #cbd5e1 100%)", // Ualá clásico
-        amarillo: "linear-gradient(135deg, #f59e0b 0%, #92400e 100%)", // NUEVO
-        emerald: "linear-gradient(135deg, #10b981 0%, #065f46 100%)", // NUEVO
-        fuchsia: "linear-gradient(135deg, #d946ef 0%, #701a75 100%)", // NUEVO
-        indigo: "linear-gradient(135deg, #6366f1 0%, #312e81 100%)", // NUEVO
-        sky: "linear-gradient(135deg, #06b6d4 0%, #155e75 100%)", // NUEVO
-        rose: "linear-gradient(135deg, #f43f5e 0%, #881337 100%)", // NUEVO
+        uala: "linear-gradient(135deg, #ef4444 0%, #cbd5e1 100%)",
+        amarillo: "linear-gradient(135deg, #f59e0b 0%, #92400e 100%)",
+        emerald: "linear-gradient(135deg, #10b981 0%, #065f46 100%)",
+        fuchsia: "linear-gradient(135deg, #d946ef 0%, #701a75 100%)",
+        indigo: "linear-gradient(135deg, #6366f1 0%, #312e81 100%)",
+        sky: "linear-gradient(135deg, #06b6d4 0%, #155e75 100%)",
+        rose: "linear-gradient(135deg, #f43f5e 0%, #881337 100%)",
         negro: "linear-gradient(135deg, #262626 0%, #000000 100%)",
-        darkly: "linear-gradient(135deg, #1f2937 0%, #111827 100%)", // NUEVO (Gris muy oscuro)
+        darkly: "linear-gradient(135deg, #1f2937 0%, #111827 100%)",
     };
-
-    return m[color] || m['darkly']; // Si no encuentra el color, usa el darkly
+    return m[color] || m['darkly'];
 }
-/* --- GRÁFICOS --- */
-function generarGrafico(gastos) {
-  const canvas = document.getElementById('gastosChart');
-  if (!canvas) return;
-  if (miGrafico) { 
-      miGrafico.destroy(); 
-      miGrafico = null; 
-  }
-  const ctx = canvas.getContext('2d');
-  const datosAgrupados = {};
-  
-  // Armamos la lista de billeteras para saber si se pagó con tarjeta
-  const nombresBilleteras = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
-  globalBilleteras.forEach(b => nombresBilleteras.push(b.nombre.toUpperCase()));
 
-  gastos.forEach(g => {
-    let cat = g.categoriaNombre;
-
-    // MAGIA: Si el gasto no tiene categoría, la aplicación adivina de dónde viene
-    if (!cat || cat === "" || cat === "Sin categoría") {
-        const medio = (g.medioPago || "").toUpperCase();
-        const esTarjeta = !nombresBilleteras.includes(medio) && medio !== "";
-
-        if (esTarjeta) {
-            const esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
-            cat = esDolar ? "💳 Tarjetas (Dólares)" : "💳 Tarjetas (Pesos)";
-        } else {
-            cat = "Sin categoría";
-        }
-    }
-
-    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
-  });
-
-  // Agregué un par de colores más para que no se repitan
-  const coloresFinancieros = [
-      '#1e3a8a', '#0284c7', '#0f766e', '#d97706', 
-      '#64748b', '#b91c1c', '#4338ca', '#a16207',
-      '#ffce56', '#2ac9bb'
-  ];
-
-  miGrafico = new Chart(ctx, {
-    type: 'doughnut', 
-    data: {
-      labels: Object.keys(datosAgrupados),
-      datasets: [{
-        data: Object.values(datosAgrupados),
-        backgroundColor: coloresFinancieros,
-        borderWidth: 2, 
-        borderColor: '#ffffff', 
-        hoverOffset: 8,
-        borderRadius: 0 
-      }]
-    },
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: false,
-        layout: { padding: 10 },
-        cutout: '75%', 
-        plugins: { 
-            legend: { 
-                position: 'right', 
-                labels: { 
-                    color: '#334155', padding: 15,
-                    usePointStyle: true, pointStyle: 'rect',
-                    font: { size: 13, family: "'Segoe UI', Arial, sans-serif", weight: 'bold' }
-                } 
-            },
-            tooltip: {
-                backgroundColor: '#1e293b', titleColor: '#f8fafc', bodyColor: '#f8fafc',
-                padding: 12, cornerRadius: 4,
-                callbacks: {
-                    label: function(context) {
-                        let valor = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.raw);
-                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        let porcentaje = ((context.raw / total) * 100).toFixed(1);
-                        return ` ${valor} (${porcentaje}%)`;
-                    }
-                }
-            }
-        } 
-    }
-  });
-}
-// --- CORRECCIÓN DE TARJETAS (DISEÑO LIMPIO Y CARRUSEL NATIVO) ---
-function calcularSaldosPorCuenta(gastos, ingresos) {
-    const contenedor = document.getElementById("contenedorBilleteras");
-    if (!contenedor) return;
-
-    const nombres = [];
-    globalBilleteras.forEach(b => {
-        const nom = b.nombre.toUpperCase();
-        if (!nombres.includes(nom)) nombres.push(nom);
-    });
-
-    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
-    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
-
-    const saldos = {};
-    nombres.forEach(n => saldos[n] = 0);
-
-    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); });
-    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); });
-    
-    window.saldosActuales = saldos;
-
-	// Contenedor general limpio
-	    contenedor.style.cssText = "display: flex; flex-direction: row; flex-wrap: nowrap; gap: 16px; overflow-x: auto; max-width: 100%; padding: 10px 5px 20px 5px; -webkit-overflow-scrolling: touch;";
-	    contenedor.innerHTML = "";
-
-	    if (nombres.length === 0) {
-	         contenedor.innerHTML = `<div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.</div>`;
-	        return;
-	    }
-
-		globalBilleteras.forEach(billetera => {
-			        const b = billetera.nombre.toUpperCase();
-			        
-			        let btnAcciones = `
-			        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
-			            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
-			            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
-			        </div>
-			        `;
-
-		            // ¡ACÁ ESTÁ LA CORRECCIÓN! Creamos la variable montoRealTarjeta
-		            const montoRealTarjeta = formatoMoneda(saldos[b] || 0);
-			        const montoAMostrar = saldosOcultos ? "••••••" : montoRealTarjeta;
-			        const bgColor = getBgColor(billetera.color || 'default'); 
-
-			        // ACÁ ESTÁ LA MAGIA: Pasamos todo el diseño de la tarjeta al CSS usando "tarjeta-billetera"
-			        contenedor.innerHTML += `
-			        <div class="tarjeta-billetera" style="background: ${bgColor};">
-			            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
-			            
-			            ${btnAcciones}
-			            
-			            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-			                <div style="display: flex; align-items: center; gap: 4px;">
-			                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
-			                    <h4>${b}</h4>
-			                </div>
-							<div style="margin-top: auto;">
-							                    <p onmouseover="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'" 
-							                       onmouseout="if(${saldosOcultos}) this.textContent = '••••••'"
-							                       ontouchstart="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'"
-							                       ontouchend="if(${saldosOcultos}) this.textContent = '••••••'"
-							                       title="${saldosOcultos ? 'Pasá el mouse o mantené apretado para ver' : ''}" 
-							                       style="${saldosOcultos ? 'cursor: pointer;' : ''} -webkit-tap-highlight-color: transparent;">
-							                       ${montoAMostrar}
-							                    </p>
-							                </div>
-			            </div>
-			        </div>`;
-			    });
-	}
-	// REEMPLAZAR LA FUNCIÓN ENTERA POR ESTA:
-
-	function cargarSelectorFechas() {
-
+function cargarSelectorFechas() {
 	const selectMes = document.getElementById("filtroMes");
-
 	const selectAnio = document.getElementById("filtroAnio");
-
 	if (!selectMes || !selectAnio) return;
 
-
-
 	const meses = [
-
-	{ val: "01", text: "Enero" }, { val: "02", text: "Febrero" }, { val: "03", text: "Marzo" },
-
-	{ val: "04", text: "Abril" }, { val: "05", text: "Mayo" }, { val: "06", text: "Junio" },
-
-	{ val: "07", text: "Julio" }, { val: "08", text: "Agosto" }, { val: "09", text: "Septiembre" },
-
-	{ val: "10", text: "Octubre" }, { val: "11", text: "Noviembre" }, { val: "12", text: "Diciembre" }
-
+        { val: "01", text: "Enero" }, { val: "02", text: "Febrero" }, { val: "03", text: "Marzo" },
+        { val: "04", text: "Abril" }, { val: "05", text: "Mayo" }, { val: "06", text: "Junio" },
+        { val: "07", text: "Julio" }, { val: "08", text: "Agosto" }, { val: "09", text: "Septiembre" },
+        { val: "10", text: "Octubre" }, { val: "11", text: "Noviembre" }, { val: "12", text: "Diciembre" }
 	];
 
-
-
-	// Automáticamente te va a cargar este año, uno para atrás y 4 para adelante
-
 	const hoy = new Date();
-
 	const anioActual = hoy.getFullYear();
-
 	const anios = [anioActual - 1, anioActual, anioActual + 1, anioActual + 2, anioActual + 3];
 
-
-
-	// Cargar selector de Meses
-
 	selectMes.innerHTML = "";
-
 	meses.forEach(m => {
-
-	const option = document.createElement("option");
-
-	option.value = m.val;
-
-	option.textContent = m.text;
-
-	selectMes.appendChild(option);
-
+        const option = document.createElement("option");
+        option.value = m.val;
+        option.textContent = m.text;
+        selectMes.appendChild(option);
 	});
-
-
-
-	// Cargar selector de Años
 
 	selectAnio.innerHTML = "";
-
 	anios.forEach(a => {
-
-	const option = document.createElement("option");
-
-	option.value = a;
-
-	option.textContent = a;
-
-	selectAnio.appendChild(option);
-
+        const option = document.createElement("option");
+        option.value = a;
+        option.textContent = a;
+        selectAnio.appendChild(option);
 	});
 
-
-
-	// ¡LA MAGIA!: Obliga a la app a pararse en el mes exacto del día de hoy
-
 	const mesActualStr = String(hoy.getMonth() + 1).padStart(2, '0');
-
 	selectMes.value = mesActualStr;
-
 	selectAnio.value = anioActual;
 
-
-
-	// Si tocás cualquiera de los dos botones, actualiza la plata
-
 	selectMes.onchange = () => refreshAll();
-
 	selectAnio.onchange = () => refreshAll();
+}
 
-	}
-/* --- LLAMADAS API --- */
+
+/* ==========================================================================
+   3. LLAMADAS A LA API (Fetch Data)
+   ========================================================================== */
+
 async function fetchUserInfo() {
   try {
     const res = await fetch(`${API}/usuarios/me`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Token inválido");
     handleAuthError(res);
     user = await res.json();
     
     const emailDiv = document.getElementById("userEmail");
     if(emailDiv) {
-        emailDiv.textContent = "👤 " + user.email;
+        emailDiv.textContent = "👤 " + (user.email || user.nombre || "Usuario");
         emailDiv.style.color = "#ffce56"; 
         emailDiv.style.fontWeight = "bold";
     }
   } catch (e) { 
-    localStorage.removeItem("token");
-    window.location.href = "login.html"; 
+    localStorage.clear();
+    window.location.replace("login.html"); 
   }
 }
-
-function cargarNombresPrestamo() {
-    if (!user) return;
-    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
-    const config = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
-
-    const labels1 = ["labelTotal1", "labelTabla1", "labelModal1"];
-    const labels2 = ["labelTotal2", "labelTabla2", "labelModal2"];
-
-    labels1.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n1; });
-    labels2.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
-}
-
-window.configurarNombresPrestamo = function() {
-    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
-    const configActual = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
-    
-    const nombre1 = prompt("Ingresá el nombre de la 1° Persona (Ej: Mamá, Juan):", configActual.n1);
-    if (nombre1 === null) return; 
-    
-    const nombre2 = prompt("Ingresá el nombre de la 2° Persona (Ej: Belén, Pedro):", configActual.n2);
-    if (nombre2 === null) return;
-
-    if (nombre1.trim() !== "" && nombre2.trim() !== "") {
-        localStorage.setItem(`nombres_prestamo_${user.id}`, JSON.stringify({ n1: nombre1.trim(), n2: nombre2.trim() }));
-        cargarNombresPrestamo();
-        alert("¡Nombres actualizados con éxito!");
-    }
-};
 
 async function fetchCategorias() { 
     try { 
@@ -472,48 +219,87 @@ async function fetchYRenderizarMisTarjetas() {
     }
 }
 
-function actualizarMediosDePagoSelects() {
-    const gastoMedio = document.getElementById("gastoMedio");
-    const ingresoMedio = document.getElementById("ingresoMedio");
-    const tarjetaTipo = document.getElementById("tarjetaTipo"); 
-    const pagoGastoMedio = document.getElementById("pagoGastoMedio"); 
-    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); 
-    
-    // Ya no hay listas fijas. Cargamos estrictamente lo que hay en la Base de Datos
-    let opcionesBilleteras = "";
-    globalBilleteras.forEach(b => {
-        opcionesBilleteras += `<option value="${b.nombre.toUpperCase()}">🏦 ${b.nombre}</option>`;
-    });
-    
-    // Si borró todo y no hay nada, dejamos una alerta
-    if (globalBilleteras.length === 0) {
-        opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
-    }
-    
-    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
-    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
-    if (pagoGastoMedio) pagoGastoMedio.innerHTML = opcionesBilleteras;
-    
-    if (tarjetaTipo) tarjetaTipo.innerHTML = "";
-    if (globalTarjetas.length === 0 && tarjetaTipo) {
-        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
-    }
 
-    if (filtroTarjeta) {
-        const valPrevio = filtroTarjeta.value;
-        filtroTarjeta.innerHTML = '<option value="all">💳 TODAS</option>';
-        globalTarjetas.forEach(t => {
-            filtroTarjeta.innerHTML += `<option value="${t.nombre.toUpperCase()}">💳 ${t.nombre.toUpperCase()}</option>`;
-        });
-        if (valPrevio) filtroTarjeta.value = valPrevio; 
-    }
+/* ==========================================================================
+   4. RENDERIZADO DE INTERFAZ (Listas, Gráficos, Tablas)
+   ========================================================================== */
 
-    globalTarjetas.forEach(t => {
-        const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
-        if (gastoMedio) gastoMedio.innerHTML += opt;
-        if (tarjetaTipo) tarjetaTipo.innerHTML += opt;
-        if (pagoGastoMedio) pagoGastoMedio.innerHTML += opt;
-    });
+function generarGrafico(gastos) {
+  const canvas = document.getElementById('gastosChart');
+  if (!canvas) return;
+  if (miGrafico) { 
+      miGrafico.destroy(); 
+      miGrafico = null; 
+  }
+  const ctx = canvas.getContext('2d');
+  const datosAgrupados = {};
+  
+  const nombresBilleteras = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
+  globalBilleteras.forEach(b => nombresBilleteras.push(b.nombre.toUpperCase()));
+
+  gastos.forEach(g => {
+    let cat = g.categoriaNombre;
+    if (!cat || cat === "" || cat === "Sin categoría") {
+        const medio = (g.medioPago || "").toUpperCase();
+        const esTarjeta = !nombresBilleteras.includes(medio) && medio !== "";
+        if (esTarjeta) {
+            const esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
+            cat = esDolar ? "💳 Tarjetas (Dólares)" : "💳 Tarjetas (Pesos)";
+        } else {
+            cat = "Sin categoría";
+        }
+    }
+    datosAgrupados[cat] = (datosAgrupados[cat] || 0) + (Number(g.monto) || 0);
+  });
+
+  const coloresFinancieros = [
+      '#1e3a8a', '#0284c7', '#0f766e', '#d97706', 
+      '#64748b', '#b91c1c', '#4338ca', '#a16207',
+      '#ffce56', '#2ac9bb'
+  ];
+
+  miGrafico = new Chart(ctx, {
+    type: 'doughnut', 
+    data: {
+      labels: Object.keys(datosAgrupados),
+      datasets: [{
+        data: Object.values(datosAgrupados),
+        backgroundColor: coloresFinancieros,
+        borderWidth: 2, 
+        borderColor: '#ffffff', 
+        hoverOffset: 8,
+        borderRadius: 0 
+      }]
+    },
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        layout: { padding: 10 },
+        cutout: '75%', 
+        plugins: { 
+            legend: { 
+                position: 'right', 
+                labels: { 
+                    color: '#334155', padding: 15,
+                    usePointStyle: true, pointStyle: 'rect',
+                    font: { size: 13, family: "'Segoe UI', Arial, sans-serif", weight: 'bold' }
+                } 
+            },
+            tooltip: {
+                backgroundColor: '#1e293b', titleColor: '#f8fafc', bodyColor: '#f8fafc',
+                padding: 12, cornerRadius: 4,
+                callbacks: {
+                    label: function(context) {
+                        let valor = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.raw);
+                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        let porcentaje = ((context.raw / total) * 100).toFixed(1);
+                        return ` ${valor} (${porcentaje}%)`;
+                    }
+                }
+            }
+        } 
+    }
+  });
 }
 
 function renderCategorias(categorias) {
@@ -556,518 +342,6 @@ function renderCategorias(categorias) {
   }
 }
 
-function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
-    const tbody = document.getElementById("tablaProyeccionBody");
-    if (!tbody) return;
-
-    const totalIngreso = ingresos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
-    const realFijos = gastosFijos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
-    const realVariables = gastosVariables.reduce((s, x) => s + (Number(x.monto) || 0), 0);
-    const realAhorro = ahorros.reduce((s, x) => s + (Number(x.monto) || 0), 0);
-
-    const topeFijos = totalIngreso * 0.50;
-    const topeVariables = totalIngreso * 0.30;
-    const topeAhorro = totalIngreso * 0.20;
-
-    tbody.innerHTML = `
-        <tr><td>Gastos Fijos</td><td>50%</td><td style="color: #94a3b8;">${formatoMoneda(topeFijos)}</td><td style="font-weight:bold; color: ${realFijos > topeFijos ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realFijos)}</td><td>${realFijos > topeFijos ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
-        <tr><td>Gastos Variables</td><td>30%</td><td style="color: #94a3b8;">${formatoMoneda(topeVariables)}</td><td style="font-weight:bold; color: ${realVariables > topeVariables ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realVariables)}</td><td>${realVariables > topeVariables ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
-        <tr><td>Ahorros / Inv.</td><td>20%</td><td style="color: #94a3b8;">${formatoMoneda(topeAhorro)}</td><td style="font-weight:bold; color: ${realAhorro < topeAhorro ? '#ffce56' : '#2ac9bb'}">${formatoMoneda(realAhorro)}</td><td>${realAhorro >= topeAhorro && topeAhorro > 0 ? '🟢 Meta lograda' : (topeAhorro === 0 ? '⚪ Sin ingresos' : '🟡 Falta ahorro')}</td></tr>
-    `;
-
-    const contenedorSaldos = document.getElementById("resumenCuentasProyeccion");
-    if(contenedorSaldos) {
-        contenedorSaldos.innerHTML = `<h4 style="margin-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
-        const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
-        globalBilleteras.forEach(b => { if(!nombres.includes(b.nombre.toUpperCase())) nombres.push(b.nombre.toUpperCase()); });
-        const saldos = window.saldosActuales || {};
-        
-        nombres.forEach(b => {
-            contenedorSaldos.innerHTML += `
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
-                <span>🏦 ${b}:</span> 
-                <span style="font-weight: bold; color: #00aae4;">${saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0)}</span>
-            </div>`;
-        });
-    }
-}
-
-async function refreshAll() {
-    if(!user) return; 
-    cargarNombresPrestamo(); 
-
-    // 🚀 MAGIA DE VELOCIDAD: Pedimos TODO a la base de datos al mismo tiempo
-    const [categorias, billeteras, tarjetas, gTodos, iTodos, pTodos] = await Promise.all([
-        fetchCategorias(),
-        fetchBilleteras(),
-        fetchYRenderizarMisTarjetas(),
-        fetchGastos(),
-        fetchIngresos(),
-        fetchPrestamos()
-    ]);
-
-    globalBilleteras = billeteras || [];
-  
-	// MAGIA: LEEMOS LOS DOS SELECTORES NUEVOS (MES Y AÑO)
-	    const selectMes = document.getElementById("filtroMes");
-	    const selectAnio = document.getElementById("filtroAnio");
-	    
-	    // Si los selectores existen, armamos la fecha ("2026-03"). Si no, usamos la de hoy.
-	    const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
-
-    // --- MAGIA: LEER FECHAS DESDE LA BD ---
-    let textoVencimientoTarjetas = "Según tarjeta"; // Por defecto
-    const configMensual = iTodos.find(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
-    
-    if (configMensual) {
-        const partes = configMensual.descripcion.split("|");
-        const cCierre = partes[1] ? partes[1].split(":")[1].trim() : "";
-        const cVto = partes[2] ? partes[2].split(":")[1].trim() : "";
-        
-        const fc = document.getElementById("fechaCierreMes");
-        const fv = document.getElementById("fechaVtoMes");
-        if(fc) fc.value = cCierre !== "undefined" ? cCierre : "";
-        if(fv) fv.value = cVto !== "undefined" ? cVto : "";
-        
-        if (cVto && cVto !== "undefined" && cVto !== "") {
-            textoVencimientoTarjetas = cVto; 
-        }
-    } else {
-        const fc = document.getElementById("fechaCierreMes");
-        const fv = document.getElementById("fechaVtoMes");
-        if(fc) fc.value = "";
-        if(fv) fv.value = "";
-    }
-    
-    const gFiltradosMes = gTodos.filter(g => {
-        const fechaComparar = g.mesImpacto ? g.mesImpacto : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
-        return (fechaComparar || "").startsWith(mesSeleccionado);
-    });
-
-    const prestamosDelMes = pTodos.filter(p => (p.mesCuota || "").startsWith(mesSeleccionado));
-    let sumaTotalMiaPrestamos = 0;
-    prestamosDelMes.forEach(p => {
-        // MAGIA: Solo suma tu aporte (el que está guardado en la base de datos como aporteBelen)
-        sumaTotalMiaPrestamos += (Number(p.aporteBelen) || 0); 
-    });
-
-    if (sumaTotalMiaPrestamos > 0) {
-        // MAGIA: Saca tu nombre dinámicamente
-        let nombreVirtual = user.nombre ? user.nombre.split(" ")[0].charAt(0).toUpperCase() + user.nombre.split(" ")[0].slice(1).toLowerCase() : 'vos';
-        
-        gFiltradosMes.push({
-            id: 'virtual_prestamo',
-            descripcion: `Resumen Préstamos (Pagado por ${nombreVirtual})`,
-            monto: sumaTotalMiaPrestamos,
-            fechaVencimiento: "Automático",
-            categoriaNombre: "🤝 Préstamos",
-            pagado: false,
-            medioPago: "MÚLTIPLES",
-            esFijo: true,
-            esVirtual: true
-        });
-    }
-  
-    const iFiltradosMes = iTodos.filter(i => {
-        const fechaComparar = i.mesImpacto ? i.mesImpacto : i.fecha;
-        return (fechaComparar || "").startsWith(mesSeleccionado);
-    });
-
-    const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
-    let gParaTablasYGrafico = [...gFiltradosMes]; 
-    
-    if (catFilter !== "all" && catFilter !== "") {
-        gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
-    }
-
-    const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
-    const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
-
-    let totalUSD = 0;
-    let totalARS_Inv = 0;
-    inversiones.forEach(inv => {
-        const monto = Number(inv.monto) || 0;
-        if (inv.descripcion.includes("(USD)")) totalUSD += monto;
-        else totalARS_Inv += monto;
-    });
-
-	// --- MAGIA HOVER PARA AHORROS E INVERSIONES ---
-	  const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
-	  const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
-	  
-	  const textoRealUSD = `USD ${totalUSD.toFixed(2)}`;
-	  const textoRealARS = formatoMoneda(totalARS_Inv);
-
-	  // Función interna que inyecta la interactividad táctil y de mouse
-	  const aplicarMagia = (elemento, textoReal, estaOculto) => {
-	      if (!elemento) return;
-	      if (estaOculto) {
-	          elemento.innerHTML = "••••••";
-	          elemento.onmouseover = () => elemento.innerHTML = textoReal;
-	          elemento.onmouseout = () => elemento.innerHTML = "••••••";
-	          elemento.ontouchstart = () => elemento.innerHTML = textoReal;
-	          elemento.ontouchend = () => elemento.innerHTML = "••••••";
-	          elemento.ontouchcancel = () => elemento.innerHTML = "••••••";
-	          elemento.style.cursor = "pointer";
-	          elemento.style.webkitTapHighlightColor = "transparent";
-	          elemento.title = "Pasá el mouse o mantené apretado para ver";
-	      } else {
-	          elemento.innerHTML = textoReal;
-	          elemento.onmouseover = null; elemento.onmouseout = null; 
-	          elemento.ontouchstart = null; elemento.ontouchend = null; elemento.ontouchcancel = null;
-	          elemento.style.cursor = "default";
-	          elemento.title = "";
-	      }
-	  };
-
-	  // ¡CORREGIDO! Sin el window.
-	  aplicarMagia(divUSD, textoRealUSD, saldosAhorrosOcultos);
-	  aplicarMagia(divARS, textoRealARS, saldosAhorrosOcultos);
-	  // ----------------------------------------------
-  
-	  const totalG = gFiltradosMes.reduce((s, x) => {
-	      const monto = Number(x.monto) || 0;
-	      
-	      // 1. Es un gasto variable "puro" (no es fijo Y no es una cuota de tarjeta)
-	      const esVariablePuro = !x.esFijo && !(x.descripcion && x.descripcion.includes("(Cuota"));
-	      
-	      // 2. Es un gasto fijo que ya tiene el tilde de Pagado
-	      const esFijoPagado = x.esFijo && x.pagado;
-
-	      // Si cumple alguna de las dos, lo sumamos al total del Inicio
-	      if (esVariablePuro || esFijoPagado) {
-	          return s + monto;
-	      }
-	      
-	      return s;
-	  }, 0);
-    const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
-    
-	// --- 1. CÁLCULOS PARA EL FLUJO DE CAJA Y TOP CATEGORÍAS ---
-	    const balanceNeto = totalI - totalG;
-	    const porcentajeGastado = totalI > 0 ? Math.min((totalG / totalI) * 100, 100) : (totalG > 0 ? 100 : 0);
-	    
-	    // Decidimos el color del "Termómetro" (Verde < 75%, Amarillo < 90%, Rojo > 90%)
-	    let colorTermometro = '#10b981'; // Verde
-	    if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; // Amarillo
-	    if (porcentajeGastado > 90) colorTermometro = '#ef4444'; // Rojo
-
-		// Buscamos cuáles son tus 3 categorías en las que más gastaste este mes
-		    const gastosPorCategoria = {};
-		    gFiltradosMes.forEach(g => {
-		        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos") {
-		            
-		            // Atrapamos el "null" desde la raíz y lo convertimos a algo prolijo
-		            let nombreCat = g.categoriaNombre;
-		            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
-		                nombreCat = "💳 Consumos de Tarjeta"; 
-		            }
-		            
-		            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + Number(g.monto);
-		        }
-		    });
-		    
-		    // Ordenamos de mayor a menor y sacamos el Top 3
-		    const topCats = Object.entries(gastosPorCategoria)
-		        .sort((a,b) => b[1] - a[1])
-		        .slice(0, 3);
-
-		    // Armamos el HTML de las barritas para las categorías
-		    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
-		    
-		    topCats.forEach(cat => {
-		        // Como ya lo filtramos arriba, acá simplemente lo leemos
-		        const nombreCat = cat[0];
-		        const montoCat = cat[1];
-		        
-		        // Calculamos qué porcentaje del total gastado representa esta categoría
-		        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
-		        
-		        htmlTopCats += `
-		            <div style="margin-bottom: 12px;">
-		                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-		                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
-		                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
-		                </div>
-		                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-		                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
-		                </div>
-		            </div>
-		        `;
-		    });
-		    
-		    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
-		    htmlTopCats += '</div>';
-
-			// --- 2. INYECCIÓN DEL SÚPER WIDGET DE SALUD FINANCIERA ---
-						    let containerGasto = document.getElementById("totalGastoWidget");
-						    if(!containerGasto) {
-						        const oldP = document.getElementById("totalGastado");
-						        if(oldP) {
-						            const parent = oldP.closest('.card');
-						            if(parent) {
-						                parent.id = "totalGastoWidget";
-										// Tarjeta 100% responsive, ocupa todo el ancho disponible sin cortarse
-										parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px; width: 100%; box-sizing: border-box; overflow: hidden;";
-						            }
-						        }
-						    }
-						    
-						    containerGasto = document.getElementById("totalGastoWidget");
-						    if(containerGasto) {
-						        // Formateamos los números respetando los puntitos de privacidad
-						        const montoRealNeto = formatoMoneda(balanceNeto);
-						        const montoRealGasto = formatoMoneda(totalG);
-						        const montoRealIngreso = formatoMoneda(totalI);
-						        
-						        // Color para el Saldo Neto: Turquesa si sobra plata, Rojo Oscuro si estás en negativo
-						        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
-
-						        // Lógica de la barra 
-						        let pctBarraGastos = 0;
-						        
-						        if (totalI > 0) {
-						            pctBarraGastos = (totalG / totalI) * 100;
-						            if (pctBarraGastos > 100) {
-						                pctBarraGastos = 100; // Tope visual para que no se salga de la caja
-						            }
-						        } else if (totalG > 0) {
-						            // Si no hay ingresos pero hay gastos, la barra explota al 100%
-						            pctBarraGastos = 100;
-						        }
-
-								// Lógica del ojito de privacidad (NUEVA VARIABLE)
-								const textoNetoMostrar = saldosNetoOcultos ? "••••••" : montoRealNeto;
-								const textoGastoMostrar = saldosNetoOcultos ? "••••••" : montoRealGasto;
-								const textoIngresoMostrar = saldosNetoOcultos ? "••••••" : montoRealIngreso;
-
-								const hoverLogic = saldosNetoOcultos 
-								    ? `onmouseover="this.textContent = '${montoRealNeto}'" onmouseout="this.textContent = '••••••'" ontouchstart="this.textContent = '${montoRealNeto}'" ontouchend="this.textContent = '••••••'" ontouchcancel="this.textContent = '••••••'"` 
-								    : "";
-								const cursorLogic = saldosNetoOcultos ? "cursor: pointer;" : "cursor: default;";
-								const iconoOjo = saldosNetoOcultos ? "visibility_off" : "visibility";
-
-								containerGasto.innerHTML = `
-								    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-								        <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">SALDO NETO</div>
-								        <button onclick="toggleSaldosNeto()" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 0;" title="Ocultar/Mostrar saldos">
-								            <span class="material-icons" style="font-size: 18px; transition: color 0.2s;">${iconoOjo}</span>
-								        </button>
-								    </div>
-								    
-								    <div id="saldoNetoProtagonista" 
-								         ${hoverLogic}
-								         title="${saldosNetoOcultos ? 'Mantené apretado para ver' : ''}"
-								         style="font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
-								    
-										 <div class="info-barra">
-										     <div id="caja-gastos-finty">Gastos: ${textoGastoMostrar}</div>
-										     <div id="caja-ingresos-finty">Ingresos: ${textoIngresoMostrar}</div>
-										 </div>
-								    
-								    <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
-								        <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
-								    </div>
-								    
-								    <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
-								        ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
-								    </div>
-
-								    ${htmlTopCats}
-								`;
-						    }
-			    const elBal = document.getElementById("balanceTotal");
-			    if(elBal) {
-			        const bal = totalI - totalG;
-			        elBal.textContent = formatoMoneda(bal);
-			        elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
-			    }
-			  
-			    const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
-			    const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
-
-			    const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
-			    globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
-
-			    const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
-			  
-			    const totalesTarjetasARS = {};
-			    const totalesTarjetasUSD = {};
-			    let sumaTotalTarjetasARS = 0;
-			    let sumaTotalTarjetasUSD = 0;
-
-			    consumosTarjeta.forEach(g => {
-			        const m = g.medioPago || "Tarjeta Desconocida";
-			        const monto = Number(g.monto) || 0;
-			        if ((g.descripcion || "").includes("[USD]")) {
-			            totalesTarjetasUSD[m] = (totalesTarjetasUSD[m] || 0) + monto;
-			            sumaTotalTarjetasUSD += monto;
-			        } else {
-			            totalesTarjetasARS[m] = (totalesTarjetasARS[m] || 0) + monto;
-			            sumaTotalTarjetasARS += monto;
-			        }
-			    });
-	// --- MAGIA HOVER PARA TARJETAS DE CRÉDITO DINÁMICAS ---
-	  globalTarjetas.forEach(t => {
-	      const idMonto = "monto-tarjeta-" + t.id;
-	      const totalARS = totalesTarjetasARS[t.nombre] || 0;
-	      const totalUSD = totalesTarjetasUSD[t.nombre] || 0;
-	      const el = document.getElementById(idMonto);
-	      
-	      if (el) {
-	          // Preparamos el texto real (incluso si tiene pesos y dólares combinados)
-	          let textoRealHTML = formatoMoneda(totalARS);
-	          if (totalUSD > 0) {
-	              textoRealHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
-	          }
-	          
-	          // ¡CORREGIDO! Sin el window.
-	          if (saldosTarjetasOcultos) {
-	              el.innerHTML = "••••••";
-	              el.onmouseover = () => el.innerHTML = textoRealHTML;
-	              el.onmouseout = () => el.innerHTML = "••••••";
-	              el.ontouchstart = () => el.innerHTML = textoRealHTML;
-	              el.ontouchend = () => el.innerHTML = "••••••";
-	              el.ontouchcancel = () => el.innerHTML = "••••••";
-	              el.style.cursor = "pointer";
-	              el.style.webkitTapHighlightColor = "transparent";
-	              el.title = "Pasá el mouse o mantené apretado para ver";
-	          } else {
-	              // Si el ojo está apagado, mostramos siempre y le sacamos la magia
-	              el.innerHTML = textoRealHTML;
-	              el.onmouseover = null; el.onmouseout = null; 
-	              el.ontouchstart = null; el.ontouchend = null; el.ontouchcancel = null;
-	              el.style.cursor = "default";
-	              el.title = "";
-	          }
-	      }
-	  });
-	  // ------------------------------------------------------
-
-    if (sumaTotalTarjetasARS > 0) {
-        gFijosParaTabla.push({
-            id: 'virtual_tarjeta_ars', 
-            descripcion: `Resumen Tarjetas (Pesos)`,
-            monto: sumaTotalTarjetasARS,
-            fechaVencimiento: textoVencimientoTarjetas, 
-            categoriaNombre: "💳 Tarjetas", 
-            pagado: false,
-            medioPago: "MÚLTIPLES",
-            esVirtual: true 
-        });
-    }
-
-    if (sumaTotalTarjetasUSD > 0) {
-        gFijosParaTabla.push({
-            id: 'virtual_tarjeta_usd', 
-            descripcion: `Resumen Tarjetas (Dólares)`,
-            monto: sumaTotalTarjetasUSD,
-            fechaVencimiento: textoVencimientoTarjetas, 
-            categoriaNombre: "💳 Tarjetas", 
-            pagado: false,
-            medioPago: "MÚLTIPLES",
-            esVirtual: true,
-            isUSD: true 
-        });
-    }
-
-    renderGastosVariables(gVariablesParaTabla); 
-    renderGastosFijos(gFijosParaTabla); 
-    renderIngresos(ingresosNormales);
-    renderInversiones(inversiones);
-    generarGrafico(gParaTablasYGrafico);
-    renderConsumosCuotas(gParaTablasYGrafico); 
-    renderPrestamos(pTodos); 
-
-    const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
-    const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
-
-    const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
-
-    calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
-    
-    actualizarMediosDePagoSelects();
-    renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
-}
-
-  function renderPrestamos(prestamos) {
-      const contenedor = document.getElementById("contenedorTablasPrestamos");
-      if(!contenedor) return;
-      contenedor.innerHTML = "";
-
-      // MAGIA: Obtenemos tu nombre de usuario y lo ponemos prolijo (Ej: "tomas" -> "Tomas")
-      let minombre = user.nombre ? user.nombre.split(" ")[0] : "Vos";
-      minombre = minombre.charAt(0).toUpperCase() + minombre.slice(1).toLowerCase();
-
-      // Inyectamos el nombre en las tarjetas del HTML
-      document.querySelectorAll('.nombreDinamico').forEach(el => el.textContent = minombre);
-
-	  const selectMes = document.getElementById("filtroMes");
-	  const selectAnio = document.getElementById("filtroAnio");
-	  const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
-
-      // Filtramos solo los de este mes
-      const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
-      
-      const grupos = { "Mamá": [], "Papá": [], "Ambos": [] };
-      let sumaTotalMia = 0;
-
-      prestamosDelMes.forEach(p => {
-          const pertenece = p.perteneceA || "Desconocido";
-          const aBelen = Number(p.aporteBelen) || 0;
-          const aOtro = Number(p.aporteOtro) || 0;
-          const totalCuotaDinero = Number(p.montoTotal) || 0;
-
-          sumaTotalMia += aBelen;
-
-          if(grupos[pertenece]) {
-              grupos[pertenece].push({
-                  id: p.id, 
-                  nombre: p.nombre || "Sin Nombre", 
-                  cuotaActual: p.cuotaActual || 1, 
-                  cuotaTotal: p.cuotaTotal || 1, 
-                  aBelen, aOtro, totalCuotaDinero
-              });
-          }
-      });
-
-      const cardBelen = document.getElementById("totalBelenPrestamos");
-      if(cardBelen) cardBelen.textContent = formatoMoneda(sumaTotalMia);
-
-      // Dibujamos una tabla por cada persona
-      ["Mamá", "Papá", "Ambos"].forEach(grupo => {
-          if(grupos[grupo].length === 0) return;
-
-          let filas = "";
-          grupos[grupo].forEach(g => {
-              filas += `<tr>
-                  <td><strong>${g.nombre}</strong></td>
-                  <td><span style="background:var(--color-primario); color:#000; padding:2px 6px; border-radius:10px; font-size:0.8rem; font-weight:bold;">${g.cuotaActual}/${g.cuotaTotal}</span></td>
-                  <td>${formatoMoneda(g.totalCuotaDinero)}</td>
-                  <td style="color:#ffce56; font-weight:bold;">${formatoMoneda(g.aBelen)}</td>
-                  <td style="color:#94a3b8;">${formatoMoneda(g.aOtro)}</td>
-                  <td>
-                      <button onclick="abrirEditarPrestamo(${g.id}, ${g.totalCuotaDinero}, ${g.aBelen})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✏️</button>
-                      <button onclick="eliminarPrestamo(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>
-                  </td>
-              </tr>`;
-          });
-
-          // ACÁ INYECTAMOS TU NOMBRE EN LA CABECERA DE LA TABLA (<th>${minombre}</th>)
-          contenedor.innerHTML += `
-          <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
-              <h3 style="margin-top: 0; color: #00aae4; border-bottom: 1px solid #333; padding-bottom: 5px;">Pertenece a: ${grupo}</h3>
-              <div class="table-wrapper tabla-con-scroll">
-                  <table class="table">
-                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th style="color:#ffce56;">${minombre}</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
-                      <tbody>${filas}</tbody>
-                  </table>
-              </div>
-          </div>`;
-      });
-  }
-
-// --- TABLA FIJOS (CON BOTÓN DE PAGO RÁPIDO) ---
 function renderGastosFijos(lista) {
   const tbody = document.querySelector("#tablaGastosFijos tbody");
   if (!tbody) return; 
@@ -1081,7 +355,6 @@ function renderGastosFijos(lista) {
     const montoNum = Number(g.monto) || 0;
     total += montoNum;
     
-    // Matemática mágica para los 3 cuadritos
     if (g.pagado) {
         pagado += montoNum;
     } else {
@@ -1116,7 +389,7 @@ function renderGastosFijos(lista) {
 
     const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
     let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
-   let textoMonto = esDolar ? `<span style="color:#059669;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
+    let textoMonto = esDolar ? `<span style="color:#059669;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
@@ -1130,13 +403,11 @@ function renderGastosFijos(lista) {
     </tr>`;
   });
 
-  // Actualizamos el HTML con los cálculos
   if (document.getElementById("totalFijos")) document.getElementById("totalFijos").textContent = formatoMoneda(total);
   if (document.getElementById("totalFijosPagado")) document.getElementById("totalFijosPagado").textContent = formatoMoneda(pagado);
   if (document.getElementById("totalFijosFalta")) document.getElementById("totalFijosFalta").textContent = formatoMoneda(faltaPagar);
 }
 
-// --- TABLA VARIABLES (CON BOTÓN DE PAGO RÁPIDO) ---
 function renderGastosVariables(lista) {
   const tbody = document.querySelector("#tablaGastosVariables tbody");
   if (!tbody) return; 
@@ -1201,20 +472,14 @@ function renderConsumosCuotas(lista) {
     const mediosIgnorados = ["BNA", "MERCADO PAGO", "MERCADO_PAGO", "EFECTIVO", "PENDIENTE", "MÚLTIPLES"];
     globalBilleteras.forEach(b => mediosIgnorados.push(b.nombre.toUpperCase()));
     
-    // ¡ACÁ LEEMOS QUÉ TARJETA ELIGIÓ TU HERMANA!
     const filtroSelect = document.getElementById("filtroTarjetaSelect");
     const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
 
     const consumosTarjeta = lista.filter(g => {
         if (!g.medioPago) return false;
         const medio = g.medioPago.toUpperCase();
-        
-        // 1. Descartar si no es tarjeta (billeteras, efectivo, etc)
         if (mediosIgnorados.includes(medio)) return false;
-
-        // 2. Si eligió una tarjeta específica en el filtro, descartamos las demás
         if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
-
         return true;
     });
     
@@ -1235,9 +500,8 @@ function renderConsumosCuotas(lista) {
       }
       
       let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
-      
       let esDolar = (g.descripcion || "").includes("[USD]");
-      let montoAMostrar = esDolar ? `<span style="color:#86efac;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
+      let montoAMostrar = esDolar ? `<span style="color:#059669;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
       tbody.innerHTML += `
       <tr>
@@ -1251,7 +515,311 @@ function renderConsumosCuotas(lista) {
     });
 }
 
-// --- CREAR BILLETERA ---
+function renderInversiones(lista) {
+  const tbody = document.querySelector('#tablaInversiones tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  lista.forEach(i => {
+    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
+    
+    let detalleLimpio = (i.descripcion || "").replace("INV: ", "");
+    let colorMonto = detalleLimpio.includes('(USD)') ? '#86efac' : '#94a3b8';
+    let prefijo = detalleLimpio.includes('(USD)') ? 'USD ' : '';
+
+    let montoAMostrar = `${prefijo}${formatoMoneda(i.monto)}`;
+
+    tbody.innerHTML += `<tr>
+        <td>${i.fecha}</td>
+        <td>${detalleLimpio}</td>
+        <td style="font-weight: bold; color: ${colorMonto};">${montoAMostrar}</td>
+        <td>${acciones}</td>
+    </tr>`;
+  });
+}
+
+function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
+    const tbody = document.getElementById("tablaProyeccionBody");
+    if (!tbody) return;
+
+    const totalIngreso = ingresos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realFijos = gastosFijos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realVariables = gastosVariables.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+    const realAhorro = ahorros.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+
+    const topeFijos = totalIngreso * 0.50;
+    const topeVariables = totalIngreso * 0.30;
+    const topeAhorro = totalIngreso * 0.20;
+
+    tbody.innerHTML = `
+        <tr><td>Gastos Fijos</td><td>50%</td><td style="color: #94a3b8;">${formatoMoneda(topeFijos)}</td><td style="font-weight:bold; color: ${realFijos > topeFijos ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realFijos)}</td><td>${realFijos > topeFijos ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
+        <tr><td>Gastos Variables</td><td>30%</td><td style="color: #94a3b8;">${formatoMoneda(topeVariables)}</td><td style="font-weight:bold; color: ${realVariables > topeVariables ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realVariables)}</td><td>${realVariables > topeVariables ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
+        <tr><td>Ahorros / Inv.</td><td>20%</td><td style="color: #94a3b8;">${formatoMoneda(topeAhorro)}</td><td style="font-weight:bold; color: ${realAhorro < topeAhorro ? '#ffce56' : '#2ac9bb'}">${formatoMoneda(realAhorro)}</td><td>${realAhorro >= topeAhorro && topeAhorro > 0 ? '🟢 Meta lograda' : (topeAhorro === 0 ? '⚪ Sin ingresos' : '🟡 Falta ahorro')}</td></tr>
+    `;
+
+    const contenedorSaldos = document.getElementById("resumenCuentasProyeccion");
+    if(contenedorSaldos) {
+        contenedorSaldos.innerHTML = `<h4 style="margin-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
+        const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
+        globalBilleteras.forEach(b => { if(!nombres.includes(b.nombre.toUpperCase())) nombres.push(b.nombre.toUpperCase()); });
+        const saldos = window.saldosActuales || {};
+        
+        nombres.forEach(b => {
+            contenedorSaldos.innerHTML += `
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
+                <span>🏦 ${b}:</span> 
+                <span style="font-weight: bold; color: #00aae4;">${saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0)}</span>
+            </div>`;
+        });
+    }
+}
+
+function renderPrestamos(prestamos) {
+      const contenedor = document.getElementById("contenedorTablasPrestamos");
+      if(!contenedor) return;
+      contenedor.innerHTML = "";
+
+      let minombre = user.nombre ? user.nombre.split(" ")[0] : "Vos";
+      minombre = minombre.charAt(0).toUpperCase() + minombre.slice(1).toLowerCase();
+
+      document.querySelectorAll('.nombreDinamico').forEach(el => el.textContent = minombre);
+
+	  const selectMes = document.getElementById("filtroMes");
+	  const selectAnio = document.getElementById("filtroAnio");
+	  const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
+
+      const prestamosDelMes = prestamos.filter(p => p.mesCuota && p.mesCuota.startsWith(mesSeleccionado));
+      
+      const grupos = { "Mamá": [], "Papá": [], "Ambos": [] };
+      let sumaTotalMia = 0;
+
+      prestamosDelMes.forEach(p => {
+          const pertenece = p.perteneceA || "Desconocido";
+          const aBelen = Number(p.aporteBelen) || 0;
+          const aOtro = Number(p.aporteOtro) || 0;
+          const totalCuotaDinero = Number(p.montoTotal) || 0;
+
+          sumaTotalMia += aBelen;
+
+          if(grupos[pertenece]) {
+              grupos[pertenece].push({
+                  id: p.id, 
+                  nombre: p.nombre || "Sin Nombre", 
+                  cuotaActual: p.cuotaActual || 1, 
+                  cuotaTotal: p.cuotaTotal || 1, 
+                  aBelen, aOtro, totalCuotaDinero
+              });
+          }
+      });
+
+      const cardBelen = document.getElementById("totalBelenPrestamos");
+      if(cardBelen) cardBelen.textContent = formatoMoneda(sumaTotalMia);
+
+      ["Mamá", "Papá", "Ambos"].forEach(grupo => {
+          if(grupos[grupo].length === 0) return;
+
+          let filas = "";
+          grupos[grupo].forEach(g => {
+              filas += `<tr>
+                  <td><strong>${g.nombre}</strong></td>
+                  <td><span style="background:var(--color-primario); color:#000; padding:2px 6px; border-radius:10px; font-size:0.8rem; font-weight:bold;">${g.cuotaActual}/${g.cuotaTotal}</span></td>
+                  <td>${formatoMoneda(g.totalCuotaDinero)}</td>
+                  <td style="color:#ffce56; font-weight:bold;">${formatoMoneda(g.aBelen)}</td>
+                  <td style="color:#94a3b8;">${formatoMoneda(g.aOtro)}</td>
+                  <td>
+                      <button onclick="abrirEditarPrestamo(${g.id}, ${g.totalCuotaDinero}, ${g.aBelen})" class="btn-edit" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">✏️</button>
+                      <button onclick="eliminarPrestamo(${g.id})" class="btn-delete" style="background:none;border:none;cursor:pointer;font-size:1.1rem;">🗑️</button>
+                  </td>
+              </tr>`;
+          });
+
+          contenedor.innerHTML += `
+          <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
+              <h3 style="margin-top: 0; color: #00aae4; border-bottom: 1px solid #333; padding-bottom: 5px;">Pertenece a: ${grupo}</h3>
+              <div class="table-wrapper tabla-con-scroll">
+                  <table class="table">
+                      <thead><tr><th>Préstamo</th><th>Cuota</th><th>Total Cuota</th><th style="color:#ffce56;">${minombre}</th><th>Aportado (Otro)</th><th>Acciones</th></tr></thead>
+                      <tbody>${filas}</tbody>
+                  </table>
+              </div>
+          </div>`;
+      });
+}
+
+function generarSparkline(gastos, mes) {
+    const canvas = document.getElementById('sparklineCanvas');
+    if (!canvas) return;
+    if (miSparkline) { miSparkline.destroy(); miSparkline = null; }
+
+    const [yyyy, mm] = mes.split('-');
+    const numDays = new Date(yyyy, mm, 0).getDate();
+    const dias = {};
+    for(let i=1; i<=numDays; i++) dias[i] = 0;
+
+    gastos.forEach(g => {
+        const f = g.fecha || g.fechaVencimiento;
+        if(!f) return;
+        const d = parseInt(f.split('-')[2]);
+        if(dias[d] !== undefined) dias[d] += (Number(g.monto) || 0);
+    });
+
+    let acumulado = 0;
+    const data = Object.keys(dias).map(d => {
+        acumulado += dias[d];
+        return acumulado;
+    });
+
+    const ctx = canvas.getContext('2d');
+    let gradient = ctx.createLinearGradient(0, 0, 0, 45);
+    gradient.addColorStop(0, 'rgba(190, 18, 60, 0.25)'); 
+    gradient.addColorStop(1, 'rgba(190, 18, 60, 0)');
+
+    miSparkline = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Object.keys(dias),
+            datasets: [{
+                data: data,
+                borderColor: '#be123c',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false, min: 0 } },
+            layout: { padding: 0 },
+            animation: { duration: 1000, easing: 'easeOutQuart' }
+        }
+    });
+}
+
+
+/* ==========================================================================
+   5. CÁLCULOS LOGÍSTICOS Y PROCESSING
+   ========================================================================== */
+
+function calcularSaldosPorCuenta(gastos, ingresos) {
+    const contenedor = document.getElementById("contenedorBilleteras");
+    if (!contenedor) return;
+
+    const nombres = [];
+    globalBilleteras.forEach(b => {
+        const nom = b.nombre.toUpperCase();
+        if (!nombres.includes(nom)) nombres.push(nom);
+    });
+
+    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
+    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (!nombres.includes(m)) nombres.push(m); });
+
+    const saldos = {};
+    nombres.forEach(n => saldos[n] = 0);
+
+    ingresos.forEach(i => { let m = (i.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] += (Number(i.monto) || 0); });
+    gastos.forEach(g => { if (g.pagado === false) return; let m = (g.medioPago || "EFECTIVO").toUpperCase(); if (m === "MERCADO_PAGO") m = "MERCADO PAGO"; if (saldos[m] !== undefined) saldos[m] -= (Number(g.monto) || 0); });
+    
+    window.saldosActuales = saldos;
+
+	    contenedor.style.cssText = "display: flex; flex-direction: row; flex-wrap: nowrap; gap: 16px; overflow-x: auto; max-width: 100%; padding: 10px 5px 20px 5px; -webkit-overflow-scrolling: touch;";
+	    contenedor.innerHTML = "";
+
+	    if (nombres.length === 0) {
+	         contenedor.innerHTML = `<div style="width: 100%; text-align: center; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 12px; color: #888;">No tenés cuentas de débito creadas. Usá el botón "🏦 + Nueva Cuenta" para empezar.</div>`;
+	        return;
+	    }
+
+		globalBilleteras.forEach(billetera => {
+			        const b = billetera.nombre.toUpperCase();
+			        
+			        let btnAcciones = `
+			        <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 10px; z-index: 10;">
+			            <button onclick="abrirEditarBilletera(${billetera.id}, '${billetera.nombre}', '${billetera.color || 'default'}')" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Configurar">⚙️</button>
+			            <button onclick="eliminarBilletera(${billetera.id})" style="background: transparent; border: none; cursor: pointer; color: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));" title="Eliminar">🗑️</button>
+			        </div>
+			        `;
+
+		            const montoRealTarjeta = formatoMoneda(saldos[b] || 0);
+			        const montoAMostrar = saldosOcultos ? "••••••" : montoRealTarjeta;
+			        const bgColor = getBgColor(billetera.color || 'default'); 
+
+			        contenedor.innerHTML += `
+			        <div class="tarjeta-billetera" style="background: ${bgColor};">
+			            <div style="position: absolute; bottom: -20px; right: -20px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 1; pointer-events: none;"></div>
+			            
+			            ${btnAcciones}
+			            
+			            <div style="position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+			                <div style="display: flex; align-items: center; gap: 4px;">
+			                    <span style="font-size: 0.8rem; color: rgba(255,255,255,0.9);">🏦</span>
+			                    <h4>${b}</h4>
+			                </div>
+							<div style="margin-top: auto;">
+							                    <p onmouseover="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'" 
+							                       onmouseout="if(${saldosOcultos}) this.textContent = '••••••'"
+							                       ontouchstart="if(${saldosOcultos}) this.textContent = '${montoRealTarjeta}'"
+							                       ontouchend="if(${saldosOcultos}) this.textContent = '••••••'"
+							                       title="${saldosOcultos ? 'Pasá el mouse o mantené apretado para ver' : ''}" 
+							                       style="${saldosOcultos ? 'cursor: pointer;' : ''} -webkit-tap-highlight-color: transparent;">
+							                       ${montoAMostrar}
+							                    </p>
+							                </div>
+			            </div>
+			        </div>`;
+			    });
+}
+
+function actualizarMediosDePagoSelects() {
+    const gastoMedio = document.getElementById("gastoMedio");
+    const ingresoMedio = document.getElementById("ingresoMedio");
+    const tarjetaTipo = document.getElementById("tarjetaTipo"); 
+    const pagoGastoMedio = document.getElementById("pagoGastoMedio"); 
+    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); 
+    
+    let opcionesBilleteras = "";
+    globalBilleteras.forEach(b => {
+        opcionesBilleteras += `<option value="${b.nombre.toUpperCase()}">🏦 ${b.nombre}</option>`;
+    });
+    
+    if (globalBilleteras.length === 0) {
+        opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
+    }
+    
+    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
+    if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
+    if (pagoGastoMedio) pagoGastoMedio.innerHTML = opcionesBilleteras;
+    
+    if (tarjetaTipo) tarjetaTipo.innerHTML = "";
+    if (globalTarjetas.length === 0 && tarjetaTipo) {
+        tarjetaTipo.innerHTML = '<option value="">No tenés tarjetas de crédito creadas</option>';
+    }
+
+    if (filtroTarjeta) {
+        const valPrevio = filtroTarjeta.value;
+        filtroTarjeta.innerHTML = '<option value="all">💳 TODAS</option>';
+        globalTarjetas.forEach(t => {
+            filtroTarjeta.innerHTML += `<option value="${t.nombre.toUpperCase()}">💳 ${t.nombre.toUpperCase()}</option>`;
+        });
+        if (valPrevio) filtroTarjeta.value = valPrevio; 
+    }
+
+    globalTarjetas.forEach(t => {
+        const opt = `<option value="${t.nombre}">💳 ${t.nombre}</option>`;
+        if (gastoMedio) gastoMedio.innerHTML += opt;
+        if (tarjetaTipo) tarjetaTipo.innerHTML += opt;
+        if (pagoGastoMedio) pagoGastoMedio.innerHTML += opt;
+    });
+}
+
+
+/* ==========================================================================
+   6. EVENTOS DE FORMULARIOS (SUBMITS, MODALES)
+   ========================================================================== */
+
 const formBilletera = document.getElementById("formBilletera");
 if (formBilletera) {
     formBilletera.onsubmit = async (e) => {
@@ -1263,21 +831,13 @@ if (formBilletera) {
         try {
             const body = { 
                 nombre: document.getElementById("billeteraNombre").value.trim(), 
-                
-                // MAGIA: COMENTAMOS EL COLOR UN SEGUNDO PARA PROBAR
-                // color: document.getElementById("billeteraColor").value,
-                
                 usuario: { id: user.id } 
             };
             
             const res = await fetch(`${API}/billeteras`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
+                method: "POST", headers: authHeaders(), body: JSON.stringify(body) 
             });
-            
             handleAuthError(res);
-
             if(!res.ok) {
                 const errText = await res.text();
                 throw new Error(`El servidor bloqueó la cuenta. Código: ${res.status}. Detalle: ${errText}`);
@@ -1297,18 +857,6 @@ if (formBilletera) {
     };
 }
 
-// --- ABRIR EDITAR BILLETERA ---
-window.abrirEditarBilletera = function(id, nombre, color) {
-    document.getElementById("editBilleteraId").value = id;
-    document.getElementById("editBilleteraNombre").value = nombre;
-    
-    const selectColor = document.getElementById("editBilleteraColor");
-    if(selectColor) selectColor.value = color !== 'undefined' ? color : 'azul';
-
-    document.getElementById("modalEditarBilletera").style.display = "flex";
-};
-
-// --- GUARDAR EDICIÓN BILLETERA ---
 const formEditarBilletera = document.getElementById("formEditarBilletera");
 if (formEditarBilletera) {
     formEditarBilletera.onsubmit = async (e) => {
@@ -1344,11 +892,7 @@ if (formNuevaTarjeta) {
                 usuario: { id: user.id }
             };
 
-            const res = await fetch(`${API}/tarjetas`, { 
-                method: "POST", 
-                headers: authHeaders(), 
-                body: JSON.stringify(body) 
-            });
+            const res = await fetch(`${API}/tarjetas`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
 
             if (!res.ok) {
                  const errorText = await res.text();
@@ -1390,7 +934,7 @@ if (formPrestamo) {
                 const mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
 
                 const body = {
-                    mesCuota: `${yyyy}-${mm}`, // Ahora solo guarda la fecha acá
+                    mesCuota: `${yyyy}-${mm}`,
                     nombre: nombre,
                     perteneceA: pertenece,
                     cuotaActual: i,
@@ -1417,11 +961,9 @@ if (formPrestamo) {
 }
 
 const formGasto = document.getElementById("formGasto");
-
 if (formGasto) {
 formGasto.onsubmit = async (e) => { 
 e.preventDefault(); 
-
 const btnSubmit = document.querySelector("#formGasto button[type='submit']");
 btnSubmit.disabled = true;
 btnSubmit.textContent = "Guardando...";
@@ -1432,7 +974,6 @@ const descripcion = document.getElementById("gastoDescripcion").value;
 const montoRaw = document.getElementById("gastoMonto").value;
 const monto = parseFloat(montoRaw.replace(',', '.'));
 
-// MAGIA NUEVA: Si no está pagado, guardamos "PENDIENTE" y no nos importa el select
 const pagado = document.getElementById("gastoPagado").checked;
 const medioPago = pagado ? document.getElementById("gastoMedio").value : "PENDIENTE";
 
@@ -1443,7 +984,6 @@ let fechaVto = document.getElementById("gastoVencimiento").value;
 const fechaReal = document.getElementById("gastoFecha").value;
 const mesImpacto = document.getElementById("gastoMesImpacto").value;
 
-// MAGIA: Si dejó vacío el vencimiento, usamos la fecha en la que lo pagó (o la de hoy)
 if (!fechaVto) {
     fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
 }
@@ -1484,7 +1024,6 @@ if (idAEditar) {
 	            
 	            let mPago = isPagado ? medioPago : "PENDIENTE";
 
-	            // ¡MAGIA ACÁ! Hacemos que el "Mes de Impacto" también avance correctamente
 	            let nuevoMesImpacto = null;
 	            if (mesImpacto) {
 	                let [mY, mM] = mesImpacto.split('-');
@@ -1579,15 +1118,13 @@ if (formTarjeta) {
             const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
-            const fechaExacta = document.getElementById("tarjetaFechaExacta").value; // ¡Acá tomamos la fecha del calendario!
+            const fechaExacta = document.getElementById("tarjetaFechaExacta").value; 
             const tarjetaTipo = document.getElementById("tarjetaTipo").value; 
             const categoriaId = document.getElementById("tarjetaCategoria").value || null; 
 
-            // Si es USD, le agregamos la etiqueta a la descripción para reconocerlo visualmente
             const descFinal = moneda === "USD" ? `[USD] ${descripcionBase}` : descripcionBase;
             const montoPorCuota = Number((montoTotal / cuotas).toFixed(2));
             
-            // Usamos el mes de la "1° cuota" para calcular hacia adelante
             const [year, month] = primeraCuota.split('-');
             const diaCompraOriginal = parseInt(fechaExacta.split('-')[2]); 
             
@@ -1659,18 +1196,6 @@ if (formInversion) {
     };
 }
 
-// --- FUNCIÓN DEL NUEVO BOTÓN DE PAGO RÁPIDO ---
-window.abrirModalPago = function(id) {
-    const gasto = globalGastos.find(g => g.id === id);
-    if (!gasto) return;
-
-    document.getElementById("pagoGastoId").value = gasto.id;
-    document.getElementById("pagoGastoDesc").textContent = gasto.descripcion;
-    document.getElementById("pagoGastoFecha").value = new Date().toISOString().split('T')[0];
-    
-    document.getElementById("modalPagarGasto").style.display = "flex";
-};
-
 const formPagarGasto = document.getElementById("formPagarGasto");
 if (formPagarGasto) {
     formPagarGasto.onsubmit = async (e) => {
@@ -1695,7 +1220,7 @@ if (formPagarGasto) {
                 usuarioId: user.id,
                 categoriaId: catId,
                 fechaVencimiento: gastoOriginal.fechaVencimiento,
-                pagado: true, // ¡ACÁ SE MARCA COMO PAGADO!
+                pagado: true,
                 mesImpacto: gastoOriginal.mesImpacto
             };
 
@@ -1717,14 +1242,122 @@ if (formPagarGasto) {
         }
     };
 }
-// ----------------------------------------------
 
-/* --- ELIMINACIONES E INTERACCIONES --- */
+const formEditarCuota = document.getElementById("formEditarCuota");
+if (formEditarCuota) {
+    formEditarCuota.onsubmit = async (e) => {
+        e.preventDefault();
+        const btnSubmit = document.querySelector("#formEditarCuota button[type='submit']");
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando...";
+
+        try {
+            const id = document.getElementById("editCuotaId").value;
+            const descBase = document.getElementById("editCuotaDescripcion").value.trim();
+            const cuotaInfo = document.getElementById("editCuotaInfo").value.trim();
+            const descripcionFinal = cuotaInfo ? `${descBase} (Cuota ${cuotaInfo})` : descBase;
+
+            const body = {
+                descripcion: descripcionFinal,
+                monto: parseFloat(document.getElementById("editCuotaMonto").value),
+                medioPago: document.getElementById("editCuotaMedio").value,
+                fecha: document.getElementById("editCuotaFecha").value,
+                categoriaId: document.getElementById("editCuotaCategoria").value || null,
+                usuarioId: user.id,
+                esFijo: false
+            };
+
+            const originalGasto = globalGastos.find(g => g.id == id);
+            if (originalGasto) {
+                body.pagado = originalGasto.pagado;
+                body.fechaVencimiento = originalGasto.fechaVencimiento;
+                body.mesImpacto = originalGasto.mesImpacto;
+            }
+
+            const res = await fetch(`${API}/gastos/${id}`, {
+                method: "PUT",
+                headers: authHeaders(),
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) throw new Error("Error al actualizar la cuota");
+
+            document.getElementById("modalEditarCuota").style.display = "none";
+            await refreshAll();
+        } catch (error) {
+            alert("Error al guardar cambios");
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Guardar Cambios";
+        }
+    };
+}
+
+const formEditarPrestamo = document.getElementById("formEditarPrestamo");
+if (formEditarPrestamo) {
+    formEditarPrestamo.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const id = document.getElementById("editPrestamoId").value;
+            const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
+            const belen = parseFloat(document.getElementById("editPrestamoBelen").value) || 0;
+            const aportado = total - belen; 
+
+            const body = {
+                montoTotal: total,
+                aporteBelen: belen,
+                aporteOtro: aportado
+            };
+            
+            await fetch(`${API}/prestamos/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+            
+            document.getElementById("modalEditarPrestamo").style.display = "none";
+            await refreshAll();
+        } catch(err) {
+            alert("Error al actualizar la cuota.");
+        }
+    };
+}
+
+
+/* ==========================================================================
+   7. INTERACCIONES Y ELIMINACIONES (Clicks, Toggles, Borrados)
+   ========================================================================== */
+
+window.abrirEditarBilletera = function(id, nombre, color) {
+    document.getElementById("editBilleteraId").value = id;
+    document.getElementById("editBilleteraNombre").value = nombre;
+    const selectColor = document.getElementById("editBilleteraColor");
+    if(selectColor) selectColor.value = color !== 'undefined' ? color : 'azul';
+    document.getElementById("modalEditarBilletera").style.display = "flex";
+};
+
 window.eliminarBilletera = async function(id) {
     if(confirm("¿Seguro que querés eliminar esta cuenta? No se borrarán los movimientos pasados.")) {
         await fetch(`${API}/billeteras/${id}`, { method: "DELETE", headers: authHeaders() });
         await refreshAll();
     }
+};
+
+window.abrirEditarPrestamo = function(id, total, belen) {
+    document.getElementById("editPrestamoId").value = id;
+    document.getElementById("editPrestamoTotal").value = total > 0 ? total : "";
+    document.getElementById("editPrestamoBelen").value = belen > 0 ? belen : "";
+    
+    const inTotal = document.getElementById("editPrestamoTotal");
+    const inBelen = document.getElementById("editPrestamoBelen");
+    const outCalc = document.getElementById("calculoAportado");
+    
+    const recalcular = () => {
+        const t = Number(inTotal.value) || 0;
+        const b = Number(inBelen.value) || 0;
+        outCalc.textContent = formatoMoneda(t - b);
+    };
+    inTotal.onkeyup = recalcular;
+    inBelen.onkeyup = recalcular;
+    recalcular();
+
+    document.getElementById("modalEditarPrestamo").style.display = "flex";
 };
 
 window.eliminarPrestamo = async function(id) {
@@ -1769,9 +1402,7 @@ window.eliminarGasto = async function(id) {
 };
 
 window.editarGasto = async function(id) {
-
     await fetchCategorias();
-
     gastoEnEdicion = globalGastos.find(g => g.id === id);
     if (!gastoEnEdicion) return;
 
@@ -1817,6 +1448,17 @@ window.editarGasto = async function(id) {
 	    document.getElementById("modalGasto").style.display = "flex";
 };
 
+window.abrirModalPago = function(id) {
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
+
+    document.getElementById("pagoGastoId").value = gasto.id;
+    document.getElementById("pagoGastoDesc").textContent = gasto.descripcion;
+    document.getElementById("pagoGastoFecha").value = new Date().toISOString().split('T')[0];
+    
+    document.getElementById("modalPagarGasto").style.display = "flex";
+};
+
 window.eliminarIngreso = async function(id) { 
     if(confirm("¿Eliminar ingreso?")) { 
         await fetch(`${API}/ingresos/${id}`, { method: "DELETE", headers: authHeaders() }); 
@@ -1840,9 +1482,7 @@ window.crearCategoria = async function() {
         };
 
         const res = await fetch(`${API}/categorias`, { 
-            method: "POST", 
-            headers: authHeaders(), 
-            body: JSON.stringify(body) 
+            method: "POST", headers: authHeaders(), body: JSON.stringify(body) 
         });
 
         if (!res.ok) throw new Error("Error del servidor");
@@ -1850,9 +1490,7 @@ window.crearCategoria = async function() {
         inputCat.value = ""; 
         await refreshAll();
 
-    } catch (error) { 
-        alert("Error al crear la categoría."); 
-    }
+    } catch (error) { alert("Error al crear la categoría."); }
 };
 
 window.eliminarCategoria = async function(id) { 
@@ -1860,9 +1498,7 @@ window.eliminarCategoria = async function(id) {
         try {
             await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
             await refreshAll(); 
-        } catch(e) {
-            alert("Error al eliminar la categoría.");
-        }
+        } catch(e) { alert("Error al eliminar la categoría."); }
     } 
 };
 
@@ -1871,13 +1507,486 @@ window.eliminarMiTarjeta = async function(id) {
         try {
             await fetch(`${API}/tarjetas/${id}`, { method: "DELETE", headers: authHeaders() });
             await refreshAll(); 
-        } catch(e) {
-            alert("Error al intentar eliminar la tarjeta.");
-        }
+        } catch(e) { alert("Error al intentar eliminar la tarjeta."); }
     }
 };
 
-/* --- INICIO Y DOMContentLoaded --- */
+window.editarCuotaTarjeta = async function(id) {
+    await fetchCategorias(); 
+
+    const gasto = globalGastos.find(g => g.id === id);
+    if (!gasto) return;
+
+    document.getElementById("editCuotaId").value = gasto.id;
+    document.getElementById("editCuotaMedio").value = gasto.medioPago; 
+    document.getElementById("editCuotaFecha").value = gasto.fecha || "";
+    document.getElementById("editCuotaMonto").value = gasto.monto;
+
+    let desc = gasto.descripcion || "";
+    let cuotaStr = "";
+    if (desc.includes("(Cuota")) {
+        const partes = desc.split("(Cuota");
+        desc = partes[0].trim();
+        cuotaStr = partes[1].replace(")", "").trim(); 
+    }
+    document.getElementById("editCuotaDescripcion").value = desc;
+    document.getElementById("editCuotaInfo").value = cuotaStr;
+
+    const eSelect = document.getElementById("editCuotaCategoria");
+    const catId = gasto.categoria ? gasto.categoria.id : (gasto.categoriaId || "");
+    if(eSelect) eSelect.value = catId;
+
+    document.getElementById("modalEditarCuota").style.display = "flex";
+};
+
+window.guardarFechasTarjetas = async function() {
+    const selectMes = document.getElementById("filtroMes");
+    const selectAnio = document.getElementById("filtroAnio");
+    const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
+    
+    const cierre = document.getElementById("fechaCierreMes") ? document.getElementById("fechaCierreMes").value : "";
+    const vto = document.getElementById("fechaVtoMes") ? document.getElementById("fechaVtoMes").value : "";
+    
+    const descString = `[CONFIG_TC] ${mesSeleccionado} | C:${cierre} | V:${vto}`;
+
+    try {
+        const iTodos = await fetchIngresos();
+        const existentes = iTodos.filter(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
+        for (let i of existentes) {
+            await fetch(`${API}/ingresos/${i.id}`, { method: "DELETE", headers: authHeaders() });
+        }
+
+        const body = {
+            descripcion: descString,
+            monto: 0,
+            medioPago: "EFECTIVO",
+            fecha: `${mesSeleccionado}-01`,
+            usuarioId: user.id
+        };
+        await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+        
+        alert("¡Fechas guardadas!");
+        await refreshAll();
+    } catch(err) {
+        alert("Error al guardar en la base de datos.");
+    }
+};
+
+window.configurarNombresPrestamo = function() {
+    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
+    const configActual = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
+    
+    const nombre1 = prompt("Ingresá el nombre de la 1° Persona (Ej: Mamá, Juan):", configActual.n1);
+    if (nombre1 === null) return; 
+    
+    const nombre2 = prompt("Ingresá el nombre de la 2° Persona (Ej: Belén, Pedro):", configActual.n2);
+    if (nombre2 === null) return;
+
+    if (nombre1.trim() !== "" && nombre2.trim() !== "") {
+        localStorage.setItem(`nombres_prestamo_${user.id}`, JSON.stringify({ n1: nombre1.trim(), n2: nombre2.trim() }));
+        cargarNombresPrestamo();
+        alert("¡Nombres actualizados con éxito!");
+    }
+};
+
+function cargarNombresPrestamo() {
+    if (!user) return;
+    const guardado = localStorage.getItem(`nombres_prestamo_${user.id}`);
+    const config = guardado ? JSON.parse(guardado) : { n1: "Persona 1", n2: "Persona 2" };
+
+    const labels1 = ["labelTotal1", "labelTabla1", "labelModal1"];
+    const labels2 = ["labelTotal2", "labelTabla2", "labelModal2"];
+
+    labels1.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n1; });
+    labels2.forEach(id => { if(document.getElementById(id)) document.getElementById(id).textContent = config.n2; });
+}
+
+window.toggleSaldos = function() {
+    saldosOcultos = !saldosOcultos; 
+    const icono = document.getElementById("iconoSaldos");
+    if(icono) icono.textContent = saldosOcultos ? "visibility_off" : "visibility";
+    refreshAll();
+};
+
+window.toggleSaldosTarjetas = function() {
+    saldosTarjetasOcultos = !saldosTarjetasOcultos; 
+    const icono = document.getElementById("iconoSaldosTarjetas");
+    if(icono) icono.textContent = saldosTarjetasOcultos ? "visibility_off" : "visibility";
+    refreshAll();
+};
+
+window.toggleSaldosAhorros = function() {
+    saldosAhorrosOcultos = !saldosAhorrosOcultos; 
+    const icono = document.getElementById("iconoSaldosAhorros");
+    if(icono) icono.textContent = saldosAhorrosOcultos ? "visibility_off" : "visibility";
+    refreshAll();
+};
+
+window.toggleSaldosNeto = function() {
+    saldosNetoOcultos = !saldosNetoOcultos; 
+    refreshAll();
+};
+
+
+/* ==========================================================================
+   8. CORAZÓN DE LA APLICACIÓN (refreshAll, DOMContentLoaded e Init)
+   ========================================================================== */
+
+async function refreshAll() {
+    if(!user) return; 
+    cargarNombresPrestamo(); 
+
+    const [categorias, billeteras, tarjetas, gTodos, iTodos, pTodos] = await Promise.all([
+        fetchCategorias(),
+        fetchBilleteras(),
+        fetchYRenderizarMisTarjetas(),
+        fetchGastos(),
+        fetchIngresos(),
+        fetchPrestamos()
+    ]);
+
+    globalBilleteras = billeteras || [];
+  
+	const selectMes = document.getElementById("filtroMes");
+	const selectAnio = document.getElementById("filtroAnio");
+	const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
+
+    let textoVencimientoTarjetas = "Según tarjeta";
+    const configMensual = iTodos.find(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
+    
+    if (configMensual) {
+        const partes = configMensual.descripcion.split("|");
+        const cCierre = partes[1] ? partes[1].split(":")[1].trim() : "";
+        const cVto = partes[2] ? partes[2].split(":")[1].trim() : "";
+        
+        const fc = document.getElementById("fechaCierreMes");
+        const fv = document.getElementById("fechaVtoMes");
+        if(fc) fc.value = cCierre !== "undefined" ? cCierre : "";
+        if(fv) fv.value = cVto !== "undefined" ? cVto : "";
+        
+        if (cVto && cVto !== "undefined" && cVto !== "") {
+            textoVencimientoTarjetas = cVto; 
+        }
+    } else {
+        const fc = document.getElementById("fechaCierreMes");
+        const fv = document.getElementById("fechaVtoMes");
+        if(fc) fc.value = "";
+        if(fv) fv.value = "";
+    }
+    
+    const gFiltradosMes = gTodos.filter(g => {
+        const fechaComparar = g.mesImpacto ? g.mesImpacto : (g.fechaVencimiento ? g.fechaVencimiento : g.fecha);
+        return (fechaComparar || "").startsWith(mesSeleccionado);
+    });
+
+    const prestamosDelMes = pTodos.filter(p => (p.mesCuota || "").startsWith(mesSeleccionado));
+    let sumaTotalMiaPrestamos = 0;
+    prestamosDelMes.forEach(p => {
+        sumaTotalMiaPrestamos += (Number(p.aporteBelen) || 0); 
+    });
+
+    if (sumaTotalMiaPrestamos > 0) {
+        let nombreVirtual = user.nombre ? user.nombre.split(" ")[0].charAt(0).toUpperCase() + user.nombre.split(" ")[0].slice(1).toLowerCase() : 'vos';
+        
+        gFiltradosMes.push({
+            id: 'virtual_prestamo',
+            descripcion: `Resumen Préstamos (Pagado por ${nombreVirtual})`,
+            monto: sumaTotalMiaPrestamos,
+            fechaVencimiento: "Automático",
+            categoriaNombre: "🤝 Préstamos",
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esFijo: true,
+            esVirtual: true
+        });
+    }
+  
+    const iFiltradosMes = iTodos.filter(i => {
+        const fechaComparar = i.mesImpacto ? i.mesImpacto : i.fecha;
+        return (fechaComparar || "").startsWith(mesSeleccionado);
+    });
+
+    const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
+    let gParaTablasYGrafico = [...gFiltradosMes]; 
+    
+    if (catFilter !== "all" && catFilter !== "") {
+        gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
+    }
+
+    const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
+    const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
+
+    let totalUSD = 0;
+    let totalARS_Inv = 0;
+    inversiones.forEach(inv => {
+        const monto = Number(inv.monto) || 0;
+        if (inv.descripcion.includes("(USD)")) totalUSD += monto;
+        else totalARS_Inv += monto;
+    });
+
+	const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
+	const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
+	  
+	const textoRealUSD = `USD ${totalUSD.toFixed(2)}`;
+	const textoRealARS = formatoMoneda(totalARS_Inv);
+
+	const aplicarMagia = (elemento, textoReal, estaOculto) => {
+	      if (!elemento) return;
+	      if (estaOculto) {
+	          elemento.innerHTML = "••••••";
+	          elemento.onmouseover = () => elemento.innerHTML = textoReal;
+	          elemento.onmouseout = () => elemento.innerHTML = "••••••";
+	          elemento.ontouchstart = () => elemento.innerHTML = textoReal;
+	          elemento.ontouchend = () => elemento.innerHTML = "••••••";
+	          elemento.ontouchcancel = () => elemento.innerHTML = "••••••";
+	          elemento.style.cursor = "pointer";
+	          elemento.style.webkitTapHighlightColor = "transparent";
+	          elemento.title = "Pasá el mouse o mantené apretado para ver";
+	      } else {
+	          elemento.innerHTML = textoReal;
+	          elemento.onmouseover = null; elemento.onmouseout = null; 
+	          elemento.ontouchstart = null; elemento.ontouchend = null; elemento.ontouchcancel = null;
+	          elemento.style.cursor = "default";
+	          elemento.title = "";
+	      }
+	};
+
+	aplicarMagia(divUSD, textoRealUSD, saldosAhorrosOcultos);
+	aplicarMagia(divARS, textoRealARS, saldosAhorrosOcultos);
+  
+	const totalG = gFiltradosMes.reduce((s, x) => {
+	      const monto = Number(x.monto) || 0;
+	      const esVariablePuro = !x.esFijo && !(x.descripcion && x.descripcion.includes("(Cuota"));
+	      const esFijoPagado = x.esFijo && x.pagado;
+
+	      if (esVariablePuro || esFijoPagado) return s + monto;
+	      return s;
+	}, 0);
+
+    const totalI = ingresosNormales.reduce((s,x) => s + (Number(x.monto) || 0), 0);
+    
+	const balanceNeto = totalI - totalG;
+	const porcentajeGastado = totalI > 0 ? Math.min((totalG / totalI) * 100, 100) : (totalG > 0 ? 100 : 0);
+	    
+	let colorTermometro = '#10b981'; 
+	if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; 
+	if (porcentajeGastado > 90) colorTermometro = '#ef4444'; 
+
+    const gastosPorCategoria = {};
+    gFiltradosMes.forEach(g => {
+        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos") {
+            let nombreCat = g.categoriaNombre;
+            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
+                nombreCat = "💳 Consumos de Tarjeta"; 
+            }
+            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + Number(g.monto);
+        }
+    });
+		    
+    const topCats = Object.entries(gastosPorCategoria)
+        .sort((a,b) => b[1] - a[1])
+        .slice(0, 3);
+
+    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
+    
+    topCats.forEach(cat => {
+        const nombreCat = cat[0];
+        const montoCat = cat[1];
+        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
+        
+        htmlTopCats += `
+            <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
+                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
+                </div>
+                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
+                </div>
+            </div>
+        `;
+    });
+    
+    if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
+    htmlTopCats += '</div>';
+
+    let containerGasto = document.getElementById("totalGastoWidget");
+    if(!containerGasto) {
+        const oldP = document.getElementById("totalGastado");
+        if(oldP) {
+            const parent = oldP.closest('.card');
+            if(parent) {
+                parent.id = "totalGastoWidget";
+                parent.style.cssText = "background: #ffffff; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 24px; border: 1px solid #f1f5f9; margin-top: 15px; width: 100%; box-sizing: border-box; overflow: hidden;";
+            }
+        }
+    }
+    
+    containerGasto = document.getElementById("totalGastoWidget");
+    if(containerGasto) {
+        const montoRealNeto = formatoMoneda(balanceNeto);
+        const montoRealGasto = formatoMoneda(totalG);
+        const montoRealIngreso = formatoMoneda(totalI);
+        
+        const colorSaldoNeto = balanceNeto >= 0 ? '#2ac9bb' : '#B80B0B'; 
+
+        let pctBarraGastos = 0;
+        if (totalI > 0) {
+            pctBarraGastos = (totalG / totalI) * 100;
+            if (pctBarraGastos > 100) pctBarraGastos = 100; 
+        } else if (totalG > 0) {
+            pctBarraGastos = 100;
+        }
+
+        const textoNetoMostrar = saldosNetoOcultos ? "••••••" : montoRealNeto;
+        const textoGastoMostrar = saldosNetoOcultos ? "••••••" : montoRealGasto;
+        const textoIngresoMostrar = saldosNetoOcultos ? "••••••" : montoRealIngreso;
+
+        const hoverLogic = saldosNetoOcultos 
+            ? `onmouseover="this.textContent = '${montoRealNeto}'" onmouseout="this.textContent = '••••••'" ontouchstart="this.textContent = '${montoRealNeto}'" ontouchend="this.textContent = '••••••'" ontouchcancel="this.textContent = '••••••'"` 
+            : "";
+        const cursorLogic = saldosNetoOcultos ? "cursor: pointer;" : "cursor: default;";
+        const iconoOjo = saldosNetoOcultos ? "visibility_off" : "visibility";
+
+        containerGasto.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">SALDO NETO</div>
+                <button onclick="toggleSaldosNeto()" style="background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; padding: 0;" title="Ocultar/Mostrar saldos">
+                    <span class="material-icons" style="font-size: 18px; transition: color 0.2s;">${iconoOjo}</span>
+                </button>
+            </div>
+            
+            <div id="saldoNetoProtagonista" 
+                 ${hoverLogic}
+                 title="${saldosNetoOcultos ? 'Mantené apretado para ver' : ''}"
+                 style="font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 800; color: ${colorSaldoNeto}; letter-spacing: -1px; line-height: 1.1; ${cursorLogic} -webkit-tap-highlight-color: transparent; margin-bottom: 25px; word-break: break-word; text-align: left;">${textoNetoMostrar}</div>
+            
+                 <div class="info-barra">
+                     <div id="caja-gastos-finty">Gastos: ${textoGastoMostrar}</div>
+                     <div id="caja-ingresos-finty">Ingresos: ${textoIngresoMostrar}</div>
+                 </div>
+            
+            <div style="width: 100%; background: #2ac9bb; height: 12px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; position: relative;">
+                <div style="width: ${pctBarraGastos}%; background: #FF5454; height: 100%; border-radius: 6px; transition: width 1s ease; position: absolute; left: 0; top: 0;"></div>
+            </div>
+            
+            <div style="text-align: right; font-size: 0.75rem; font-weight: 700; color: #FF5454; margin-bottom: 20px;">
+                ${totalI > 0 ? (totalG / totalI * 100).toFixed(1) : (totalG > 0 ? '100+' : '0')}% consumido
+            </div>
+
+            ${htmlTopCats}
+        `;
+    }
+
+    const elBal = document.getElementById("balanceTotal");
+    if(elBal) {
+        const bal = totalI - totalG;
+        elBal.textContent = formatoMoneda(bal);
+        elBal.className = "highlight " + (bal >= 0 ? "positivo" : "negativo");
+    }
+  
+    const gVariablesParaTabla = gParaTablasYGrafico.filter(g => !g.esFijo && !(g.descripcion && g.descripcion.includes("(Cuota")));
+    const gFijosParaTabla = gParaTablasYGrafico.filter(g => g.esFijo); 
+
+    const baseMediosTC = ["BNA", "MERCADO PAGO", "EFECTIVO", "MERCADO_PAGO", "PENDIENTE", "MÚLTIPLES"];
+    globalBilleteras.forEach(b => baseMediosTC.push(b.nombre.toUpperCase()));
+
+    const consumosTarjeta = gParaTablasYGrafico.filter(g => !baseMediosTC.includes((g.medioPago||"").toUpperCase()));
+  
+    const totalesTarjetasARS = {};
+    const totalesTarjetasUSD = {};
+    let sumaTotalTarjetasARS = 0;
+    let sumaTotalTarjetasUSD = 0;
+
+    consumosTarjeta.forEach(g => {
+        const m = g.medioPago || "Tarjeta Desconocida";
+        const monto = Number(g.monto) || 0;
+        if ((g.descripcion || "").includes("[USD]")) {
+            totalesTarjetasUSD[m] = (totalesTarjetasUSD[m] || 0) + monto;
+            sumaTotalTarjetasUSD += monto;
+        } else {
+            totalesTarjetasARS[m] = (totalesTarjetasARS[m] || 0) + monto;
+            sumaTotalTarjetasARS += monto;
+        }
+    });
+
+	globalTarjetas.forEach(t => {
+	      const idMonto = "monto-tarjeta-" + t.id;
+	      const totalARS = totalesTarjetasARS[t.nombre] || 0;
+	      const totalUSD = totalesTarjetasUSD[t.nombre] || 0;
+	      const el = document.getElementById(idMonto);
+	      
+	      if (el) {
+	          let textoRealHTML = formatoMoneda(totalARS);
+	          if (totalUSD > 0) {
+	              textoRealHTML += `<br><span style="font-size: 1.1rem; color: #86efac;">USD ${totalUSD.toFixed(2)}</span>`;
+	          }
+	          
+	          if (saldosTarjetasOcultos) {
+	              el.innerHTML = "••••••";
+	              el.onmouseover = () => el.innerHTML = textoRealHTML;
+	              el.onmouseout = () => el.innerHTML = "••••••";
+	              el.ontouchstart = () => el.innerHTML = textoRealHTML;
+	              el.ontouchend = () => el.innerHTML = "••••••";
+	              el.ontouchcancel = () => el.innerHTML = "••••••";
+	              el.style.cursor = "pointer";
+	              el.style.webkitTapHighlightColor = "transparent";
+	              el.title = "Pasá el mouse o mantené apretado para ver";
+	          } else {
+	              el.innerHTML = textoRealHTML;
+	              el.onmouseover = null; el.onmouseout = null; 
+	              el.ontouchstart = null; el.ontouchend = null; el.ontouchcancel = null;
+	              el.style.cursor = "default";
+	              el.title = "";
+	          }
+	      }
+	});
+
+    if (sumaTotalTarjetasARS > 0) {
+        gFijosParaTabla.push({
+            id: 'virtual_tarjeta_ars', 
+            descripcion: `Resumen Tarjetas (Pesos)`,
+            monto: sumaTotalTarjetasARS,
+            fechaVencimiento: textoVencimientoTarjetas, 
+            categoriaNombre: "💳 Tarjetas", 
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esVirtual: true 
+        });
+    }
+
+    if (sumaTotalTarjetasUSD > 0) {
+        gFijosParaTabla.push({
+            id: 'virtual_tarjeta_usd', 
+            descripcion: `Resumen Tarjetas (Dólares)`,
+            monto: sumaTotalTarjetasUSD,
+            fechaVencimiento: textoVencimientoTarjetas, 
+            categoriaNombre: "💳 Tarjetas", 
+            pagado: false,
+            medioPago: "MÚLTIPLES",
+            esVirtual: true,
+            isUSD: true 
+        });
+    }
+
+    renderGastosVariables(gVariablesParaTabla); 
+    renderGastosFijos(gFijosParaTabla); 
+    renderIngresos(ingresosNormales);
+    renderInversiones(inversiones);
+    generarGrafico(gParaTablasYGrafico);
+    renderConsumosCuotas(gParaTablasYGrafico); 
+    renderPrestamos(pTodos); 
+
+    const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
+    const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
+
+    const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
+
+    calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
+    actualizarMediosDePagoSelects();
+    renderProyeccion(ingresosNormales, gFijosParaTabla, gVariablesParaTabla, inversiones);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
@@ -2023,283 +2132,8 @@ if (logoutBtn) {
     };
 }
 
-// ARRANQUE DE LA APP
 (async function init() { 
     await fetchUserInfo(); 
     cargarSelectorFechas(); 
     await refreshAll(); 
 })();
-
-//EDITAR CUOTA
-window.editarCuotaTarjeta = async function(id) {
-    await fetchCategorias(); 
-
-    const gasto = globalGastos.find(g => g.id === id);
-    if (!gasto) return;
-
-    document.getElementById("editCuotaId").value = gasto.id;
-    document.getElementById("editCuotaMedio").value = gasto.medioPago; 
-    document.getElementById("editCuotaFecha").value = gasto.fecha || "";
-    document.getElementById("editCuotaMonto").value = gasto.monto;
-
-    let desc = gasto.descripcion || "";
-    let cuotaStr = "";
-    if (desc.includes("(Cuota")) {
-        const partes = desc.split("(Cuota");
-        desc = partes[0].trim();
-        cuotaStr = partes[1].replace(")", "").trim(); 
-    }
-    document.getElementById("editCuotaDescripcion").value = desc;
-    document.getElementById("editCuotaInfo").value = cuotaStr;
-
-    const eSelect = document.getElementById("editCuotaCategoria");
-    const catId = gasto.categoria ? gasto.categoria.id : (gasto.categoriaId || "");
-    if(eSelect) eSelect.value = catId;
-
-    document.getElementById("modalEditarCuota").style.display = "flex";
-};
-
-const formEditarCuota = document.getElementById("formEditarCuota");
-if (formEditarCuota) {
-    formEditarCuota.onsubmit = async (e) => {
-        e.preventDefault();
-        const btnSubmit = document.querySelector("#formEditarCuota button[type='submit']");
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando...";
-
-        try {
-            const id = document.getElementById("editCuotaId").value;
-            const descBase = document.getElementById("editCuotaDescripcion").value.trim();
-            const cuotaInfo = document.getElementById("editCuotaInfo").value.trim();
-            const descripcionFinal = cuotaInfo ? `${descBase} (Cuota ${cuotaInfo})` : descBase;
-
-            const body = {
-                descripcion: descripcionFinal,
-                monto: parseFloat(document.getElementById("editCuotaMonto").value),
-                medioPago: document.getElementById("editCuotaMedio").value,
-                fecha: document.getElementById("editCuotaFecha").value,
-                categoriaId: document.getElementById("editCuotaCategoria").value || null,
-                usuarioId: user.id,
-                esFijo: false
-            };
-
-            const originalGasto = globalGastos.find(g => g.id == id);
-            if (originalGasto) {
-                body.pagado = originalGasto.pagado;
-                body.fechaVencimiento = originalGasto.fechaVencimiento;
-                body.mesImpacto = originalGasto.mesImpacto;
-            }
-
-            const res = await fetch(`${API}/gastos/${id}`, {
-                method: "PUT",
-                headers: authHeaders(),
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) throw new Error("Error al actualizar la cuota");
-
-            document.getElementById("modalEditarCuota").style.display = "none";
-            await refreshAll();
-        } catch (error) {
-            alert("Error al guardar cambios");
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Guardar Cambios";
-        }
-    };
-}
-
-function renderInversiones(lista) {
-  const tbody = document.querySelector('#tablaInversiones tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  
-  lista.forEach(i => {
-    const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
-    
-    let detalleLimpio = (i.descripcion || "").replace("INV: ", "");
-    let colorMonto = detalleLimpio.includes('(USD)') ? '#86efac' : '#94a3b8';
-    let prefijo = detalleLimpio.includes('(USD)') ? 'USD ' : '';
-
-    // Le devolvemos el número visible siempre:
-    let montoAMostrar = `${prefijo}${formatoMoneda(i.monto)}`;
-
-    tbody.innerHTML += `<tr>
-        <td>${i.fecha}</td>
-        <td>${detalleLimpio}</td>
-        <td style="font-weight: bold; color: ${colorMonto};">${montoAMostrar}</td>
-        <td>${acciones}</td>
-    </tr>`;
-  });
-}
-
-window.toggleSaldos = function() {
-    saldosOcultos = !saldosOcultos; 
-    const icono = document.getElementById("iconoSaldos");
-    if(icono) icono.textContent = saldosOcultos ? "visibility_off" : "visibility";
-    refreshAll();
-};
-
-window.toggleSaldosTarjetas = function() {
-    saldosTarjetasOcultos = !saldosTarjetasOcultos; 
-    const icono = document.getElementById("iconoSaldosTarjetas");
-    if(icono) icono.textContent = saldosTarjetasOcultos ? "visibility_off" : "visibility";
-    refreshAll();
-};
-
-window.toggleSaldosAhorros = function() {
-    saldosAhorrosOcultos = !saldosAhorrosOcultos; 
-    const icono = document.getElementById("iconoSaldosAhorros");
-    if(icono) icono.textContent = saldosAhorrosOcultos ? "visibility_off" : "visibility";
-    refreshAll();
-};
-
-// --- GUARDAR FECHAS DE TARJETAS EN LA BASE DE DATOS (FANTASMA) ---
-window.guardarFechasTarjetas = async function() {
-    // MAGIA: Usamos los selectores separados acá también
-    const selectMes = document.getElementById("filtroMes");
-    const selectAnio = document.getElementById("filtroAnio");
-    const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}` : new Date().toISOString().slice(0, 7);
-    
-    const cierre = document.getElementById("fechaCierreMes") ? document.getElementById("fechaCierreMes").value : "";
-    const vto = document.getElementById("fechaVtoMes") ? document.getElementById("fechaVtoMes").value : "";
-    
-    
-    // Armamos el texto secreto que va a ir a la base de datos
-    const descString = `[CONFIG_TC] ${mesSeleccionado} | C:${cierre} | V:${vto}`;
-
-    try {
-        const iTodos = await fetchIngresos();
-        const existentes = iTodos.filter(i => (i.descripcion || "").includes(`[CONFIG_TC] ${mesSeleccionado}`));
-        for (let i of existentes) {
-            await fetch(`${API}/ingresos/${i.id}`, { method: "DELETE", headers: authHeaders() });
-        }
-
-        const body = {
-            descripcion: descString,
-            monto: 0,
-            medioPago: "EFECTIVO",
-            fecha: `${mesSeleccionado}-01`,
-            usuarioId: user.id
-        };
-        await fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-        
-        alert("¡Fechas guardadas!");
-        await refreshAll();
-    } catch(err) {
-        alert("Error al guardar en la base de datos.");
-    }
-};
-
-// NUEVA FUNCIÓN: Abrir modal de edición matemática
-window.abrirEditarPrestamo = function(id, total, belen) {
-    document.getElementById("editPrestamoId").value = id;
-    document.getElementById("editPrestamoTotal").value = total > 0 ? total : "";
-    document.getElementById("editPrestamoBelen").value = belen > 0 ? belen : "";
-    
-    // Calculadora en vivo
-    const inTotal = document.getElementById("editPrestamoTotal");
-    const inBelen = document.getElementById("editPrestamoBelen");
-    const outCalc = document.getElementById("calculoAportado");
-    
-    const recalcular = () => {
-        const t = Number(inTotal.value) || 0;
-        const b = Number(inBelen.value) || 0;
-        outCalc.textContent = formatoMoneda(t - b);
-    };
-    inTotal.onkeyup = recalcular;
-    inBelen.onkeyup = recalcular;
-    recalcular();
-
-    document.getElementById("modalEditarPrestamo").style.display = "flex";
-};
-
-// NUEVA FUNCIÓN: Guardar edición del préstamo (usando el PUT de Java)
-const formEditarPrestamo = document.getElementById("formEditarPrestamo");
-if (formEditarPrestamo) {
-    formEditarPrestamo.onsubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const id = document.getElementById("editPrestamoId").value;
-            const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
-            const belen = parseFloat(document.getElementById("editPrestamoBelen").value) || 0;
-            const aportado = total - belen; // Calcula lo del otro automáticamente
-
-            const body = {
-                montoTotal: total,
-                aporteBelen: belen,
-                aporteOtro: aportado
-            };
-            
-            // Llama al nuevo método PUT que creamos en Java
-            await fetch(`${API}/prestamos/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
-            
-            document.getElementById("modalEditarPrestamo").style.display = "none";
-            await refreshAll();
-        } catch(err) {
-            alert("Error al actualizar la cuota.");
-        }
-    };
-}
-
-// --- NUEVO: MICRO-VISUALIZACIÓN (SPARKLINE) ---
-let miSparkline = null;
-window.generarSparkline = function(gastos, mes) {
-    const canvas = document.getElementById('sparklineCanvas');
-    if (!canvas) return;
-    if (miSparkline) { miSparkline.destroy(); miSparkline = null; }
-
-    const [yyyy, mm] = mes.split('-');
-    const numDays = new Date(yyyy, mm, 0).getDate();
-    const dias = {};
-    for(let i=1; i<=numDays; i++) dias[i] = 0;
-
-    gastos.forEach(g => {
-        const f = g.fecha || g.fechaVencimiento;
-        if(!f) return;
-        const d = parseInt(f.split('-')[2]);
-        if(dias[d] !== undefined) dias[d] += (Number(g.monto) || 0);
-    });
-
-    let acumulado = 0;
-    const data = Object.keys(dias).map(d => {
-        acumulado += dias[d];
-        return acumulado;
-    });
-
-    const ctx = canvas.getContext('2d');
-    
-    // Gradiente sutil para la curva
-    let gradient = ctx.createLinearGradient(0, 0, 0, 45);
-    gradient.addColorStop(0, 'rgba(190, 18, 60, 0.25)'); // Carmesí suave
-    gradient.addColorStop(1, 'rgba(190, 18, 60, 0)');
-
-    miSparkline = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Object.keys(dias),
-            datasets: [{
-                data: data,
-                borderColor: '#be123c', // Carmesí vibrante
-                backgroundColor: gradient,
-                borderWidth: 2,
-                tension: 0.4, // Curva suave
-                fill: true,
-                pointRadius: 0, // Esconde los puntitos para que sea limpio
-                pointHoverRadius: 0
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            scales: { x: { display: false }, y: { display: false, min: 0 } },
-            layout: { padding: 0 },
-            animation: { duration: 1000, easing: 'easeOutQuart' }
-        }
-    });
-};
-
-window.toggleSaldosNeto = function() {
-    saldosNetoOcultos = !saldosNetoOcultos; 
-    refreshAll();
-};
