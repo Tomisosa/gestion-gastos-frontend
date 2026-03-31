@@ -1114,7 +1114,7 @@ function renderGastosFijos(lista) {
 
     const vto = g.fechaVencimiento ? g.fechaVencimiento : "-";
     let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
-    let textoMonto = esDolar ? `<span style="color:#86efac;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
+   let textoMonto = esDolar ? `<span style="color:#059669;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
 
     tbody.innerHTML += `<tr>
         <td>${g.descripcion||"-"}</td>
