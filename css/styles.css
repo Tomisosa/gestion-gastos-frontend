@@ -709,15 +709,19 @@ select:focus, #filtroFechaMes:focus {
    LOGO FINTY TEXTO MODERNO
    ========================================================= */
 
+/* CONTENEDOR */
 .brand {
     display: flex;
-    justify-content: center;
     align-items: center;
-    margin-bottom: 25px;
+    justify-content: center;
+    padding: 10px 0;
 }
 
 /* TEXTO FINTY */
 .logo-text {
+    position: relative; /* NECESARIO para el brillo */
+    overflow: hidden;   /* corta el brillo */
+
     font-size: 2.2rem;
     font-weight: 800;
     font-family: 'Inter', sans-serif;
@@ -730,19 +734,37 @@ select:focus, #filtroFechaMes:focus {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    /* Animación suave */
+    /* Animaciones */
     animation: gradientMove 5s ease infinite, fadeInLogo 0.8s ease-out;
 
-    /* Glow sutil */
+    /* Glow + profundidad */
     filter: drop-shadow(0 0 8px rgba(42, 201, 187, 0.4));
+    text-shadow: 0 0 20px rgba(42, 201, 187, 0.2);
 }
 
-/* Animación gradiente */
-@keyframes gradientMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* EFECTO BRILLO */
+.logo-text::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.6),
+        transparent
+    );
+    transform: skewX(-20deg);
 }
+
+/* ANIMACIÓN DEL BRILLO */
+.logo-text:hover::after {
+    animation: shine 0.8s ease;
+}
+
+/* ANIMACIONES */
 
 /* Aparición */
 @keyframes fadeInLogo {
@@ -756,11 +778,17 @@ select:focus, #filtroFechaMes:focus {
     }
 }
 
-/* Hover PRO */
-.logo-text:hover {
-    filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.6));
-    transform: scale(1.05);
-    transition: 0.25s ease;
+/* Gradiente animado */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Brillo que pasa */
+@keyframes shine {
+    0% { left: -75%; }
+    100% { left: 125%; }
 }
 /* ==========================================================================
    10. DISEÑO INDEX PREMIUM Y CASCADAS 3D
