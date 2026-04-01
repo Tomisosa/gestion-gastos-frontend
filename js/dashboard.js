@@ -1,3 +1,32 @@
+// --- SISTEMA DE NOTIFICACIONES PREMIUM (TOASTS) ---
+function mostrarNotificacion(mensaje, tipo = "success") {
+    const colores = {
+        success: { bg: "#10b981", icon: "check_circle" },
+        error: { bg: "#ef4444", icon: "error" },
+        info: { bg: "#3b82f6", icon: "info" }
+    };
+    
+    const config = colores[tipo];
+    let toast = document.getElementById("finty-toast-notif");
+    
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "finty-toast-notif";
+        document.body.appendChild(toast);
+    }
+    
+    toast.innerHTML = `<span class="material-icons" style="font-size: 20px;">${config.icon}</span> ${mensaje}`;
+    toast.style.cssText = `
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+        background: ${config.bg}; color: white; padding: 12px 24px; border-radius: 50px;
+        display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif;
+        font-weight: 600; font-size: 0.95rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999;
+    `;
+    
+    setTimeout(() => { toast.style.transform = "translateX(-50%) translateY(0)"; }, 10);
+    setTimeout(() => { toast.style.transform = "translateX(-50%) translateY(100px)"; }, 3500);
+}
 /* ==========================================================================
    1. CONFIGURACIÓN, SESIÓN Y VARIABLES GLOBALES
    ========================================================================== */

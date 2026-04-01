@@ -1127,3 +1127,102 @@ body.auth button:disabled,
   opacity: 0.75;
   cursor: not-allowed;
 }
+
+/* =========================================================
+   DISEÑO PREMIUM PARA TARJETAS DE CRÉDITO Y BILLETERAS
+   ========================================================= */
+#contenedorMisTarjetas .card {
+    border-radius: 16px !important;
+    padding: 24px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto de brillo de vidrio cruzando la tarjeta */
+#contenedorMisTarjetas .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: brilloTarjeta 6s infinite;
+}
+
+@keyframes brilloTarjeta {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
+}
+
+/* Chip de la tarjeta falso para darle realismo */
+#contenedorMisTarjetas .card h3::before {
+    content: '';
+    display: inline-block;
+    width: 35px; height: 25px;
+    background: linear-gradient(135deg, #d4af37 0%, #fcd34d 100%);
+    border-radius: 4px;
+    margin-right: 10px;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+
+/* =========================================================
+   TABLAS ESTILO FINTECH (DATA GRIDS)
+   ========================================================= */
+.table th {
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+    color: #64748b !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    background: transparent !important;
+    padding-bottom: 12px !important;
+}
+
+.table td {
+    padding: 14px 8px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+    vertical-align: middle !important;
+    font-size: 0.95rem !important;
+}
+
+/* Efecto hover súper suave al pasar el mouse por las filas */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+.table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Los montos (números) siempre deberian estar en una fuente tabular para que se alineen bien */
+.monto-gasto, .monto-ingreso {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+}
+/* =========================================================
+   MODALES MÁS LIMPIOS
+   ========================================================= */
+.modal-content {
+    border: none !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    border-radius: 20px !important;
+}
+
+.modal-content input, .modal-content select {
+    background-color: #f1f5f9 !important; /* Gris un poco más oscuro que el fondo */
+    border: 2px solid transparent !important; /* Sin borde de entrada */
+    border-radius: 10px !important;
+    padding: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+.modal-content input:focus, .modal-content select:focus {
+    background-color: #ffffff !important;
+    border: 2px solid var(--color-primario) !important;
+    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.1) !important;
+}
