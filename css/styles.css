@@ -1271,3 +1271,19 @@ input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-co
     box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.15) !important;
     background-color: #ffffff !important;
 }
+
+/* =========================================================
+   PARCHE: FORZAR LETRAS VISIBLES EN FORMULARIOS Y LISTAS
+   ========================================================= */
+select option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+}
+
+input, select {
+    color: #0f172a !important;
+}
+
+#filtroMes, #filtroAnio {
+    color: #ffffff !important; /* Los de arriba de todo quedan blancos */
+}

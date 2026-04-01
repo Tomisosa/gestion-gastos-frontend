@@ -912,6 +912,7 @@ if (formGastoFijo) {
             const categoriaId = document.getElementById("gastoCategoriaFijo").value || null;
             let fechaVto = document.getElementById("gastoVencimientoFijo").value;
             const fechaReal = document.getElementById("gastoFechaFijo").value;
+            const mesImpactoFijo = document.getElementById("gastoMesImpactoFijo").value; // <-- ACÁ LO LEE
 
             if (!fechaVto) fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
             let fechaBase = pagado ? fechaReal : fechaVto;
@@ -920,7 +921,8 @@ if (formGastoFijo) {
                 const body = {
                     descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
                     esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                    fechaVencimiento: fechaVto || null, pagado, mesImpacto: null
+                    fechaVencimiento: fechaVto || null, pagado, 
+                    mesImpacto: mesImpactoFijo ? mesImpactoFijo + "-01" : null // <-- ACÁ LO MANDA
                 };
                 const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
                 if (!res.ok) throw new Error("Error al guardar");
@@ -943,10 +945,21 @@ if (formGastoFijo) {
                         let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
                         let mPago = isPagado ? medioPago : "PENDIENTE";
 
+                        // --- MAGIA MES IMPACTO EN LA REPETICIÓN ---
+                        let nuevoMesImpacto = null;
+                        if (mesImpactoFijo) {
+                            let [mY, mM] = mesImpactoFijo.split('-');
+                            let impM = parseInt(mM) + (i * saltoMes);
+                            let impY = parseInt(mY);
+                            while (impM > 12) { impM -= 12; impY += 1; }
+                            nuevoMesImpacto = `${impY}-${String(impM).padStart(2,'0')}-01`;
+                        }
+
                         const bodyFijo = {
                             descripcion, monto, medioPago: mPago, fecha: pFecha,
                             esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                            fechaVencimiento: nuevoVto, pagado: isPagado, mesImpacto: null
+                            fechaVencimiento: nuevoVto, pagado: isPagado, 
+                            mesImpacto: nuevoMesImpacto // <-- ACÁ LO MANDA
                         };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
                     }
@@ -954,7 +967,8 @@ if (formGastoFijo) {
                     const body = {
                         descripcion, monto, medioPago, fecha: fechaBase,
                         esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                        fechaVencimiento: fechaVto, pagado, mesImpacto: null
+                        fechaVencimiento: fechaVto, pagado, 
+                        mesImpacto: mesImpactoFijo ? mesImpactoFijo + "-01" : null // <-- ACÁ LO MANDA
                     };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
@@ -970,7 +984,6 @@ if (formGastoFijo) {
         finally { btnSubmit.disabled = false; btnSubmit.textContent = "Guardar Fijo"; }
     };
 }
-
 // --- SUBMIT GASTO VARIABLE ---
 const formGastoVariable = document.getElementById("formGastoVariable");
 if (formGastoVariable) {
