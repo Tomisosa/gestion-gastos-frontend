@@ -187,9 +187,32 @@ input, textarea, select {
 }
 
 .nav-list { list-style: none; margin-top: 2rem; }
-.nav-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s ease; font-weight: 500; color: var(--texto-blanco); }
-.nav-item:hover { background-color: var(--hover-izq); }
-.nav-item.active { background-color: var(--color-primario); color: #ffffff; font-weight: 600; }
+/* =========================================================
+   SIDEBAR MODERNO (Efecto cristal / Transparencias)
+   ========================================================= */
+.nav-item { 
+    padding: 0.85rem 1.2rem; 
+    border-radius: 8px; 
+    margin-bottom: 0.3rem; 
+    cursor: pointer; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    font-weight: 500; 
+    color: #cbd5e1; 
+    border-left: 3px solid transparent; 
+}
+
+.nav-item:hover { 
+    background-color: rgba(255, 255, 255, 0.05); 
+    color: #ffffff;
+    transform: translateX(4px); 
+}
+
+.nav-item.active { 
+    background-color: rgba(42, 201, 187, 0.1); 
+    color: var(--color-primario); 
+    border-left: 3px solid var(--color-primario); 
+    font-weight: 700; 
+}
 
 .main { 
     flex: 1; 
@@ -218,32 +241,21 @@ input, textarea, select {
 .page { display: none; } 
 .page.visible { display: block !important; animation: fadeIn 0.4s ease; }
 
-/* ==========================================================================
-   3. PANELES, TARJETAS Y TABLAS
-   ========================================================================== */
-/* ==== PANELES Y TARJETAS ==== */
+/* =========================================================
+   3. SOMBRAS SUAVES Y MULTICAPA (Tarjetas flotantes)
+   ========================================================= */
 .panel, .card { 
     background-color: var(--bg-tarjetas); 
-    border-radius: 12px; 
+    border-radius: 16px !important; 
     padding: 1.5rem; 
     margin-bottom: 2rem; 
-    border: 1px solid var(--borde);
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+    border: 1px solid rgba(226, 232, 240, 0.8) !important; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important; 
+    transition: box-shadow 0.3s ease;
 }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 
-.card h3 { 
-    font-size: 0.85rem; 
-    color: var(--texto-claro);
-    text-transform: uppercase; 
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-.card .highlight { 
-    font-size: 2rem; 
-    font-weight: 800; 
-    margin-top: 0.5rem; 
-    color: var(--color-primario); 
+.card:hover {
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08), 0 20px 25px -5px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* ==== TABLAS DE DATOS ==== */
@@ -1225,4 +1237,32 @@ body.auth button:disabled,
     background-color: #ffffff !important;
     border: 2px solid var(--color-primario) !important;
     box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.1) !important;
+}
+
+/* =========================================================
+    SCROLLBAR PREMIUM (Fina y redondeada)
+   ========================================================= */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; 
+}
+
+/* =========================================================
+   INPUTS Y SELECTS (Efecto Glow/Resplandor al hacer clic)
+   ========================================================= */
+input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-content select:focus {
+    outline: none !important;
+    border-color: var(--color-primario) !important;
+    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.15) !important;
+    background-color: #ffffff !important;
 }
