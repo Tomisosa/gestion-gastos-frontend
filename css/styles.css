@@ -705,67 +705,91 @@ select:focus, #filtroFechaMes:focus {
     .mobile-header { display: none !important; } 
 }
 
-/* ==========================================================================
-   LOGO FINTY - ANIMACIÓN SIMPLE Y ELEGANTE
-   ========================================================================== */
-.finty-logo-splash {
-    position: absolute;
-    z-index: 10;
-    width: 120px;
-    height: auto;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    animation: logoSimple 1.5s ease-out forwards;
+/* =========================================================
+   LOGO FINTY - MODERNO Y PREMIUM
+   ========================================================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-/* ANIMACIÓN SIMPLE: Solo aparece + flota SUAVEMENTE */
-@keyframes logoSimple {
+/* Texto */
+.brand h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: 0.3px;
+}
+
+/* Contenedor del logo */
+.finty-logo-container {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2ac9bb, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+
+    /* sombra moderna */
+    box-shadow: 
+        0 4px 15px rgba(0,0,0,0.25),
+        inset 0 1px 1px rgba(255,255,255,0.15);
+
+    /* animación suave */
+    animation: logoFadeIn 0.8s ease-out forwards;
+}
+
+/* Letra F */
+.finty-f {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    z-index: 2;
+}
+
+/* Glow interno sutil (MUCHO más pro) */
+.finty-logo-container::after {
+    content: "";
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 60%);
+    opacity: 0.4;
+    animation: glowMove 6s linear infinite;
+}
+
+/* Animaciones */
+@keyframes logoFadeIn {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8) translateY(20px);
-    }
-    70% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.02);
+        transform: scale(0.7) translateY(10px);
     }
     100% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: scale(1) translateY(0);
     }
 }
 
-/* FLOTACIÓN CONTINUA SÚPER SUTIL */
-.finty-logo-splash {
-    animation: logoSimple 1.5s ease-out forwards,
-               logoFloatSimple 4s ease-in-out 1.5s infinite;
+@keyframes glowMove {
+    0% { transform: translate(-20%, -20%); }
+    50% { transform: translate(20%, 20%); }
+    100% { transform: translate(-20%, -20%); }
 }
 
-@keyframes logoFloatSimple {
-    0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
-    50% { transform: translate(-50%, -50%) translateY(-6px); }
+/* Hover (detalle PRO) */
+.finty-logo-container:hover {
+    transform: scale(1.05);
+    transition: 0.2s ease;
 }
-
-/* LOGO BASE LIMPIO */
-.finty-logo-container {
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 16px;
-    border: 1px solid rgba(42,201,187,0.3);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-}
-
-.finty-f {
-    font-size: 2.8rem;
-    font-weight: 900;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    font-style: italic;
-    text-shadow: 0 2px 10px rgba(42,201,187,0.4);
-}
-
 /* ==========================================================================
    10. DISEÑO INDEX PREMIUM Y CASCADAS 3D
    ========================================================================== */
