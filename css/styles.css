@@ -42,10 +42,7 @@ body.inicio, body.auth {
     overflow: hidden; 
 }
 
-/* Efecto de luz de fondo para que no sea un color plano */
-body.premium-landing {
-    background: radial-gradient(circle at top, #162133 0%, var(--bg-izquierda) 100%);
-}
+/* body.premium-landing → definida en la sección 10 */
 
 .hero-container {
     animation: fadeIn 1.2s ease-out;
@@ -65,48 +62,7 @@ body.premium-landing {
     box-sizing: border-box;
 }
 
-.btn-principal {
-    background: var(--color-primario);
-    color: #ffffff;
-    padding: 18px;
-    border-radius: 14px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-    width: 100%;
-    box-sizing: border-box;
-    display: inline-block;
-}
-
-/* Botón secundario ajustado para fondo oscuro */
-.btn-secundario-new {
-    background: transparent;
-    color: var(--texto-blanco); /* Letras blancas para contraste */
-    padding: 18px;
-    border-radius: 14px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.1rem;
-    border: 2px solid var(--color-primario);
-    transition: background 0.3s, transform 0.2s;
-    width: 100%;
-    box-sizing: border-box;
-    display: inline-block;
-}
-
-.btn-principal:hover {
-    background: #1eb3a5;
-}
-
-.btn-secundario-new:hover {
-    background: var(--color-primario);
-    color: #ffffff;
-}
-
-.btn-principal:active, .btn-secundario-new:active {
-    transform: scale(0.96);
-}
+/* .btn-principal y .btn-secundario-new → definidos en la sección 10 */
 
 /* --- Cajas de Login y Registro --- */
 .form-container {
@@ -631,53 +587,7 @@ select:focus, #filtroFechaMes:focus {
    DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
    ========================================================= */
 
-/* 1. Base para Celulares (Compacto) */
-.tarjeta-billetera {
-    flex: 0 0 170px; /* Ancho fijo para deslizar */
-    width: 170px;
-    height: 110px;
-    padding: 16px;
-    border-radius: 16px;
-    position: relative;
-    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    font-family: 'Inter', sans-serif;
-    scroll-snap-align: start;
-    transition: all 0.3s ease;
-}
-
-.tarjeta-billetera h4 {
-    color: rgba(255,255,255,0.95);
-    font-size: 0.75rem;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 700;
-    max-width: 65px; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Lo achicamos de 90 a 65 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.tarjeta-billetera p {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #fff;
-    margin: 0;
-    letter-spacing: -0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-/* =========================================================
-   DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
-   ========================================================= */
-
-/* 1. BASE PARA CELULARES (AFUERA del @media) */
-/* Todo esto se aplica por defecto a los teléfonos */
+/* tarjeta-billetera base → ver definición final abajo */
 
 .tarjeta-billetera {
     flex: 0 0 210px; /* Tarjetas más anchas en el celu */
@@ -886,98 +796,7 @@ select:focus, #filtroFechaMes:focus {
     100% { transform: translate(-20px, -20px) scale(1); }
 }
 
-/* =========================================================
-   NUEVO LOGO FINTY (ANIMADO)
-   ========================================================= */
-.brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.brand h1 {
-    margin: 0;
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: var(--texto-blanco);
-    letter-spacing: 0.5px;
-    text-shadow: none;
-}
-
-.brand-mobile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: 15px;
-}
-
-.brand-mobile h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 0.5px;
-}
-
-/* Contenedor del logo: Cuadrado moderno con bordes redondeados */
-.finty-logo-container {
-    position: relative;
-    width: 38px;
-    height: 38px;
-    /* Degradado turquesa espectacular */
-    background: linear-gradient(135deg, var(--color-primario) 0%, #0f766e 100%);
-    border-radius: 12px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(42, 201, 187, 0.4);
-    overflow: hidden;
-}
-
-.finty-logo-container.mini {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-}
-
-/* La letra F central */
-.finty-f {
-    position: relative;
-    z-index: 2;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    font-style: italic; /* Le da un toque de velocidad/dinamismo */
-    padding-right: 2px;
-}
-
-.finty-logo-container.mini .finty-f {
-    font-size: 1.2rem;
-}
-
-/* El punto animado (Aura de luz interna que rebota) */
-.finty-dot {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
-    border-radius: 50%;
-    animation: moveGlow 3s infinite ease-in-out;
-}
-
-/* Animación: El brillo interno viaja por el cuadradito */
-@keyframes moveGlow {
-    0% { transform: translate(-20px, -20px) scale(1); }
-    50% { transform: translate(20px, 20px) scale(1.5); }
-    100% { transform: translate(-20px, -20px) scale(1); }
-}
-
-/* =========================================================
-   ANIMACIÓN DE ENTRADA PARA EL SPLASH SCREEN (FINTY)
-   ========================================================= */
+/* Fin sección 9 */
 
 @keyframes splashLogoEntry {
     0% {
@@ -1273,4 +1092,35 @@ body.premium-landing {
     font-size: 0.85rem !important;
     font-weight: 800 !important;
     color: #ef4444 !important; 
+}
+/* ==========================================================================
+   12. SISTEMA DE TOASTS (Notificaciones inline)
+   ========================================================================== */
+#finty-toast {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Inputs con estado de validación */
+.form-container input:focus,
+body.auth input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(42, 201, 187, 0.4);
+}
+
+/* Animación spin para loading */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Inputs del formulario auth (dark theme) */
+body.auth input {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Botón deshabilitado durante loading */
+body.auth button:disabled,
+.btn-principal:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
 }
