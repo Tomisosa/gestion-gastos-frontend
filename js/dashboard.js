@@ -530,15 +530,16 @@ function renderInversiones(lista) {
     const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
     
     let detalleLimpio = (i.descripcion || "").replace("INV: ", "");
-    let colorMonto = detalleLimpio.includes('(USD)') ? '#86efac' : '#94a3b8';
+    // ACÁ ESTÁ EL CAMBIO: Cambiamos al verde esmeralda profesional (#059669)
+    let colorMonto = detalleLimpio.includes('(USD)') ? '#059669' : '#94a3b8';
     let prefijo = detalleLimpio.includes('(USD)') ? 'USD ' : '';
 
     let montoAMostrar = `${prefijo}${formatoMoneda(i.monto)}`;
 
     tbody.innerHTML += `<tr>
-        <td>${i.fecha}</td>
-        <td>${detalleLimpio}</td>
-        <td style="font-weight: bold; color: ${colorMonto};">${montoAMostrar}</td>
+        <td style="color: #64748b; font-weight: 600;">${i.fecha}</td>
+        <td style="font-weight: bold; color: #334155;">${detalleLimpio}</td>
+        <td style="font-weight: 800; font-size: 1.05rem; color: ${colorMonto};">${montoAMostrar}</td>
         <td>${acciones}</td>
     </tr>`;
   });
