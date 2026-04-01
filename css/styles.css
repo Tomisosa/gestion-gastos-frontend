@@ -1295,3 +1295,53 @@ select {
 #filtroMes, #filtroAnio {
     color: var(--texto-oscuro) !important;
 }
+
+.form-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #334155;
+}
+
+.form-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: #2ac9bb;
+    box-shadow: 0 0 0 2px rgba(42, 201, 187, 0.2);
+    outline: none;
+}
+
+/* Botón mejorado */
+.btn-primary {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #2ac9bb, #14b8a6);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
