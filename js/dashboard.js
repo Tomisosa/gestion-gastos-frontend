@@ -999,8 +999,11 @@ if (formGastoVariable) {
             const monto = parseFloat(document.getElementById("gastoMontoVariable").value.replace(',', '.'));
             const medioPago = document.getElementById("gastoMedioVariable").value;
             const categoriaId = document.getElementById("gastoCategoriaVariable").value || null;
-            const fechaReal = document.getElementById("gastoFechaVariable").value;
-            const mesImpacto = document.getElementById("gastoMesImpactoVariable").value;
+			const fechaReal = document.getElementById("gastoFechaVariable").value;
+			const mesImpactoInput = document.getElementById("gastoMesImpactoVariable").value;
+
+			// 🔥 lógica corregida
+			const mesImpacto = mesImpactoInput || obtenerMesActualFiltro();
 
             const body = {
                 descripcion, monto, medioPago, fecha: fechaReal,
@@ -2147,3 +2150,13 @@ if (logoutBtn) {
     cargarSelectorFechas(); 
     await refreshAll(); 
 })();
+
+// ===============================
+// UTILIDADES
+// ===============================
+
+function obtenerMesActualFiltro() {
+    const mes = document.getElementById("filtroMes").value;
+    const anio = document.getElementById("filtroAnio").value;
+    return `${anio}-${String(mes).padStart(2, "0")}`;
+}
