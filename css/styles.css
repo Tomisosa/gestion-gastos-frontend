@@ -370,7 +370,12 @@ input, textarea, select {
 .modal-content form { display: flex; flex-direction: column; }
 .modal-content label { font-size: 0.9rem; color: var(--texto-oscuro); margin-top: 15px; margin-bottom: 5px; font-weight: 600; }
 .modal-content input, .modal-content select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--borde); background-color: #f8fafc; color: var(--texto-oscuro); font-family: 'Inter', sans-serif; font-size: 1rem; outline: none; }
-.modal-content input:focus, .modal-content select:focus { border-color: var(--color-primario); }
+input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-content select:focus {
+    outline: none !important;
+    border-color: var(--color-primario) !important;
+    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.15) !important;
+    background-color: #ffffff !important;
+}
 .modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: #ffffff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
 
 /* --- Animaciones Generales --- */
@@ -1240,7 +1245,7 @@ body.auth button:disabled,
 }
 
 /* =========================================================
-    SCROLLBAR PREMIUM (Fina y redondeada)
+   SCROLLBAR PREMIUM (Fina y redondeada)
    ========================================================= */
 ::-webkit-scrollbar {
     width: 8px;
