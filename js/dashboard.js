@@ -1303,21 +1303,29 @@ window.editarGasto = async function(id) {
 
     const catId = gastoEnEdicion.categoriaId ?? gastoEnEdicion.categoria?.id ?? "";
 
-    if (gastoEnEdicion.esFijo) {
-        document.getElementById("gastoFijoId").value = gastoEnEdicion.id;
-        document.getElementById("gastoDescripcionFijo").value = gastoEnEdicion.descripcion;
-        document.getElementById("gastoMontoFijo").value = gastoEnEdicion.monto;
-        document.getElementById("gastoMedioFijo").value = gastoEnEdicion.medioPago || "EFECTIVO";
-        
-        setTimeout(() => {
-            const selectCat = document.getElementById("gastoCategoriaFijo");
-            if (selectCat) selectCat.value = catId;
-        }, 0);
-        
-        document.getElementById("gastoVencimientoFijo").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
+	if (gastoEnEdicion.esFijo) {
+	        document.getElementById("gastoFijoId").value = gastoEnEdicion.id;
+	        document.getElementById("gastoDescripcionFijo").value = gastoEnEdicion.descripcion;
+	        document.getElementById("gastoMontoFijo").value = gastoEnEdicion.monto;
+	        document.getElementById("gastoMedioFijo").value = gastoEnEdicion.medioPago || "EFECTIVO";
+	        
+	        setTimeout(() => {
+	            const selectCat = document.getElementById("gastoCategoriaFijo");
+	            if (selectCat) selectCat.value = catId;
+	        }, 0);
+	        
+	        document.getElementById("gastoVencimientoFijo").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
 
-        const isPagado = gastoEnEdicion.pagado || false;
-        document.getElementById("gastoPagadoFijo").checked = isPagado;
+	        // ACA CARGAMOS EL MES DE IMPACTO AL EDITAR
+	        if(gastoEnEdicion.mesImpacto){
+	            document.getElementById("gastoMesImpactoFijo").value = gastoEnEdicion.mesImpacto.slice(0,7);
+	        } else {
+	            document.getElementById("gastoMesImpactoFijo").value = "";
+	        }
+
+	        const isPagado = gastoEnEdicion.pagado || false;
+	        document.getElementById("gastoPagadoFijo").checked = isPagado;
+	// ... el resto sigue igual
 
         const divFechaPago = document.getElementById("divFechaPagoRealFijo");
         if (isPagado) {
