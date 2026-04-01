@@ -806,9 +806,18 @@ function actualizarMediosDePagoSelects() {
         opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
     }
     
-    if (gastoMedio) gastoMedio.innerHTML = opcionesBilleteras;
+    // --- MAGIA: AGREGAMOS LOS AHORROS COMO MEDIO DE PAGO ---
+    let opcionesPago = opcionesBilleteras + `
+        <option value="AHORROS_USD" style="color: #059669; font-weight: bold;">🐷 Ahorros (Dólares)</option>
+        <option value="AHORROS_ARS" style="color: #0284c7; font-weight: bold;">🐷 Ahorros (Pesos)</option>
+    `;
+    
+    // Al pagar un gasto, mostramos las billeteras + los ahorros
+    if (gastoMedio) gastoMedio.innerHTML = opcionesPago;
+    if (pagoGastoMedio) pagoGastoMedio.innerHTML = opcionesPago;
+    
+    // A los ingresos normales solo mostramos billeteras (los ahorros se cargan desde su pestaña)
     if (ingresoMedio) ingresoMedio.innerHTML = opcionesBilleteras;
-    if (pagoGastoMedio) pagoGastoMedio.innerHTML = opcionesBilleteras;
     
     if (tarjetaTipo) tarjetaTipo.innerHTML = "";
     if (globalTarjetas.length === 0 && tarjetaTipo) {
@@ -1813,16 +1822,26 @@ async function refreshAll() {
         gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
     }
 
-    const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
-    const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
+	const inversiones = iTodos.filter(i => (i.descripcion || "").includes("INV:"));
+	    const ingresosNormales = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
-    let totalUSD = 0;
-    let totalARS_Inv = 0;
-    inversiones.forEach(inv => {
-        const monto = Number(inv.monto) || 0;
-        if (inv.descripcion.includes("(USD)")) totalUSD += monto;
-        else totalARS_Inv += monto;
-    });
+	    let totalUSD = 0;
+	    let totalARS_Inv = 0;
+	    
+	    // 1. Sumamos la plata que metiste en Inversiones/Ahorros
+	    inversiones.forEach(inv => {
+	        const monto = Number(inv.monto) || 0;
+	        if (inv.descripcion.includes("(USD)")) totalUSD += monto;
+	        else totalARS_Inv += monto;
+	    });
+
+	    // 2. MAGIA: RESTAMOS LO QUE PAGASTE USANDO AHORROS
+	    gTodos.forEach(g => {
+	        if (g.pagado) {
+	            if (g.medioPago === "AHORROS_USD") totalUSD -= (Number(g.monto) || 0);
+	            if (g.medioPago === "AHORROS_ARS") totalARS_Inv -= (Number(g.monto) || 0);
+	        }
+	    });
 
 	const divUSD = document.querySelector("#ahorros .card:nth-child(1) .highlight");
 	const divARS = document.querySelector("#ahorros .card:nth-child(2) .highlight");
