@@ -706,28 +706,33 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* =========================================================
-   LOGO FINTY TEXTO MODERNO
+   LOGO FINTY TEXTO MODERNO (PRO)
    ========================================================= */
 
-/* CONTENEDOR */
-.brand {
+/* CONTENEDORES */
+.brand,
+.brand-mobile {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 0;
+}
+
+/* MOBILE HEADER AJUSTE */
+.brand-mobile {
+    margin-left: 12px;
 }
 
 /* TEXTO FINTY */
 .logo-text {
-    position: relative; /* NECESARIO para el brillo */
-    overflow: hidden;   /* corta el brillo */
+    position: relative;
+    overflow: hidden;
 
     font-size: 2.2rem;
     font-weight: 800;
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.5px;
 
-    /* Gradiente moderno */
+    /* Gradiente moderno fintech */
     background: linear-gradient(135deg, #2ac9bb, #0ea5e9, #6366f1);
     background-size: 200% 200%;
 
@@ -737,12 +742,12 @@ select:focus, #filtroFechaMes:focus {
     /* Animaciones */
     animation: gradientMove 5s ease infinite, fadeInLogo 0.8s ease-out;
 
-    /* Glow + profundidad */
+    /* Glow elegante */
     filter: drop-shadow(0 0 8px rgba(42, 201, 187, 0.4));
     text-shadow: 0 0 20px rgba(42, 201, 187, 0.2);
 }
 
-/* EFECTO BRILLO */
+/* BRILLO AUTOMÁTICO (IMPORTANTE PARA MOBILE) */
 .logo-text::after {
     content: "";
     position: absolute;
@@ -757,16 +762,21 @@ select:focus, #filtroFechaMes:focus {
         transparent
     );
     transform: skewX(-20deg);
+
+    /* Animación automática */
+    animation: shine 3s infinite;
 }
 
-/* ANIMACIÓN DEL BRILLO */
+/* HOVER (solo desktop) */
 .logo-text:hover::after {
     animation: shine 0.8s ease;
 }
 
-/* ANIMACIONES */
+/* =========================================================
+   ANIMACIONES
+   ========================================================= */
 
-/* Aparición */
+/* Aparición suave */
 @keyframes fadeInLogo {
     0% {
         opacity: 0;
@@ -778,17 +788,31 @@ select:focus, #filtroFechaMes:focus {
     }
 }
 
-/* Gradiente animado */
+/* Gradiente en movimiento */
 @keyframes gradientMove {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-/* Brillo que pasa */
+/* Brillo que recorre */
 @keyframes shine {
     0% { left: -75%; }
     100% { left: 125%; }
+}
+
+/* =========================================================
+   RESPONSIVE (CELULAR)
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .logo-text {
+        font-size: 1.7rem;
+
+        /* Glow más sutil en celular */
+        filter: drop-shadow(0 0 5px rgba(42, 201, 187, 0.3));
+        text-shadow: 0 0 12px rgba(42, 201, 187, 0.15);
+    }
 }
 /* ==========================================================================
    10. DISEÑO INDEX PREMIUM Y CASCADAS 3D
