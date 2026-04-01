@@ -435,11 +435,12 @@
 				            <input type="hidden" id="editPrestamoMesString">
 				            
 				            <label style="color: #334155; font-weight: 700;">Monto TOTAL de la Cuota ($) <input id="editPrestamoTotal" type="number" step="0.01" required /></label>
-				            <label style="color: #0f766e; font-weight: 700;">Lo que paga <span class="nombreDinamico">vos</span> ($) <input id="editPrestamoBelen" type="number" step="0.01" required /></label>
 				            
-				            <div style="background: #f8fafc; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-				                <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-weight: 600;">El otro aportará automáticamente:</p>
-				                <h3 id="calculoAportado" style="margin: 5px 0 0 0; color: #d97706; font-size: 1.5rem;">$ 0.00</h3>
+				            <label style="color: #64748b; font-weight: 700;">Lo que paga la OTRA persona ($) <input id="editPrestamoOtro" type="number" step="0.01" required /></label>
+				            
+				            <div style="background: #f0fdfa; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid #ccfbf1; text-align: center;">
+				                <p style="margin: 0; font-size: 0.85rem; color: #0d9488; font-weight: 600;">Tu parte (<span class="nombreDinamico">vos</span>) será automáticamente:</p>
+				                <h3 id="calculoAportado" style="margin: 5px 0 0 0; color: #0f766e; font-size: 1.5rem;">$ 0.00</h3>
 				            </div>
 				            
 				            <button type="submit" class="btn" style="margin-top: 20px;">Guardar Montos</button>

@@ -1179,10 +1179,12 @@ if (formEditarPrestamo) {
         try {
             const id = document.getElementById("editPrestamoId").value;
             const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
-            const belen = parseFloat(document.getElementById("editPrestamoBelen").value) || 0;
-            const aportado = total - belen; 
+            const otro = parseFloat(document.getElementById("editPrestamoOtro").value) || 0;
+            
+            // LA NUEVA MAGIA: Belén = Total - Otro
+            const belen = total - otro; 
 
-            const body = { montoTotal: total, aporteBelen: belen, aporteOtro: aportado };
+            const body = { montoTotal: total, aporteBelen: belen, aporteOtro: otro };
             await fetch(`${API}/prestamos/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
             
             document.getElementById("modalEditarPrestamo").style.display = "none";
@@ -1214,19 +1216,24 @@ window.eliminarBilletera = async function(id) {
 window.abrirEditarPrestamo = function(id, total, belen) {
     document.getElementById("editPrestamoId").value = id;
     document.getElementById("editPrestamoTotal").value = total > 0 ? total : "";
-    document.getElementById("editPrestamoBelen").value = belen > 0 ? belen : "";
+    
+    // Calculamos cuánto había puesto el otro para pre-llenar el input
+    let otro = total > 0 ? (total - belen) : "";
+    document.getElementById("editPrestamoOtro").value = otro !== "" ? otro : "";
     
     const inTotal = document.getElementById("editPrestamoTotal");
-    const inBelen = document.getElementById("editPrestamoBelen");
+    const inOtro = document.getElementById("editPrestamoOtro");
     const outCalc = document.getElementById("calculoAportado");
     
+    // Calculadora en tiempo real
     const recalcular = () => {
         const t = Number(inTotal.value) || 0;
-        const b = Number(inBelen.value) || 0;
-        outCalc.textContent = formatoMoneda(t - b);
+        const o = Number(inOtro.value) || 0;
+        outCalc.textContent = formatoMoneda(t - o); // Muestra lo que te toca a vos
     };
+    
     inTotal.onkeyup = recalcular;
-    inBelen.onkeyup = recalcular;
+    inOtro.onkeyup = recalcular;
     recalcular();
 
     document.getElementById("modalEditarPrestamo").style.display = "flex";
