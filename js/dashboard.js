@@ -423,8 +423,18 @@ function renderConsumosCuotas(lista) {
     const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
 
     const consumosTarjeta = lista.filter(g => {
-        if (!g.medioPago) return false;
-        const medio = g.medioPago.toUpperCase();
+        // MAGIA ANTI-FANTASMAS: Identificamos si es una cuota por su descripción
+        const esCuota = (g.descripcion || "").includes("(Cuota");
+        let medio = (g.medioPago || "").toUpperCase();
+        
+        // Si es una cuota, TIENE que mostrarse en esta tabla sí o sí (aunque no tenga tarjeta asignada)
+        if (esCuota) {
+            if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada && medio !== "") return false;
+            return true;
+        }
+
+        // Si no es cuota, aplicamos la regla normal
+        if (medio === "") return false;
         if (mediosIgnorados.includes(medio)) return false;
         if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
         return true;
@@ -446,7 +456,10 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
+      // Si el gasto no tiene medio de pago, le avisamos al usuario
+      let nombreMedio = g.medioPago ? g.medioPago : "⚠️ Sin Tarjeta";
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${nombreMedio}</span>`;
+      
       let esDolar = (g.descripcion || "").includes("[USD]");
       let montoAMostrar = esDolar ? `<span style="color:#059669;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
