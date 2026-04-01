@@ -980,12 +980,15 @@ if (formIngreso) {
         e.preventDefault(); 
         const btnSubmit = document.querySelector("#formIngreso button[type='submit']");
         btnSubmit.disabled = true;
+        btnSubmit.textContent = "Guardando..."; // Feedback visual
+        
         try {
             const mesImpacto = document.getElementById("ingresoMesImpacto").value;
 
             const body = {
                 descripcion: document.getElementById("ingresoDescripcion").value || "Ingreso",
-                monto: document.getElementById("ingresoMonto").value,
+                // 🐛 ARREGLO: Convertimos el monto a decimal real para que Java no lo rechace
+                monto: parseFloat(document.getElementById("ingresoMonto").value.replace(',', '.')),
                 medioPago: document.getElementById("ingresoMedio").value,
                 fecha: document.getElementById("ingresoFecha").value,
                 usuarioId: user.id,
@@ -999,7 +1002,14 @@ if (formIngreso) {
             document.getElementById("modalIngreso").style.display = "none"; 
             formIngreso.reset(); 
             await refreshAll(); 
-        } catch(error) { alert("Error de conexión."); } finally { btnSubmit.disabled = false; }
+            
+            alert("✅ ¡Ingreso registrado con éxito en " + body.medioPago + "!"); // Aviso de éxito
+        } catch(error) { 
+            alert("❌ Error al guardar el ingreso."); 
+        } finally { 
+            btnSubmit.disabled = false; 
+            btnSubmit.textContent = "Guardar"; 
+        }
     };
 }
 
@@ -1887,8 +1897,9 @@ async function refreshAll() {
     renderConsumosCuotas(gParaTablasYGrafico); 
     renderPrestamos(pTodos); 
 
-    const gHistoricos = gTodos.filter(g => (g.fecha || "").startsWith(mesSeleccionado));
-    const iHistoricos = iTodos.filter(i => (i.fecha || "").startsWith(mesSeleccionado));
+	// 🐛 ARREGLO: Los saldos de las Billeteras/Débito deben acumular TODO el dinero histórico hasta el mes seleccionado, no solo el flujo del mes aislado.
+	    const gHistoricos = gTodos.filter(g => (g.fecha || g.fechaVencimiento || "") <= mesSeleccionado + "-31");
+	    const iHistoricos = iTodos.filter(i => (i.fecha || "") <= mesSeleccionado + "-31");
 
     const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
