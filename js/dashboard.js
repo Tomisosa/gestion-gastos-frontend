@@ -1258,7 +1258,7 @@ if (formPagarGasto) {
                     medioPago: document.getElementById("pagoGastoMedio").value,
                     fecha: document.getElementById("pagoGastoFecha").value,
                     esFijo: true,
-                    usuario: { id: user.id }, 
+                    usuarioId: user.id, // <-- EL FIX: Java para los Gastos pide "usuarioId" directo
                     categoriaId: null,
                     fechaVencimiento: document.getElementById("pagoGastoFecha").value,
                     pagado: true,
@@ -1271,14 +1271,19 @@ if (formPagarGasto) {
                     body: JSON.stringify(body)
                 });
 
-                if (!res.ok) throw new Error("Error al procesar pago virtual");
+                // Si falla, ahora nos dice el motivo real
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`Java dice: ${errText}`);
+                }
+                
                 document.getElementById("modalPagarGasto").style.display = "none";
                 await refreshAll();
                 return;
             }
             // --- FIN MAGIA PAGO VIRTUAL ---
 
-            // Pago Normal (El que ya tenías)
+            // Pago Normal
             const gastoOriginal = globalGastos.find(g => String(g.id) === id);
             if(!gastoOriginal) throw new Error("Gasto no encontrado");
 
@@ -1303,12 +1308,16 @@ if (formPagarGasto) {
                 body: JSON.stringify(body)
             });
 
-            if (!res.ok) throw new Error("Error al registrar el pago");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Java dice: ${errText}`);
+            }
 
             document.getElementById("modalPagarGasto").style.display = "none";
             await refreshAll();
         } catch(err) {
             alert("Error al pagar: " + err.message);
+            console.error(err);
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Registrar Pago";
