@@ -1116,6 +1116,58 @@ if (formInversion) {
     };
 }
 
+// --- SUBMIT CAMBIAR CONTRASEÑA (MI PERFIL) ---
+const formCambiarPass = document.getElementById("formCambiarPass");
+if (formCambiarPass) {
+    formCambiarPass.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const newPass = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+
+        // 1. Verificamos que las contraseñas nuevas coincidan
+        if (newPass !== confirmPass) {
+            alert("❌ Las contraseñas nuevas no coinciden. Verificalas.");
+            return;
+        }
+
+        const btnSubmit = document.querySelector("#formCambiarPass button[type='submit']");
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Actualizando...";
+
+        try {
+            // 2. Armamos los datos exactamente como los pide Java
+            const body = {
+                userId: String(user.id),
+                newPassword: newPass
+            };
+
+            // 3. Se los mandamos al Controller de Spring Boot
+            const res = await fetch(`${API}/usuarios/update-password`, {
+                method: "PUT",
+                headers: authHeaders(),
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                throw new Error("No se pudo actualizar");
+            }
+
+            // 4. Si todo sale bien, le avisamos y la mandamos a loguearse de nuevo por seguridad
+            alert("✅ ¡Contraseña actualizada con éxito! Por seguridad, volvé a iniciar sesión.");
+            localStorage.clear();
+            window.location.replace("login.html");
+
+        } catch (error) {
+            alert("❌ Hubo un error al intentar cambiar la contraseña.");
+            console.error(error);
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Actualizar Contraseña";
+        }
+    };
+}
+
 const formPagarGasto = document.getElementById("formPagarGasto");
 if (formPagarGasto) {
     formPagarGasto.onsubmit = async (e) => {
