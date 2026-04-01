@@ -1244,12 +1244,14 @@ body.auth button:disabled,
     border-radius: 20px !important;
 }
 
-.modal-content input, .modal-content select {
-    background-color: #f1f5f9 !important; /* Gris un poco más oscuro que el fondo */
-    border: 2px solid transparent !important; /* Sin borde de entrada */
+.modal-content input, 
+.modal-content select {
+    background-color: #f1f5f9 !important;
+    border: 2px solid #cbd5e1 !important; /* 👈 línea visible */
     border-radius: 10px !important;
     padding: 14px !important;
     font-weight: 500 !important;
+    color: #111 !important;
     transition: all 0.3s ease !important;
 }
 
