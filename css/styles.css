@@ -506,9 +506,9 @@ input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-co
 }
 
 select, #filtroFechaMes {
-    background-color: var(--bg-saldos) !important;
-    color: var(--texto-blanco) !important;
-    border: 1px solid var(--bg-saldos) !important;
+    background-color: #ffffff !important;
+    color: var(--texto-oscuro) !important;
+    border: 1px solid var(--borde) !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
@@ -516,12 +516,16 @@ select, #filtroFechaMes {
     font-size: 0.95rem;
     outline: none;
     cursor: pointer;
-    transition: box-shadow 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-select:focus, #filtroFechaMes:focus {
-    box-shadow: 0 0 0 2px var(--color-primario);
+select:hover {
+    border-color: var(--color-primario);
+}
+
+select:focus {
+    box-shadow: 0 0 0 3px rgba(42, 201, 187, 0.2);
 }
 
 .filtro-container, .filtro-mes {
@@ -1280,10 +1284,14 @@ select option {
     color: #0f172a !important;
 }
 
-input, select {
-    color: #0f172a !important;
+input {
+    color: #0f172a;
+}
+
+select {
+    color: var(--texto-oscuro);
 }
 
 #filtroMes, #filtroAnio {
-    color: #ffffff !important; /* Los de arriba de todo quedan blancos */
+    color: var(--texto-oscuro) !important;
 }
