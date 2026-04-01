@@ -366,11 +366,24 @@ function renderGastosFijos(lista) {
     let fechaPagoReal = "-";
     let medioPagoReal = "-";
 
+    // --- ACÁ ESTÁ LA MAGIA PARA LOS RESÚMENES VIRTUALES ---
     if (g.esVirtual) {
-        acciones = `<span style="font-size: 0.8rem; background: var(--bg-saldos); padding: 4px 8px; border-radius: 5px; color: #888;">Automático</span>`;
-        estadoPagado = "-";
-        medioPagoReal = g.medioPago || "MÚLTIPLES";
+        acciones = `
+            <button onclick="editarVirtual('${g.id}')" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Ver info">✏️</button>
+            ${g.pagado ? `<button onclick="eliminarGasto(${g.idPagoReal})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Deshacer Pago">🗑️</button>` : ''}
+        `;
+        
+        if (g.pagado) {
+            estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
+            fechaPagoReal = g.fechaPagoReal || "-";
+            medioPagoReal = `<span style="color: #00aae4; font-weight: bold;">${g.medioPago}</span>`;
+        } else {
+            estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPagoVirtual('${g.id}', '${g.descripcion}', ${montoNum})" title="Tildar para pagar">`;
+            fechaPagoReal = "-";
+            medioPagoReal = `<span style="color: #888;">Pendiente</span>`;
+        }
     } else {
+        // Gastos fijos normales
         acciones = `
             <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
             <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
@@ -1228,8 +1241,45 @@ if (formPagarGasto) {
         btnSubmit.textContent = "Procesando...";
 
         try {
-            const id = document.getElementById("pagoGastoId").value;
-            const gastoOriginal = globalGastos.find(g => g.id == id);
+            const id = String(document.getElementById("pagoGastoId").value);
+            
+            // --- MAGIA PAGO VIRTUAL ---
+            if (id.startsWith("VIRTUAL_")) {
+                const descVirtual = id.replace("VIRTUAL_", "");
+                const montoVirtual = parseFloat(document.getElementById("pagoGastoId").dataset.monto);
+                
+                const selectMes = document.getElementById("filtroMes");
+                const selectAnio = document.getElementById("filtroAnio");
+                const mesSeleccionado = (selectMes && selectAnio) ? `${selectAnio.value}-${selectMes.value}-01` : new Date().toISOString().split('T')[0];
+
+                const body = {
+                    descripcion: `[PAGO_VIRTUAL] ` + descVirtual,
+                    monto: montoVirtual,
+                    medioPago: document.getElementById("pagoGastoMedio").value,
+                    fecha: document.getElementById("pagoGastoFecha").value,
+                    esFijo: true,
+                    usuario: { id: user.id }, 
+                    categoriaId: null,
+                    fechaVencimiento: document.getElementById("pagoGastoFecha").value,
+                    pagado: true,
+                    mesImpacto: mesSeleccionado
+                };
+
+                const res = await fetch(`${API}/gastos`, {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error("Error al procesar pago virtual");
+                document.getElementById("modalPagarGasto").style.display = "none";
+                await refreshAll();
+                return;
+            }
+            // --- FIN MAGIA PAGO VIRTUAL ---
+
+            // Pago Normal (El que ya tenías)
+            const gastoOriginal = globalGastos.find(g => String(g.id) === id);
             if(!gastoOriginal) throw new Error("Gasto no encontrado");
 
             const catId = gastoOriginal.categoriaId || (gastoOriginal.categoria ? gastoOriginal.categoria.id : null);
@@ -1650,6 +1700,24 @@ window.toggleSaldosNeto = function() {
     refreshAll();
 };
 
+window.editarVirtual = function(idVirtual) {
+    if (idVirtual.includes('tarjeta')) {
+        alert("💡 Para editar detalles o cuotas de la tarjeta, andá a la pestaña 'Tarjetas' en el menú de la izquierda.");
+    } else if (idVirtual.includes('prestamo')) {
+        alert("💡 Para editar las cuotas del préstamo, andá a la pestaña 'Préstamos' en el menú de la izquierda.");
+    }
+};
+
+window.abrirModalPagoVirtual = function(idVirtual, desc, monto) {
+    document.getElementById("pagoGastoId").value = "VIRTUAL_" + desc;
+    document.getElementById("pagoGastoDesc").textContent = desc + " ($ " + formatoMoneda(monto).replace('$', '').trim() + ")";
+    document.getElementById("pagoGastoFecha").value = new Date().toISOString().split('T')[0];
+    
+    // Guardamos el monto escondido para procesarlo
+    document.getElementById("pagoGastoId").dataset.monto = monto;
+    
+    document.getElementById("modalPagarGasto").style.display = "flex";
+};
 
 /* ==========================================================================
    8. CORAZÓN DE LA APLICACIÓN (refreshAll, DOMContentLoaded e Init)
