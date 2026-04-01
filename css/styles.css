@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ==========================================================================
-   0. VARIABLES GLOBALES Y RESET
-   ========================================================================== */
 :root {
   /* Unificamos al turquesa elegante que ya usabas */
   --color-primario: #2ac9bb;      
@@ -23,9 +20,6 @@
   --hover-izq: #334155;          /* Hover sutil */
 }
 
-/* ==========================================================================
-   1. PÁGINAS DE INICIO Y AUTENTICACIÓN (Index, Login, Registro)
-   ========================================================================== */
 /* =========================================================
    PÁGINAS DE INICIO Y AUTENTICACIÓN (Index, Login, Registro)
    ========================================================= */
@@ -42,7 +36,10 @@ body.inicio, body.auth {
     overflow: hidden; 
 }
 
-/* body.premium-landing → definida en la sección 10 */
+/* Efecto de luz de fondo para que no sea un color plano */
+body.premium-landing {
+    background: radial-gradient(circle at top, #162133 0%, var(--bg-izquierda) 100%);
+}
 
 .hero-container {
     animation: fadeIn 1.2s ease-out;
@@ -62,7 +59,48 @@ body.inicio, body.auth {
     box-sizing: border-box;
 }
 
-/* .btn-principal y .btn-secundario-new → definidos en la sección 10 */
+.btn-principal {
+    background: var(--color-primario);
+    color: #ffffff;
+    padding: 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+/* Botón secundario ajustado para fondo oscuro */
+.btn-secundario-new {
+    background: transparent;
+    color: var(--texto-blanco); /* Letras blancas para contraste */
+    padding: 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 2px solid var(--color-primario);
+    transition: background 0.3s, transform 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+.btn-principal:hover {
+    background: #1eb3a5;
+}
+
+.btn-secundario-new:hover {
+    background: var(--color-primario);
+    color: #ffffff;
+}
+
+.btn-principal:active, .btn-secundario-new:active {
+    transform: scale(0.96);
+}
 
 /* --- Cajas de Login y Registro --- */
 .form-container {
@@ -90,7 +128,7 @@ body.inicio, body.auth {
     border-radius: 10px;
     border: 1px solid var(--borde);
     background-color: #f8fafc;
-    color: #111; /* 🔥 FIX */
+    color: var(--texto-oscuro);
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
     outline: none;
@@ -134,9 +172,6 @@ body.inicio, body.auth {
     background-color: #1eb3a5;
 }
 
-/* ==========================================================================
-   2. GENERAL & LAYOUT (DASHBOARD)
-   ========================================================================== */
 /* =========================================================
    GENERAL & LAYOUT (DASHBOARD)
    ========================================================= */
@@ -187,32 +222,9 @@ input, textarea, select {
 }
 
 .nav-list { list-style: none; margin-top: 2rem; }
-/* =========================================================
-   SIDEBAR MODERNO (Efecto cristal / Transparencias)
-   ========================================================= */
-.nav-item { 
-    padding: 0.85rem 1.2rem; 
-    border-radius: 8px; 
-    margin-bottom: 0.3rem; 
-    cursor: pointer; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-    font-weight: 500; 
-    color: #cbd5e1; 
-    border-left: 3px solid transparent; 
-}
-
-.nav-item:hover { 
-    background-color: rgba(255, 255, 255, 0.05); 
-    color: #ffffff;
-    transform: translateX(4px); 
-}
-
-.nav-item.active { 
-    background-color: rgba(42, 201, 187, 0.1); 
-    color: var(--color-primario); 
-    border-left: 3px solid var(--color-primario); 
-    font-weight: 700; 
-}
+.nav-item { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s ease; font-weight: 500; color: var(--texto-blanco); }
+.nav-item:hover { background-color: var(--hover-izq); }
+.nav-item.active { background-color: var(--color-primario); color: #ffffff; font-weight: 600; }
 
 .main { 
     flex: 1; 
@@ -241,21 +253,29 @@ input, textarea, select {
 .page { display: none; } 
 .page.visible { display: block !important; animation: fadeIn 0.4s ease; }
 
-/* =========================================================
-   3. SOMBRAS SUAVES Y MULTICAPA (Tarjetas flotantes)
-   ========================================================= */
+/* ==== PANELES Y TARJETAS ==== */
 .panel, .card { 
     background-color: var(--bg-tarjetas); 
-    border-radius: 16px !important; 
+    border-radius: 12px; 
     padding: 1.5rem; 
     margin-bottom: 2rem; 
-    border: 1px solid rgba(226, 232, 240, 0.8) !important; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.04) !important; 
-    transition: box-shadow 0.3s ease;
+    border: 1px solid var(--borde);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
 }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 
-.card:hover {
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08), 0 20px 25px -5px rgba(0, 0, 0, 0.04) !important;
+.card h3 { 
+    font-size: 0.85rem; 
+    color: var(--texto-claro);
+    text-transform: uppercase; 
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.card .highlight { 
+    font-size: 2rem; 
+    font-weight: 800; 
+    margin-top: 0.5rem; 
+    color: var(--color-primario); 
 }
 
 /* ==== TABLAS DE DATOS ==== */
@@ -276,9 +296,6 @@ input, textarea, select {
 .highlight.positivo { color: #2ac9bb; }
 .highlight.negativo { color: #ff6384; }
 
-/* ==========================================================================
-   4. BOTÓN FLOTANTE DEFINITIVO (PRO)
-   ========================================================================== */
 /* =========================================================
    BOTÓN FLOTANTE DEFINITIVO (PRO)
    ========================================================= */
@@ -336,9 +353,6 @@ input, textarea, select {
 .fab-label { background: white; color: #333; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 .fab-mini-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: white; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
 
-/* ==========================================================================
-   5. MODALES Y FORMULARIOS
-   ========================================================================== */
 /* ==== MODALES Y FORMULARIOS ==== */
 .modal { 
     position: fixed; 
@@ -369,24 +383,8 @@ input, textarea, select {
 .modal-content h2, .modal-content h3 { color: var(--color-primario); margin-bottom: 20px; font-size: 1.4rem; }
 .modal-content form { display: flex; flex-direction: column; }
 .modal-content label { font-size: 0.9rem; color: var(--texto-oscuro); margin-top: 15px; margin-bottom: 5px; font-weight: 600; }
-.modal-content input, 
-.modal-content select { 
-    width: 100%; 
-    padding: 12px; 
-    border-radius: 8px; 
-    border: 1px solid var(--borde); 
-    background-color: #ffffff; 
-    color: #111; /* 🔥 ESTO ES LA CLAVE */
-    font-family: 'Inter', sans-serif; 
-    font-size: 1rem; 
-    outline: none; 
-}
-input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-content select:focus {
-    outline: none !important;
-    border-color: var(--color-primario) !important;
-    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.15) !important;
-    background-color: #ffffff !important;
-}
+.modal-content input, .modal-content select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--borde); background-color: #f8fafc; color: var(--texto-oscuro); font-family: 'Inter', sans-serif; font-size: 1rem; outline: none; }
+.modal-content input:focus, .modal-content select:focus { border-color: var(--color-primario); }
 .modal-content button { margin-top: 25px; width: 100%; padding: 14px; background-color: var(--color-primario); color: #ffffff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
 
 /* --- Animaciones Generales --- */
@@ -396,9 +394,6 @@ input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-co
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ==========================================================================
-   6. ADAPTACIÓN PARA CELULARES (MENÚ HAMBURGUESA Y DISEÑO LIMPIO)
-   ========================================================================== */
 /* =========================================================
    ADAPTACIÓN PARA CELULARES (MENÚ HAMBURGUESA Y DISEÑO LIMPIO)
    ========================================================= */
@@ -486,9 +481,6 @@ input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-co
   .card h3 { display: flex !important; justify-content: space-between !important; align-items: center !important; }
 }
 
-/* ==========================================================================
-   7. ARREGLO DEFINITIVO: TARJETAS SUPERIORES Y SELECTOR
-   ========================================================================== */
 /* =========================================================
    ARREGLO DEFINITIVO: TARJETAS SUPERIORES Y SELECTOR
    ========================================================= */
@@ -517,9 +509,9 @@ input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-co
 }
 
 select, #filtroFechaMes {
-    background-color: #ffffff !important;
-    color: var(--texto-oscuro) !important;
-    border: 1px solid var(--borde) !important;
+    background-color: var(--bg-saldos) !important;
+    color: var(--texto-blanco) !important;
+    border: 1px solid var(--bg-saldos) !important;
     padding: 8px 15px;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
@@ -527,16 +519,12 @@ select, #filtroFechaMes {
     font-size: 0.95rem;
     outline: none;
     cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-select:hover {
-    border-color: var(--color-primario);
-}
-
-select:focus {
-    box-shadow: 0 0 0 3px rgba(42, 201, 187, 0.2);
+select:focus, #filtroFechaMes:focus {
+    box-shadow: 0 0 0 2px var(--color-primario);
 }
 
 .filtro-container, .filtro-mes {
@@ -612,14 +600,57 @@ select:focus {
     border-bottom: 1px solid #e2e8f0; /* Borde clarito a juego */
 }
 
-/* ==========================================================================
-   8. DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
-   ========================================================================== */
 /* =========================================================
    DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
    ========================================================= */
 
-/* tarjeta-billetera base → ver definición final abajo */
+/* 1. Base para Celulares (Compacto) */
+.tarjeta-billetera {
+    flex: 0 0 170px; /* Ancho fijo para deslizar */
+    width: 170px;
+    height: 110px;
+    padding: 16px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    scroll-snap-align: start;
+    transition: all 0.3s ease;
+}
+
+.tarjeta-billetera h4 {
+    color: rgba(255,255,255,0.95);
+    font-size: 0.75rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    max-width: 65px; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Lo achicamos de 90 a 65 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.tarjeta-billetera p {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* =========================================================
+   DISEÑO DE TARJETAS Y RESPONSIVE (PC vs MÓVIL)
+   ========================================================= */
+
+/* 1. BASE PARA CELULARES (AFUERA del @media) */
+/* Todo esto se aplica por defecto a los teléfonos */
 
 .tarjeta-billetera {
     flex: 0 0 210px; /* Tarjetas más anchas en el celu */
@@ -738,117 +769,198 @@ select:focus {
 }
 
 /* =========================================================
-   LOGO FINTY TEXTO MODERNO (PRO)
+   NUEVO LOGO FINTY (ANIMADO)
    ========================================================= */
-
-/* CONTENEDORES */
-.brand,
-.brand-mobile {
+.brand {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-/* MOBILE HEADER AJUSTE */
-.brand-mobile {
-    margin-left: 12px;
-}
-
-/* TEXTO FINTY */
-.logo-text {
-    position: relative;
-    overflow: hidden;
-
-    font-size: 2.2rem;
+.brand h1 {
+    margin: 0;
+    font-size: 1.9rem;
     font-weight: 800;
-    font-family: 'Inter', sans-serif;
+    color: var(--texto-blanco);
     letter-spacing: 0.5px;
-
-    /* Gradiente moderno fintech */
-    background: linear-gradient(135deg, #2ac9bb, #0ea5e9, #6366f1);
-    background-size: 200% 200%;
-
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    /* Animaciones */
-    animation: gradientMove 5s ease infinite, fadeInLogo 0.8s ease-out;
-
-    /* Glow elegante */
-    filter: drop-shadow(0 0 8px rgba(42, 201, 187, 0.4));
-    text-shadow: 0 0 20px rgba(42, 201, 187, 0.2);
+    text-shadow: none; /* Adiós a la sombra vieja */
 }
 
-/* BRILLO AUTOMÁTICO (IMPORTANTE PARA MOBILE) */
-.logo-text::after {
-    content: "";
+.brand-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.brand-mobile h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+/* Contenedor del logo: Cuadrado moderno con bordes redondeados */
+.finty-logo-splash {
+      position: absolute; 
+      z-index: 10;
+      width: 130px; 
+      height: auto;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1.6); 
+      opacity: 0;
+      animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
+    }
+
+.finty-logo-container.mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+}
+
+/* La letra F central */
+.finty-f {
+    position: relative;
+    z-index: 2;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-style: italic; /* Le da un toque de velocidad/dinamismo */
+    padding-right: 2px;
+}
+
+.finty-logo-container.mini .finty-f {
+    font-size: 1.2rem;
+}
+
+/* El punto animado (Aura de luz interna que rebota) */
+.finty-dot {
     position: absolute;
-    top: 0;
-    left: -75%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(255,255,255,0.6),
-        transparent
-    );
-    transform: skewX(-20deg);
-
-    /* Animación automática */
-    animation: shine 3s infinite;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    animation: moveGlow 3s infinite ease-in-out;
 }
 
-/* HOVER (solo desktop) */
-.logo-text:hover::after {
-    animation: shine 0.8s ease;
+/* Animación: El brillo interno viaja por el cuadradito */
+@keyframes moveGlow {
+    0% { transform: translate(-20px, -20px) scale(1); }
+    50% { transform: translate(20px, 20px) scale(1.5); }
+    100% { transform: translate(-20px, -20px) scale(1); }
 }
 
 /* =========================================================
-   ANIMACIONES
+   NUEVO LOGO FINTY (ANIMADO)
+   ========================================================= */
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--texto-blanco);
+    letter-spacing: 0.5px;
+    text-shadow: none;
+}
+
+.brand-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.brand-mobile h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+/* Contenedor del logo: Cuadrado moderno con bordes redondeados */
+.finty-logo-container {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    /* Degradado turquesa espectacular */
+    background: linear-gradient(135deg, var(--color-primario) 0%, #0f766e 100%);
+    border-radius: 12px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(42, 201, 187, 0.4);
+    overflow: hidden;
+}
+
+.finty-logo-container.mini {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+}
+
+/* La letra F central */
+.finty-f {
+    position: relative;
+    z-index: 2;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-style: italic; /* Le da un toque de velocidad/dinamismo */
+    padding-right: 2px;
+}
+
+.finty-logo-container.mini .finty-f {
+    font-size: 1.2rem;
+}
+
+/* El punto animado (Aura de luz interna que rebota) */
+.finty-dot {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    animation: moveGlow 3s infinite ease-in-out;
+}
+
+/* Animación: El brillo interno viaja por el cuadradito */
+@keyframes moveGlow {
+    0% { transform: translate(-20px, -20px) scale(1); }
+    50% { transform: translate(20px, 20px) scale(1.5); }
+    100% { transform: translate(-20px, -20px) scale(1); }
+}
+
+/* =========================================================
+   ANIMACIÓN DE ENTRADA PARA EL SPLASH SCREEN (FINTY)
    ========================================================= */
 
-/* Aparición suave */
-@keyframes fadeInLogo {
+@keyframes splashLogoEntry {
     0% {
         opacity: 0;
-        transform: translateY(10px) scale(0.95);
+        /* Empieza más chico y un poco más abajo */
+        transform: scale(0.5) translateY(30px);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        /* Termina en su escala grande (2.5 defined en el HTML) y centrado */
+        transform: scale(2.5) translateY(0);
     }
 }
-
-/* Gradiente en movimiento */
-@keyframes gradientMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Brillo que recorre */
-@keyframes shine {
-    0% { left: -75%; }
-    100% { left: 125%; }
-}
-
-/* =========================================================
-   RESPONSIVE (CELULAR)
-   ========================================================= */
-
-@media (max-width: 768px) {
-    .logo-text {
-        font-size: 1.7rem;
-
-        /* Glow más sutil en celular */
-        filter: drop-shadow(0 0 5px rgba(42, 201, 187, 0.3));
-        text-shadow: 0 0 12px rgba(42, 201, 187, 0.15);
-    }
-}
-/* ==========================================================================
-   10. DISEÑO INDEX PREMIUM Y CASCADAS 3D
-   ========================================================================== */
 /* =========================================================
    DISEÑO INDEX PREMIUM (EFECTO FOCO CENTRAL COMO LA FOTO)
    ========================================================= */
@@ -1060,9 +1172,6 @@ body.premium-landing {
     }
 }
 
-/* ==========================================================================
-   11. DISEÑO EXACTO "TICKET PREMIUM" Y TOP CATEGORÍAS
-   ========================================================================== */
 /* =========================================================
    DISEÑO EXACTO "TICKET PREMIUM" (SALDO NETO)
    ========================================================= */
@@ -1127,259 +1236,4 @@ body.premium-landing {
     font-size: 0.85rem !important;
     font-weight: 800 !important;
     color: #ef4444 !important; 
-}
-/* ==========================================================================
-   12. SISTEMA DE TOASTS (Notificaciones inline)
-   ========================================================================== */
-#finty-toast {
-  font-family: 'Inter', sans-serif;
-}
-
-/* Inputs con estado de validación */
-.form-container input:focus,
-body.auth input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(42, 201, 187, 0.4);
-}
-
-/* Animación spin para loading */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-/* Inputs del formulario auth (dark theme) */
-body.auth input {
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-/* Botón deshabilitado durante loading */
-body.auth button:disabled,
-.btn-principal:disabled {
-  opacity: 0.75;
-  cursor: not-allowed;
-}
-
-/* =========================================================
-   DISEÑO PREMIUM PARA TARJETAS DE CRÉDITO Y BILLETERAS
-   ========================================================= */
-#contenedorMisTarjetas .card {
-    border-radius: 16px !important;
-    padding: 24px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Efecto de brillo de vidrio cruzando la tarjeta */
-#contenedorMisTarjetas .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 50%; height: 100%;
-    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-    transform: skewX(-25deg);
-    animation: brilloTarjeta 6s infinite;
-}
-
-@keyframes brilloTarjeta {
-    0% { left: -100%; }
-    20% { left: 200%; }
-    100% { left: 200%; }
-}
-
-/* Chip de la tarjeta falso para darle realismo */
-#contenedorMisTarjetas .card h3::before {
-    content: '';
-    display: inline-block;
-    width: 35px; height: 25px;
-    background: linear-gradient(135deg, #d4af37 0%, #fcd34d 100%);
-    border-radius: 4px;
-    margin-right: 10px;
-    vertical-align: middle;
-    opacity: 0.8;
-}
-
-/* =========================================================
-   TABLAS ESTILO FINTECH (DATA GRIDS)
-   ========================================================= */
-.table th {
-    text-transform: uppercase !important;
-    font-size: 0.75rem !important;
-    letter-spacing: 0.05em !important;
-    color: #64748b !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-    background: transparent !important;
-    padding-bottom: 12px !important;
-}
-
-.table td {
-    padding: 14px 8px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-    color: #334155 !important;
-    vertical-align: middle !important;
-    font-size: 0.95rem !important;
-}
-
-/* Efecto hover súper suave al pasar el mouse por las filas */
-.table tbody tr {
-    transition: background-color 0.2s ease;
-}
-.table tbody tr:hover {
-    background-color: #f8fafc !important;
-}
-
-/* Los montos (números) siempre deberian estar en una fuente tabular para que se alineen bien */
-.monto-gasto, .monto-ingreso {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.5px;
-}
-/* =========================================================
-   MODALES MÁS LIMPIOS
-   ========================================================= */
-.modal-content {
-    border: none !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-    border-radius: 20px !important;
-}
-
-.modal-content input, 
-.modal-content select {
-    background-color: #f1f5f9 !important;
-    border: 2px solid #cbd5e1 !important; /* 👈 línea visible */
-    border-radius: 10px !important;
-    padding: 14px !important;
-    font-weight: 500 !important;
-    color: #111 !important;
-    transition: all 0.3s ease !important;
-}
-
-.modal-content input:focus, .modal-content select:focus {
-    background-color: #ffffff !important;
-    border: 2px solid var(--color-primario) !important;
-    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.1) !important;
-}
-
-/* =========================================================
-   SCROLLBAR PREMIUM (Fina y redondeada)
-   ========================================================= */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-track {
-    background: transparent; 
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1; 
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8; 
-}
-
-/* =========================================================
-   INPUTS Y SELECTS (Efecto Glow/Resplandor al hacer clic)
-   ========================================================= */
-input:focus, select:focus, textarea:focus, .modal-content input:focus, .modal-content select:focus {
-    outline: none !important;
-    border-color: var(--color-primario) !important;
-    box-shadow: 0 0 0 4px rgba(42, 201, 187, 0.15) !important;
-    background-color: #ffffff !important;
-}
-
-/* =========================================================
-   PARCHE: FORZAR LETRAS VISIBLES EN FORMULARIOS Y LISTAS
-   ========================================================= */
-select option {
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-}
-
-input {
-    color: #0f172a;
-}
-
-select {
-    color: var(--texto-oscuro);
-}
-
-#filtroMes, #filtroAnio {
-    color: var(--texto-oscuro) !important;
-}
-
-.form-modern {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #334155;
-}
-
-.form-group input {
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-}
-
-.form-group input:focus {
-    border-color: #2ac9bb;
-    box-shadow: 0 0 0 2px rgba(42, 201, 187, 0.2);
-    outline: none;
-}
-
-/* Botón mejorado */
-.btn-primary {
-    margin-top: 10px;
-    background: linear-gradient(135deg, #2ac9bb, #14b8a6);
-    color: white;
-    font-weight: bold;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-/* ===== FIX DEFINITIVO INPUTS (LOGIN + MODALES) ===== */
-
-input, select, textarea {
-    background-color: #ffffff !important;
-    color: #111111 !important;
-}
-
-/* Login / Register */
-.form-container input {
-    background-color: #ffffff !important;
-    color: #111111 !important;
-}
-
-/* Modales */
-.modal-content input,
-.modal-content select {
-    background-color: #ffffff !important;
-    color: #111111 !important;
-}
-
-/* Placeholder (texto gris dentro del input) */
-input::placeholder {
-    color: #94a3b8 !important;
 }

@@ -26,9 +26,13 @@
         <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
         <aside class="sidebar" id="sidebar">
-			<div class="brand">
-			  <h1 class="logo-text">Finty</h1>
-			</div>
+            <div class="brand">
+                <div class="finty-logo-container">
+                    <div class="finty-dot"></div>
+                    <span class="finty-f">F</span>
+                </div>
+                <h1>Finty</h1>
+            </div>
             <nav>
                 <ul class="nav-list">
                     <li class="nav-item active" data-section="inicio">🏠 Inicio</li>
@@ -47,15 +51,19 @@
 
         <main class="main">
             
-			<div class="mobile-header">
-			    <button id="menuToggle" class="menu-btn">
-			        <span class="material-icons">menu</span>
-			    </button>
-
-			    <div class="brand-mobile">
-			        <h2 class="logo-text">Finty</h2>
-			    </div>
-			</div>
+            <div class="mobile-header">
+                <button id="menuToggle" class="menu-btn">
+                    <span class="material-icons">menu</span>
+                </button>
+                <div class="brand-mobile">
+                    <div class="finty-logo-container mini">
+                        <div class="finty-dot"></div>
+                        <span class="finty-f">F</span>
+                    </div>
+                    <h2>Finty</h2>
+                </div>
+            </div>
+            
             <section class="content">
                 
                 <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
@@ -264,33 +272,17 @@
                     </div>
                 </div>
 
-				<div id="perfil" class="page">
-				    <div class="panel">
-				        <h3>⚙️ Configuración de Seguridad</h3>
-						<form id="formCambiarPass" class="form form-modern">
-						    
-						    <div class="form-group">
-						        <label>Contraseña Actual</label>
-						        <input type="password" id="currentPassword" required>
-						    </div>
-
-						    <div class="form-group">
-						        <label>Nueva Contraseña</label>
-						        <input type="password" id="newPassword" required>
-						    </div>
-
-						    <div class="form-group">
-						        <label>Confirmar Contraseña</label>
-						        <input type="password" id="confirmPassword" required>
-						    </div>
-
-						    <button type="submit" class="btn btn-primary">
-						        Actualizar Contraseña
-						    </button>
-
-						</form>
-				    </div>
-				</div>
+                <div id="perfil" class="page">
+                    <div class="panel">
+                        <h3>⚙️ Configuración de Seguridad</h3>
+                        <form id="formCambiarPass" class="form" style="max-width: 400px;">
+                            <label>Contraseña Actual</label><input type="password" id="currentPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <label>Nueva Contraseña</label><input type="password" id="newPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <label>Confirmar Contraseña</label><input type="password" id="confirmPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
+                            <button type="submit" class="btn">Actualizar Contraseña</button>
+                        </form>
+                    </div>
+                </div>
 
 				<div class="fab-container" id="mainFabContainer">
 				    <div class="fab-options" id="fabOptions">
@@ -322,8 +314,7 @@
 				            <label>Monto <input id="gastoMontoFijo" type="number" step="0.01" required /></label>
 				            <label>Categoría <select id="gastoCategoriaFijo"></select></label>
 				            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-							<label>📅 Fecha de Vencimiento <input id="gastoVencimientoFijo" type="date" required /></label>
-							<label>Mes de impacto <input type="month" id="gastoMesImpactoFijo"></label>
+				            <label>📅 Fecha de Vencimiento <input id="gastoVencimientoFijo" type="date" required /></label>
 				            
 				            <div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
 				                <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer;"><input type="checkbox" id="gastoPagadoFijo" style="width: 20px; height: 20px; accent-color: #2ac9bb;"> ✅ ¿Ya está pagado?</label>
@@ -349,7 +340,7 @@
 				            <label>Categoría <select id="gastoCategoriaVariable"></select></label>
 				            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
 				            <label>📅 Fecha del gasto <input id="gastoFechaVariable" type="date" required /></label>
-				            <label>Mes de impacto <input type="month" id="gastoMesImpactoVariable"></label>
+				            <label>Mes de impacto (Opcional) <input type="month" id="gastoMesImpactoVariable"></label>
 				            <label>🏦 ¿De dónde salió la plata? <select id="gastoMedioVariable" required></select></label>
 				            
 				            <button type="submit" class="btn" style="margin-top: 15px; background-color: #ff6384;">Guardar Variable</button>
@@ -369,7 +360,7 @@
                             <label>Categoría <select id="ingresoCategoria"></select></label>
                             <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
                             <label>📅 Fecha de cobro real <input id="ingresoFecha" type="date" required /></label>
-                            <label>Mes de impacto <input type="month" id="ingresoMesImpacto"></label>
+                            <label>Mes de impacto (Opcional) <input type="month" id="ingresoMesImpacto"></label>
                             <button type="submit" class="btn" style="margin-top: 15px;">Guardar</button>
                         </form>
                     </div>
@@ -579,6 +570,6 @@
             </section>
         </main>
     </div>
-    <script src="js/dashboard.js?v=168"></script>
+    <script src="js/dashboard.js?v=159"></script>
 </body>
 </html>

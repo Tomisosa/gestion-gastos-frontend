@@ -1,32 +1,3 @@
-// --- SISTEMA DE NOTIFICACIONES PREMIUM (TOASTS) ---
-function mostrarNotificacion(mensaje, tipo = "success") {
-    const colores = {
-        success: { bg: "#10b981", icon: "check_circle" },
-        error: { bg: "#ef4444", icon: "error" },
-        info: { bg: "#3b82f6", icon: "info" }
-    };
-    
-    const config = colores[tipo];
-    let toast = document.getElementById("finty-toast-notif");
-    
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "finty-toast-notif";
-        document.body.appendChild(toast);
-    }
-    
-    toast.innerHTML = `<span class="material-icons" style="font-size: 20px;">${config.icon}</span> ${mensaje}`;
-    toast.style.cssText = `
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-        background: ${config.bg}; color: white; padding: 12px 24px; border-radius: 50px;
-        display: flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif;
-        font-weight: 600; font-size: 0.95rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999;
-    `;
-    
-    setTimeout(() => { toast.style.transform = "translateX(-50%) translateY(0)"; }, 10);
-    setTimeout(() => { toast.style.transform = "translateX(-50%) translateY(100px)"; }, 3500);
-}
 /* ==========================================================================
    1. CONFIGURACIÓN, SESIÓN Y VARIABLES GLOBALES
    ========================================================================== */
@@ -452,18 +423,8 @@ function renderConsumosCuotas(lista) {
     const tarjetaSeleccionada = filtroSelect ? filtroSelect.value : "all";
 
     const consumosTarjeta = lista.filter(g => {
-        // MAGIA ANTI-FANTASMAS: Identificamos si es una cuota por su descripción
-        const esCuota = (g.descripcion || "").includes("(Cuota");
-        let medio = (g.medioPago || "").toUpperCase();
-        
-        // Si es una cuota, TIENE que mostrarse en esta tabla sí o sí (aunque no tenga tarjeta asignada)
-        if (esCuota) {
-            if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada && medio !== "") return false;
-            return true;
-        }
-
-        // Si no es cuota, aplicamos la regla normal
-        if (medio === "") return false;
+        if (!g.medioPago) return false;
+        const medio = g.medioPago.toUpperCase();
         if (mediosIgnorados.includes(medio)) return false;
         if (tarjetaSeleccionada !== "all" && medio !== tarjetaSeleccionada) return false;
         return true;
@@ -485,10 +446,7 @@ function renderConsumosCuotas(lista) {
           badgeCuota = `<span style="background: var(--color-primario); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;">${cuotaInfo}</span>`;
       }
       
-      // Si el gasto no tiene medio de pago, le avisamos al usuario
-      let nombreMedio = g.medioPago ? g.medioPago : "⚠️ Sin Tarjeta";
-      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${nombreMedio}</span>`;
-      
+      let tarjetaBadge = `<span style="color: #00aae4; font-weight: bold; font-size: 0.8rem; display: block; margin-top: 4px;">${g.medioPago}</span>`;
       let esDolar = (g.descripcion || "").includes("[USD]");
       let montoAMostrar = esDolar ? `<span style="color:#059669;">USD ${Number(g.monto).toFixed(2)}</span>` : formatoMoneda(g.monto);
       
@@ -912,7 +870,6 @@ if (formGastoFijo) {
             const categoriaId = document.getElementById("gastoCategoriaFijo").value || null;
             let fechaVto = document.getElementById("gastoVencimientoFijo").value;
             const fechaReal = document.getElementById("gastoFechaFijo").value;
-            const mesImpactoFijo = document.getElementById("gastoMesImpactoFijo").value; // <-- ACÁ LO LEE
 
             if (!fechaVto) fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
             let fechaBase = pagado ? fechaReal : fechaVto;
@@ -921,8 +878,7 @@ if (formGastoFijo) {
                 const body = {
                     descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
                     esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                    fechaVencimiento: fechaVto || null, pagado, 
-                    mesImpacto: mesImpactoFijo ? mesImpactoFijo + "-01" : null // <-- ACÁ LO MANDA
+                    fechaVencimiento: fechaVto || null, pagado, mesImpacto: null
                 };
                 const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
                 if (!res.ok) throw new Error("Error al guardar");
@@ -945,21 +901,10 @@ if (formGastoFijo) {
                         let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
                         let mPago = isPagado ? medioPago : "PENDIENTE";
 
-                        // --- MAGIA MES IMPACTO EN LA REPETICIÓN ---
-                        let nuevoMesImpacto = null;
-                        if (mesImpactoFijo) {
-                            let [mY, mM] = mesImpactoFijo.split('-');
-                            let impM = parseInt(mM) + (i * saltoMes);
-                            let impY = parseInt(mY);
-                            while (impM > 12) { impM -= 12; impY += 1; }
-                            nuevoMesImpacto = `${impY}-${String(impM).padStart(2,'0')}-01`;
-                        }
-
                         const bodyFijo = {
                             descripcion, monto, medioPago: mPago, fecha: pFecha,
                             esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                            fechaVencimiento: nuevoVto, pagado: isPagado, 
-                            mesImpacto: nuevoMesImpacto // <-- ACÁ LO MANDA
+                            fechaVencimiento: nuevoVto, pagado: isPagado, mesImpacto: null
                         };
                         await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyFijo) });
                     }
@@ -967,8 +912,7 @@ if (formGastoFijo) {
                     const body = {
                         descripcion, monto, medioPago, fecha: fechaBase,
                         esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                        fechaVencimiento: fechaVto, pagado, 
-                        mesImpacto: mesImpactoFijo ? mesImpactoFijo + "-01" : null // <-- ACÁ LO MANDA
+                        fechaVencimiento: fechaVto, pagado, mesImpacto: null
                     };
                     await fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
                 }
@@ -984,6 +928,7 @@ if (formGastoFijo) {
         finally { btnSubmit.disabled = false; btnSubmit.textContent = "Guardar Fijo"; }
     };
 }
+
 // --- SUBMIT GASTO VARIABLE ---
 const formGastoVariable = document.getElementById("formGastoVariable");
 if (formGastoVariable) {
@@ -999,11 +944,8 @@ if (formGastoVariable) {
             const monto = parseFloat(document.getElementById("gastoMontoVariable").value.replace(',', '.'));
             const medioPago = document.getElementById("gastoMedioVariable").value;
             const categoriaId = document.getElementById("gastoCategoriaVariable").value || null;
-			const fechaReal = document.getElementById("gastoFechaVariable").value;
-			const mesImpactoInput = document.getElementById("gastoMesImpactoVariable").value;
-
-			// 🔥 lógica corregida
-			const mesImpacto = mesImpactoInput || obtenerMesActualFiltro();
+            const fechaReal = document.getElementById("gastoFechaVariable").value;
+            const mesImpacto = document.getElementById("gastoMesImpactoVariable").value;
 
             const body = {
                 descripcion, monto, medioPago, fecha: fechaReal,
@@ -1129,58 +1071,6 @@ if (formInversion) {
             await refreshAll();
             alert("Inversión registrada con éxito.");
         } catch (error) { alert("Hubo un error al registrar la inversión."); } finally { btnSubmit.disabled = false; }
-    };
-}
-
-// --- SUBMIT CAMBIAR CONTRASEÑA (MI PERFIL) ---
-const formCambiarPass = document.getElementById("formCambiarPass");
-if (formCambiarPass) {
-    formCambiarPass.onsubmit = async (e) => {
-        e.preventDefault();
-        
-        const newPass = document.getElementById("newPassword").value;
-        const confirmPass = document.getElementById("confirmPassword").value;
-
-        // 1. Verificamos que las contraseñas nuevas coincidan
-        if (newPass !== confirmPass) {
-            alert("❌ Las contraseñas nuevas no coinciden. Verificalas.");
-            return;
-        }
-
-        const btnSubmit = document.querySelector("#formCambiarPass button[type='submit']");
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Actualizando...";
-
-        try {
-            // 2. Armamos los datos exactamente como los pide Java
-            const body = {
-                userId: String(user.id),
-                newPassword: newPass
-            };
-
-            // 3. Se los mandamos al Controller de Spring Boot
-            const res = await fetch(`${API}/usuarios/update-password`, {
-                method: "PUT",
-                headers: authHeaders(),
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) {
-                throw new Error("No se pudo actualizar");
-            }
-
-            // 4. Si todo sale bien, le avisamos y la mandamos a loguearse de nuevo por seguridad
-            alert("✅ ¡Contraseña actualizada con éxito! Por seguridad, volvé a iniciar sesión.");
-            localStorage.clear();
-            window.location.replace("login.html");
-
-        } catch (error) {
-            alert("❌ Hubo un error al intentar cambiar la contraseña.");
-            console.error(error);
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Actualizar Contraseña";
-        }
     };
 }
 
@@ -2150,13 +2040,3 @@ if (logoutBtn) {
     cargarSelectorFechas(); 
     await refreshAll(); 
 })();
-
-// ===============================
-// UTILIDADES
-// ===============================
-
-function obtenerMesActualFiltro() {
-    const mes = document.getElementById("filtroMes").value;
-    const anio = document.getElementById("filtroAnio").value;
-    return `${anio}-${String(mes).padStart(2, "0")}`;
-}
