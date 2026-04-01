@@ -324,7 +324,7 @@ function renderGastosFijos(lista) {
         if (g.pagado) {
             estadoPagado = `<span style="color: #2ac9bb;">✅ Sí</span>`;
             fechaPagoReal = g.fechaPagoReal || "-";
-            medioPagoReal = `<span style="color: #00aae4; font-weight: bold;">${g.medioPago}</span>`;
+            medioPagoReal = g.medioPago;
         } else {
             estadoPagado = `<input type="checkbox" style="width: 18px; height: 18px; cursor: pointer; accent-color: #2ac9bb;" onclick="event.preventDefault(); abrirModalPagoVirtual('${g.id}', '${g.descripcion}', ${montoNum})" title="Tildar para pagar">`;
             fechaPagoReal = "-";
@@ -351,14 +351,25 @@ function renderGastosFijos(lista) {
     let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
     let textoMonto = esDolar ? `<span style="color:#059669;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
 
+    // 🌟 MAGIA VISUAL: Agregamos el cartelito de Mes de Impacto al Concepto
+    let descFinal = g.descripcion || "-";
+    if (g.mesImpacto && !g.esVirtual) {
+        const [y, m] = g.mesImpacto.split('-');
+        const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+        const nombreMes = mesesNombres[parseInt(m) - 1];
+        // Cartelito color naranja para combinar con los gastos fijos
+        descFinal += `<br><span style="font-size: 0.7rem; color: #d97706; background: rgba(217, 119, 6, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 800; display: inline-block; margin-top: 4px;">➡️ Para ${nombreMes}</span>`;
+    }
+
+    // Usamos el mismo diseño moderno que en la tabla de variables
     tbody.innerHTML += `<tr>
-        <td>${g.descripcion||"-"}</td>
+        <td style="font-weight: bold; color: #334155; line-height: 1.4;">${descFinal}</td>
         <td class="monto-gasto">${textoMonto}</td>
-        <td>${vto}</td>
-        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
+        <td style="color: #64748b; font-weight: 600;">${vto}</td>
+        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : 'background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; color: #475569;'}">${g.categoriaNombre||"-"}</span></td>
         <td>${estadoPagado}</td>
-        <td>${fechaPagoReal}</td>
-        <td>${medioPagoReal}</td>
+        <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
+        <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
         <td>${acciones}</td>
     </tr>`;
   });
