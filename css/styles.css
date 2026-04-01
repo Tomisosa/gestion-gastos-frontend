@@ -706,109 +706,222 @@ select:focus, #filtroFechaMes:focus {
 }
 
 /* ==========================================================================
-   9. NUEVO LOGO FINTY (ANIMADO)
+   LOGO FINTY ANIMADO PREMIUM (SÚPER MEJORADO)
    ========================================================================== */
-/* =========================================================
-   NUEVO LOGO FINTY (ANIMADO)
-   ========================================================= */
-.brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.brand h1 {
-    margin: 0;
-    font-size: 1.9rem;
-    font-weight: 800;
-    color: var(--texto-blanco);
-    letter-spacing: 0.5px;
-    text-shadow: none; /* Adiós a la sombra vieja */
-}
-
-.brand-mobile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: 15px;
-}
-
-.brand-mobile h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: white;
-    letter-spacing: 0.5px;
-}
-
-/* Contenedor del logo: Cuadrado moderno con bordes redondeados */
 .finty-logo-splash {
-      position: absolute; 
-      z-index: 10;
-      width: 130px; 
-      height: auto;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1.6); 
-      opacity: 0;
-      animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
-      filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
-    }
-
-.finty-logo-container.mini {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-}
-
-/* La letra F central */
-.finty-f {
-    position: relative;
-    z-index: 2;
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    font-style: italic; /* Le da un toque de velocidad/dinamismo */
-    padding-right: 2px;
-}
-
-.finty-logo-container.mini .finty-f {
-    font-size: 1.2rem;
-}
-
-/* El punto animado (Aura de luz interna que rebota) */
-.finty-dot {
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
-    border-radius: 50%;
-    animation: moveGlow 3s infinite ease-in-out;
+    z-index: 10;
+    width: 140px;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    /* ANIMACIÓN PRINCIPAL: Entrada épica con rebote */
+    animation: logoEpicEntry 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               logoFloatPremium 6s ease-in-out 2s infinite,
+               logoPulseGlow 4s ease-in-out 3s infinite;
+    
+    filter: drop-shadow(0 0 20px rgba(42, 201, 187, 0.6));
 }
 
-/* Animación: El brillo interno viaja por el cuadradito */
-@keyframes moveGlow {
-    0% { transform: translate(-20px, -20px) scale(1); }
-    50% { transform: translate(20px, 20px) scale(1.5); }
-    100% { transform: translate(-20px, -20px) scale(1); }
-}
-
-/* Fin sección 9 */
-
-@keyframes splashLogoEntry {
+/* === ANIMACIÓN DE ENTRADA ÉPICA === */
+@keyframes logoEpicEntry {
     0% {
         opacity: 0;
-        /* Empieza más chico y un poco más abajo */
-        transform: scale(0.5) translateY(30px);
+        transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(1.3) rotate(10deg);
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(0.95) rotate(-5deg);
+    }
+    85% {
+        transform: translate(-50%, -50%) scale(1.05) rotate(2deg);
     }
     100% {
         opacity: 1;
-        /* Termina en su escala grande (2.5 defined en el HTML) y centrado */
-        transform: scale(2.5) translateY(0);
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
     }
+}
+
+/* === FLOTACIÓN SUAVE CON GIRO SUTIL === */
+@keyframes logoFloatPremium {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1) translateY(0px) rotate(0deg); 
+    }
+    33% { 
+        transform: translate(-50%, -50%) scale(1.02) translateY(-8px) rotate(1deg); 
+    }
+    66% { 
+        transform: translate(-50%, -50%) scale(1.02) translateY(-3px) rotate(-1deg); 
+    }
+}
+
+/* === PULSO DE BRILLO NEÓN === */
+@keyframes logoPulseGlow {
+    0%, 100% { 
+        filter: drop-shadow(0 0 20px rgba(42, 201, 187, 0.6)) 
+                drop-shadow(0 0 40px rgba(42, 201, 187, 0.2));
+    }
+    50% { 
+        filter: drop-shadow(0 0 30px rgba(42, 201, 187, 0.9)) 
+                drop-shadow(0 0 60px rgba(42, 201, 187, 0.4));
+    }
+}
+
+/* === LOGO ESTRUCTURA MEJORADA === */
+.finty-logo-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(42, 201, 187, 0.15) 0%, rgba(26, 38, 57, 0.8) 100%);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(42, 201, 187, 0.3);
+    box-shadow: 
+        0 20px 40px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.finty-logo-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #2ac9bb, #20b8b0, #2ac9bb);
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0;
+    animation: borderShine 3s linear infinite;
+}
+
+@keyframes borderShine {
+    0% { opacity: 0; transform: rotate(0deg) scale(1); }
+    50% { opacity: 1; transform: rotate(180deg) scale(1.02); }
+    100% { opacity: 0; transform: rotate(360deg) scale(1); }
+}
+
+/* === LETRA F PRINCIPAL (CON EFECTO 3D) === */
+.finty-f {
+    position: relative;
+    z-index: 3;
+    font-size: 3.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    letter-spacing: -2px;
+    text-shadow: 
+        0 0 20px rgba(42, 201, 187, 0.5),
+        2px 2px 4px rgba(0,0,0,0.3),
+        -2px -2px 4px rgba(255,255,255,0.2);
+    
+    /* Partículas flotantes alrededor de la F */
+}
+.finty-f::before,
+.finty-f::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #2ac9bb, transparent);
+    border-radius: 50%;
+    animation: particleFloat 4s ease-in-out infinite;
+}
+
+.finty-f::before {
+    top: 10px;
+    right: -15px;
+    animation-delay: 0s;
+}
+
+.finty-f::after {
+    bottom: 8px;
+    left: -12px;
+    animation-delay: -2s;
+}
+
+@keyframes particleFloat {
+    0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+    50% { transform: translateY(-15px) scale(1.2); opacity: 1; }
+}
+
+/* === AURA INTERNA DINÁMICA === */
+.finty-dot {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(42, 201, 187, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.3) 0%, transparent 50%);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: auraBreathe 5s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes auraBreathe {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+    33% { 
+        transform: translate(-50%, -50%) scale(1.15) rotate(120deg);
+        opacity: 0.8;
+    }
+    66% { 
+        transform: translate(-50%, -50%) scale(1.05) rotate(240deg);
+        opacity: 0.7;
+    }
+}
+
+/* === VERSIÓN MÓVIL === */
+@media (max-width: 768px) {
+    .finty-logo-splash {
+        width: 120px;
+        animation-duration: 1.8s, 5s, 3.5s;
+    }
+    
+    .finty-f {
+        font-size: 2.6rem;
+    }
+    
+    .finty-logo-container {
+        padding: 16px;
+        border-radius: 16px;
+    }
+}
+
+/* === VERSIÓN MINI (sidebar/mobile header) === */
+.finty-logo-container.mini {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+.finty-logo-container.mini .finty-f {
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+.finty-logo-container.mini .finty-dot {
+    width: 24px;
+    height: 24px;
 }
 
 /* ==========================================================================
