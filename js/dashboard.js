@@ -1694,7 +1694,7 @@ async function refreshAll() {
     });
 
     const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
-    let gParaTablasYGrafico = [...gFiltradosMes]; 
+    let gParaTablasYGrafico = gFiltradosMes.filter(g => !(g.descripcion || "").startsWith("[PAGO_VIRTUAL]")); 
     
     if (catFilter !== "all" && catFilter !== "") {
         gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
@@ -1983,7 +1983,7 @@ async function refreshAll() {
 	// Las billeteras ahora calculan solo la plata ingresada y gastada en el MES SELECCIONADO (cada mes arranca de cero)
 	    const ingresosParaSaldos = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
-	    calcularSaldosPorCuenta(gFiltradosMes, ingresosParaSaldos);
+	    calcularSaldosPorCuenta(gFiltradosMes.filter(g => !g.esVirtual), ingresosParaSaldos);
     actualizarMediosDePagoSelects();
     renderProyeccion(ingresosNormales, gFijosParaTablaFinal, gVariablesParaTabla, inversiones);
 }
