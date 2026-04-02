@@ -1930,13 +1930,10 @@ async function refreshAll() {
     renderConsumosCuotas(gParaTablasYGrafico); 
     renderPrestamos(pTodos); 
 
-	// 🐛 ARREGLO: Los saldos de las Billeteras/Débito deben acumular TODO el dinero histórico hasta el mes seleccionado, no solo el flujo del mes aislado.
-	    const gHistoricos = gTodos.filter(g => (g.fecha || g.fechaVencimiento || "") <= mesSeleccionado + "-31");
-	    const iHistoricos = iTodos.filter(i => (i.fecha || "") <= mesSeleccionado + "-31");
+	// Las billeteras ahora calculan solo la plata ingresada y gastada en el MES SELECCIONADO (cada mes arranca de cero)
+	    const ingresosParaSaldos = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
-    const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
-
-    calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
+	    calcularSaldosPorCuenta(gFiltradosMes, ingresosParaSaldos);
     actualizarMediosDePagoSelects();
     renderProyeccion(ingresosNormales, gFijosParaTablaFinal, gVariablesParaTabla, inversiones);
 }
