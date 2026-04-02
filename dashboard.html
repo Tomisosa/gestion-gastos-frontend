@@ -314,12 +314,10 @@
 				            <label>Monto <input id="gastoMontoFijo" type="number" step="0.01" required /></label>
 				            <label>Categoría <select id="gastoCategoriaFijo"></select></label>
 				            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
-							<label>📅 Fecha de Vencimiento <input id="gastoVencimientoFijo" type="date" required /></label>
+				            <label>📅 Fecha de Vencimiento <input id="gastoVencimientoFijo" type="date" required /></label>
 
-							<label>Mes de impacto (Para asociar al mes correcto) <input type="month" id="gastoMesImpactoFijo"></label>
+				            <label>Mes de impacto (Para asociar al mes correcto) <input type="month" id="gastoMesImpactoFijo"></label>
 
-							<div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
-				            
 				            <div style="margin: 10px 0; background: #222; padding: 15px; border-radius: 5px; border: 1px solid #444;">
 				                <label style="display:flex; align-items:center; gap:10px; margin:0; cursor:pointer;"><input type="checkbox" id="gastoPagadoFijo" style="width: 20px; height: 20px; accent-color: #2ac9bb;"> ✅ ¿Ya está pagado?</label>
 				                <div id="divFechaPagoRealFijo" style="display: none; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
@@ -327,6 +325,7 @@
 				                    <label style="margin-top: 15px; color: #2ac9bb;">🏦 ¿De dónde salió la plata? <select id="gastoMedioFijo" style="margin-top: 5px;"></select></label>
 				                </div>
 				            </div>
+				            
 				            <button type="submit" class="btn" style="margin-top: 15px; background-color: #f59e0b;">Guardar Fijo</button>
 				        </form>
 				    </div>
@@ -525,17 +524,29 @@
                     </div>
                 </div>
 
-                <div id="modalProyeccion" class="modal">
-                    <div class="modal-content" style="max-width: 600px;">
-                        <span class="close" id="closeProyeccion" onclick="document.getElementById('modalProyeccion').style.display = 'none'">&times;</span>
-                        <h3>🎯 Proyección Mensual</h3>
-                        <table class="table" style="margin-bottom: 20px;">
-                            <thead><tr><th>Concepto</th><th>Ideal (%)</th><th>Tope Sugerido</th><th>Real Gastado</th><th>Estado</th></tr></thead>
-                            <tbody id="tablaProyeccionBody"></tbody>
-                        </table>
-                        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion"></div>
-                    </div>
-                </div>
+				<div id="proyeccion" class="page">
+				    <div class="panel">
+				        <h3 style="color: var(--color-primario); margin-top: 0;">🎯 Proyección Mensual</h3>
+				        <p style="color: var(--texto-claro); margin-bottom: 25px;">Distribución sugerida y estado de tus cuentas.</p>
+				        
+				        <div class="table-wrapper tabla-con-scroll">
+				            <table class="table" style="margin-bottom: 20px;">
+				                <thead>
+				                    <tr>
+				                        <th>Concepto</th>
+				                        <th>Ideal (%)</th>
+				                        <th>Tope Sugerido</th>
+				                        <th>Real Gastado</th>
+				                        <th>Estado</th>
+				                    </tr>
+				                </thead>
+				                <tbody id="tablaProyeccionBody"></tbody>
+				            </table>
+				        </div>
+				        
+				        <div style="background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;" id="resumenCuentasProyeccion"></div>
+				    </div>
+				</div>
 
                 <div id="message" class="toast"></div>
                 

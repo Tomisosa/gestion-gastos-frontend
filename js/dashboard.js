@@ -1967,11 +1967,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
 
-            if (sectionId === "proyeccion") {
-                document.getElementById('modalProyeccion').style.display = 'flex';
-                return;
-            }
-
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
             
