@@ -877,17 +877,58 @@ if (formGastoFijo) {
             if (!fechaVto) fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
             let fechaBase = pagado ? fechaReal : fechaVto;
 
-            if (idAEditar) {
-                const body = {
-                    descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
-                    esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                    fechaVencimiento: fechaVto || null, pagado, 
-                    mesImpacto: mesImpactoBase ? mesImpactoBase + "-01" : null
-                };
-                const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
-                if (!res.ok) throw new Error("Error al guardar");
-                alert("¡Gasto fijo actualizado!");
-            } else {
+			if (idAEditar) {
+			                const editarFuturos = confirm("Al ser un gasto fijo... ¿Querés que los cambios apliquen también a TODOS los meses SIGUIENTES?\n\n👉 ACEPTAR: Actualiza este mes y los futuros (Concepto, Monto y Categoría).\n👉 CANCELAR: Actualiza SOLO este mes.");
+
+			                if (editarFuturos && gastoEnEdicion) {
+			                    // 1. Traemos todos los gastos
+			                    const resTodos = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+			                    const todosLosGastos = await resTodos.json();
+
+			                    // 2. Filtramos los clones hacia el futuro
+			                    const gastosAEditar = todosLosGastos.filter(g => 
+			                        (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
+			                        g.esFijo === true && 
+			                        g.descripcion === gastoEnEdicion.descripcion && 
+			                        (g.fecha || g.fechaVencimiento || "") >= (gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "")
+			                    );
+
+			                    // 3. Editamos uno por uno en la base de datos
+			                    for (const g of gastosAEditar) {
+			                        const esElActual = (String(g.id) === String(idAEditar));
+			                        
+			                        // Si es un clon del futuro, le respetamos sus fechas y estado de pago originales
+			                        const updateBody = {
+			                            descripcion: descripcion, 
+			                            monto: monto, 
+			                            categoriaId: categoriaId,
+			                            usuarioId: user.id,
+			                            esFijo: true,
+			                            
+			                            // Si es el actual (el de este mes), le metemos todos los datos que pusiste en el formulario
+			                            medioPago: esElActual ? medioPago : g.medioPago,
+			                            fecha: esElActual ? (pagado ? fechaReal : fechaVto) : g.fecha,
+			                            fechaVencimiento: esElActual ? fechaVto : g.fechaVencimiento,
+			                            pagado: esElActual ? pagado : g.pagado,
+			                            mesImpacto: esElActual ? (mesImpactoBase ? mesImpactoBase + "-01" : null) : g.mesImpacto
+			                        };
+
+			                        await fetch(`${API}/gastos/${g.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(updateBody) });
+			                    }
+			                    alert("¡Se actualizó este gasto y todas sus repeticiones futuras!");
+			                } else {
+			                    // Lógica original: Editar SOLO el mes actual
+			                    const body = {
+			                        descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
+			                        esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
+			                        fechaVencimiento: fechaVto || null, pagado, 
+			                        mesImpacto: mesImpactoBase ? mesImpactoBase + "-01" : null
+			                    };
+			                    const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+			                    if (!res.ok) throw new Error("Error al guardar");
+			                    alert("¡Gasto fijo actualizado (solo este mes)!");
+			                }
+			            } else {
                 if (repeticion > 0) {
                     const [year, month, day] = fechaVto.split('-');
                     let saltoMes = 1;
@@ -1413,9 +1454,18 @@ window.crearCategoria = async function() {
 window.eliminarCategoria = async function(id) { 
     if(confirm("¿Seguro que querés eliminar esta categoría?")) { 
         try {
-            await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
+            const res = await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
+            
+            // Si el servidor tira error (como el 500 de la foto)
+            if (!res.ok) {
+                throw new Error("No se puede borrar. Seguramente hay gastos o ingresos usando esta categoría. ¡Cambiales la categoría primero!");
+            }
+            
             await refreshAll(); 
-        } catch(e) { alert("Error al eliminar la categoría."); }
+        } catch(e) { 
+            // Te muestra el mensaje exacto en una alerta normal
+            alert(e.message || "Error al eliminar la categoría."); 
+        }
     } 
 };
 
