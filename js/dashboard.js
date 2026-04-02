@@ -1298,7 +1298,8 @@ window.eliminarGasto = async function(id) {
 
 window.editarGasto = async function(id) {
     await fetchCategorias();
-    gastoEnEdicion = globalGastos.find(g => g.id === id);
+    // 🐛 ARREGLO: Forzamos la comparación a texto para que no falle nunca
+    gastoEnEdicion = globalGastos.find(g => String(g.id) === String(id));
     if (!gastoEnEdicion) return;
 
     const catId = gastoEnEdicion.categoriaId ?? gastoEnEdicion.categoria?.id ?? "";
@@ -1339,28 +1340,29 @@ window.editarGasto = async function(id) {
         document.getElementById("camposFijosDiv").style.display = 'none';
         document.getElementById("modalGastoFijo").style.display = "flex";
 
-    } else {
-        // ES VARIABLE
-        document.getElementById("gastoVariableId").value = gastoEnEdicion.id;
-        document.getElementById("gastoDescripcionVariable").value = gastoEnEdicion.descripcion;
-        document.getElementById("gastoMontoVariable").value = gastoEnEdicion.monto;
-        document.getElementById("gastoMedioVariable").value = gastoEnEdicion.medioPago || "EFECTIVO";
-        
-        setTimeout(() => {
-            const selectCat = document.getElementById("gastoCategoriaVariable");
-            if (selectCat) selectCat.value = catId;
-        }, 0);
-        
-        document.getElementById("gastoFechaVariable").value = gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "";
-        
-        if(gastoEnEdicion.mesImpacto){
-            document.getElementById("gastoMesImpactoVariable").value = gastoEnEdicion.mesImpacto.slice(0,7);
-        } else {
-            document.getElementById("gastoMesImpactoVariable").value = "";
-        }
+		} else {
+		        // ES VARIABLE
+		        document.getElementById("gastoVariableId").value = gastoEnEdicion.id;
+		        document.getElementById("gastoDescripcionVariable").value = gastoEnEdicion.descripcion;
+		        document.getElementById("gastoMontoVariable").value = gastoEnEdicion.monto;
+		        document.getElementById("gastoMedioVariable").value = gastoEnEdicion.medioPago || "EFECTIVO";
+		        
+		        setTimeout(() => {
+		            const selectCat = document.getElementById("gastoCategoriaVariable");
+		            // 🐛 ARREGLO: Forzamos el ID de la categoría a String
+		            if (selectCat) selectCat.value = String(catId);
+		        }, 0);
+		        
+		        document.getElementById("gastoFechaVariable").value = gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "";
+		        
+		        if(gastoEnEdicion.mesImpacto){
+		            document.getElementById("gastoMesImpactoVariable").value = gastoEnEdicion.mesImpacto.slice(0,7);
+		        } else {
+		            document.getElementById("gastoMesImpactoVariable").value = "";
+		        }
 
-        document.getElementById("modalGastoVariable").style.display = "flex";
-    }
+		        document.getElementById("modalGastoVariable").style.display = "flex";
+		    }
 };
 
 window.abrirModalPago = function(id) {
