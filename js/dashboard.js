@@ -499,25 +499,33 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     const topeAhorro = totalIngreso * 0.20;
 
     tbody.innerHTML = `
-        <tr><td>Gastos Fijos</td><td>50%</td><td style="color: #94a3b8;">${formatoMoneda(topeFijos)}</td><td style="font-weight:bold; color: ${realFijos > topeFijos ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realFijos)}</td><td>${realFijos > topeFijos ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
-        <tr><td>Gastos Variables</td><td>30%</td><td style="color: #94a3b8;">${formatoMoneda(topeVariables)}</td><td style="font-weight:bold; color: ${realVariables > topeVariables ? '#ff6384' : '#2ac9bb'}">${formatoMoneda(realVariables)}</td><td>${realVariables > topeVariables ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
-        <tr><td>Ahorros / Inv.</td><td>20%</td><td style="color: #94a3b8;">${formatoMoneda(topeAhorro)}</td><td style="font-weight:bold; color: ${realAhorro < topeAhorro ? '#ffce56' : '#2ac9bb'}">${formatoMoneda(realAhorro)}</td><td>${realAhorro >= topeAhorro && topeAhorro > 0 ? '🟢 Meta lograda' : (topeAhorro === 0 ? '⚪ Sin ingresos' : '🟡 Falta ahorro')}</td></tr>
+        <tr><td>Gastos Fijos</td><td>50%</td><td style="color: #94a3b8;">${formatoMoneda(topeFijos)}</td><td style="font-weight:bold; color: ${realFijos > topeFijos ? '#ef4444' : '#0d9488'}">${formatoMoneda(realFijos)}</td><td>${realFijos > topeFijos ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
+        <tr><td>Gastos Variables</td><td>30%</td><td style="color: #94a3b8;">${formatoMoneda(topeVariables)}</td><td style="font-weight:bold; color: ${realVariables > topeVariables ? '#ef4444' : '#0d9488'}">${formatoMoneda(realVariables)}</td><td>${realVariables > topeVariables ? '🔴 Excedido' : '🟢 Al día'}</td></tr>
+        <tr><td>Ahorros / Inv.</td><td>20%</td><td style="color: #94a3b8;">${formatoMoneda(topeAhorro)}</td><td style="font-weight:bold; color: ${realAhorro < topeAhorro ? '#f59e0b' : '#0d9488'}">${formatoMoneda(realAhorro)}</td><td>${realAhorro >= topeAhorro && topeAhorro > 0 ? '🟢 Meta lograda' : (topeAhorro === 0 ? '⚪ Sin ingresos' : '🟡 Falta ahorro')}</td></tr>
     `;
 
     const contenedorSaldos = document.getElementById("resumenCuentasProyeccion");
     if(contenedorSaldos) {
-        contenedorSaldos.innerHTML = `<h4 style="margin-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
+        // Título mejorado
+        contenedorSaldos.innerHTML = `<h4 style="margin-top: 0; margin-bottom: 15px; color: #334155; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">💳 Dinero Disponible (Débito)</h4>`;
+        
         const nombres = ["BNA", "MERCADO PAGO", "EFECTIVO"];
         globalBilleteras.forEach(b => { if(!nombres.includes(b.nombre.toUpperCase())) nombres.push(b.nombre.toUpperCase()); });
         const saldos = window.saldosActuales || {};
         
+        // Contenedor de grilla para las tarjetitas
+        let htmlSaldos = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">';
+        
         nombres.forEach(b => {
-            contenedorSaldos.innerHTML += `
-            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0;">
-                <span>🏦 ${b}:</span> 
-                <span style="font-weight: bold; color: #00aae4;">${saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0)}</span>
+            htmlSaldos += `
+            <div style="background: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <span style="color: #64748b; font-size: 0.80rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">🏦 ${b}</span> 
+                <span style="font-weight: 800; color: #0f766e; font-size: 1.4rem;">${saldosOcultos ? "••••••" : formatoMoneda(saldos[b] || 0)}</span>
             </div>`;
         });
+        
+        htmlSaldos += '</div>';
+        contenedorSaldos.innerHTML += htmlSaldos;
     }
 }
 
