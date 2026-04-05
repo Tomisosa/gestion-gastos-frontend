@@ -1766,41 +1766,45 @@ async function refreshAll() {
 	if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; 
 	if (porcentajeGastado > 90) colorTermometro = '#ef4444'; 
 
-    const gastosPorCategoria = {};
-    gFiltradosMes.forEach(g => {
-        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos" && !(g.descripcion||"").startsWith("[PAGO_VIRTUAL]")) {
-            let nombreCat = g.categoriaNombre;
-            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
-                nombreCat = "💳 Consumos de Tarjeta"; 
-            }
-            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + Number(g.monto);
-        }
-    });
-		    
-    const topCats = Object.entries(gastosPorCategoria)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0, 3);
+	const gastosPorCategoria = {};
+	    let sumaTotalCategorias = 0; // 🌟 NUEVO: Creamos un pozo solo para las categorías
+	    
+	    gFiltradosMes.forEach(g => {
+	        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos" && !(g.descripcion||"").startsWith("[PAGO_VIRTUAL]")) {
+	            let nombreCat = g.categoriaNombre;
+	            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
+	                nombreCat = "💳 Consumos de Tarjeta"; 
+	            }
+	            const monto = Number(g.monto) || 0;
+	            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + monto;
+	            sumaTotalCategorias += monto; // Vamos sumando al pozo
+	        }
+	    });
+			    
+	    const topCats = Object.entries(gastosPorCategoria)
+	        .sort((a,b) => b[1] - a[1])
+	        .slice(0, 3);
 
-    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
-    
-    topCats.forEach(cat => {
-        const nombreCat = cat[0];
-        const montoCat = cat[1];
-        const pctCat = totalG > 0 ? (montoCat / totalG) * 100 : 0;
-        
-        htmlTopCats += `
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
-                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
-                </div>
-                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
-                </div>
-            </div>
-        `;
-    });
-    
+	    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
+	    
+	    topCats.forEach(cat => {
+	        const nombreCat = cat[0];
+	        const montoCat = cat[1];
+	        // 🐛 ARREGLO: Calculamos el porcentaje en base a la suma total de las categorías, no sobre la plata pagada
+	        const pctCat = sumaTotalCategorias > 0 ? (montoCat / sumaTotalCategorias) * 100 : 0;
+	        
+	        htmlTopCats += `
+	            <div style="margin-bottom: 12px;">
+	                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+	                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
+	                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
+	                </div>
+	                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+	                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
+	                </div>
+	            </div>
+	        `;
+	    });
     if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
     htmlTopCats += '</div>';
 
