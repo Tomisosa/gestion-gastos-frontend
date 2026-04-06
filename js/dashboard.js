@@ -1078,7 +1078,7 @@ if (formIngreso) {
             const body = {
                 descripcion: document.getElementById("ingresoDescripcion").value || "Ingreso",
                 // 🐛 ARREGLO: Convertimos el monto a decimal real para que Java no lo rechace
-                monto: parseFloat(document.getElementById("ingresoMonto").value.replace(',', '.')),
+                monto: obtenerMontoLimpio("ingresoMonto"),
                 medioPago: document.getElementById("ingresoMedio").value,
                 fecha: document.getElementById("ingresoFecha").value,
                 usuarioId: user.id,
@@ -1112,7 +1112,7 @@ if (formTarjeta) {
         try {
             const descripcionBase = document.getElementById("tarjetaDescripcion").value;
             const moneda = document.getElementById("tarjetaMoneda").value;
-            const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
+            const montoTotal = obtenerMontoLimpio("tarjetaMontoTotal");
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
             const fechaExacta = document.getElementById("tarjetaFechaExacta").value; 
@@ -1157,7 +1157,7 @@ if (formInversion) {
             const lugar = document.getElementById("invLugar").value;
             const instrumento = document.getElementById("invInstrumento").value;
             const moneda = document.getElementById("invMoneda").value;
-            const monto = document.getElementById("invMonto").value;
+            const monto = obtenerMontoLimpio("invMonto");
             const fechaHoy = new Date().toISOString().split('T')[0];
 
             const body = {
@@ -1241,7 +1241,7 @@ if (formEditarCuota) {
             const descripcionFinal = cuotaInfo ? `${descBase} (Cuota ${cuotaInfo})` : descBase;
 
             const body = {
-                descripcion: descripcionFinal, monto: parseFloat(document.getElementById("editCuotaMonto").value),
+                descripcion: descripcionFinal, monto: obtenerMontoLimpio("editCuotaMonto"),
                 medioPago: document.getElementById("editCuotaMedio").value, fecha: document.getElementById("editCuotaFecha").value,
                 categoriaId: document.getElementById("editCuotaCategoria").value || null, usuarioId: user.id, esFijo: false
             };
@@ -1268,8 +1268,8 @@ if (formEditarPrestamo) {
         e.preventDefault();
         try {
             const id = document.getElementById("editPrestamoId").value;
-            const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
-            const otro = parseFloat(document.getElementById("editPrestamoOtro").value) || 0;
+			const total = obtenerMontoLimpio("editPrestamoTotal");
+			const otro = obtenerMontoLimpio("editPrestamoOtro");
             
             // LA NUEVA MAGIA: Belén = Total - Otro
             const belen = total - otro; 
