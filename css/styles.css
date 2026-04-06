@@ -1300,14 +1300,14 @@ body.premium-landing {
 /* 4. El texto principal "Finty" */
 .brand h1, .brand-mobile h2 {
     margin: 0;
-    font-size: 32px;
+    font-size: 42px; /* 🔥 MÁS GRANDE EN PC (antes 32px) */
     font-weight: 800;
     font-family: 'Inter', system-ui, sans-serif;
     /* Degradado plateado/blanco para el texto */
     background: linear-gradient(to right, #ffffff, #94a3b8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
 }
 
 /* ==========================================================================
@@ -1333,7 +1333,7 @@ body.premium-landing {
 }
 
 .brand-mobile h2 {
-    font-size: 24px !important; /* Más chico para que no desborde la barra */
+    font-size: 30px !important; /* 🔥 MÁS GRANDE EN CELU (antes 24px) */
     letter-spacing: -0.5px;
 }
 
@@ -1342,13 +1342,13 @@ body.premium-landing {
    ========================================================================== */
 
 .finty-logo-img {
-    width: 42px; /* Tamaño para PC */
-    height: 42px;
+    width: 54px; /* 🔥 IMAGEN MÁS GRANDE (antes 42px) */
+    height: 54px; /* 🔥 IMAGEN MÁS GRANDE (antes 42px) */
     object-fit: contain; /* Para que no se deforme */
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* Le da un poco de relieve */
     flex-shrink: 0;
-    margin-right: -8px; /* 🔥 MAGIA: Atrae el texto hacia la imagen */
+    margin-right: -10px; /* 🔥 MAGIA: Ajustamos el margen al nuevo tamaño para que siga pegado */
 }
 
 /* Efecto al pasar el mouse (solo PC) */
@@ -1358,7 +1358,7 @@ body.premium-landing {
 
 /* Tamaño para Celular */
 .finty-logo-img.mini {
-    width: 34px;
-    height: 34px;
-    margin-right: -5px; /* Magia para el celu */
+    width: 42px; /* 🔥 MÁS GRANDE EN CELU (antes 34px) */
+    height: 42px; /* 🔥 MÁS GRANDE EN CELU (antes 34px) */
+    margin-right: -6px; /* Ajuste para que siga pegado en el celu */
 }
