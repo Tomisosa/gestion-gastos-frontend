@@ -32,7 +32,7 @@ let saldosAhorrosOcultos = true;
 window.saldosActuales = {};
 
 /* ==========================================================================
-   2. FUNCIONES UTILITARIAS Y DE FORMATEO (NUEVO)
+   2. FUNCIONES UTILITARIAS
    ========================================================================== */
 
 function authHeaders() {
@@ -51,7 +51,7 @@ function formatoMoneda(valor) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 }).format(valor);
 }
 
-// NUEVO: Función para poner puntos de miles mientras escribís
+// 1. Formatea en vivo mientras tipeás (pone puntos y coma)
 function formatearInputMoneda(e) {
     let val = e.target.value;
     val = val.replace(/[^0-9,]/g, ""); 
@@ -67,14 +67,14 @@ function formatearInputMoneda(e) {
     e.target.value = partes.join(",");
 }
 
-// NUEVO: Función para leer el número real antes de enviarlo a Java
+// 2. Limpia el formato para que Java lo entienda al guardar
 function obtenerMontoLimpio(id) {
     const val = document.getElementById(id).value;
     if (!val) return 0;
     return parseFloat(val.replace(/\./g, '').replace(',', '.')) || 0;
 }
 
-// NUEVO: Función para pre-cargar los números formateados al abrir modales
+// 3. Formatea los números cuando abrís el lapicito de Editar
 function formatearNumeroAInput(num) {
     if (!num && num !== 0) return "";
     let str = Number(num).toFixed(2).replace('.', ','); 
@@ -384,22 +384,14 @@ function renderGastosFijos(lista) {
     let esDolar = g.isUSD || (g.descripcion && g.descripcion.includes("[USD]"));
     let textoMonto = esDolar ? `<span style="color:#059669;">USD ${montoNum.toFixed(2)}</span>` : formatoMoneda(montoNum);
 
-    let descFinal = g.descripcion || "-";
-    if (g.mesImpacto && !g.esVirtual) {
-        const [y, m] = g.mesImpacto.split('-');
-        const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-        const nombreMes = mesesNombres[parseInt(m) - 1];
-        descFinal += `<br><span style="font-size: 0.7rem; color: #d97706; background: rgba(217, 119, 6, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 800; display: inline-block; margin-top: 4px;">➡️ Para ${nombreMes}</span>`;
-    }
-
     tbody.innerHTML += `<tr>
-        <td style="font-weight: bold; color: #334155; line-height: 1.4;">${descFinal}</td>
+        <td>${g.descripcion||"-"}</td>
         <td class="monto-gasto">${textoMonto}</td>
-        <td style="color: #64748b; font-weight: 600;">${vto}</td>
-        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : 'background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; color: #475569;'}">${g.categoriaNombre||"-"}</span></td>
+        <td>${vto}</td>
+        <td><span style="${g.esVirtual ? 'color: #00aae4; font-weight: bold;' : ''}">${g.categoriaNombre||"-"}</span></td>
         <td>${estadoPagado}</td>
-        <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
-        <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
+        <td>${fechaPagoReal}</td>
+        <td>${medioPagoReal}</td>
         <td>${acciones}</td>
     </tr>`;
   });
@@ -424,20 +416,12 @@ function renderGastosVariables(lista) {
         <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
     `;
     
-    let fechaPagoReal = g.fecha || g.fechaVencimiento || "-";
+    const fechaPagoReal = g.fecha || g.fechaVencimiento || "-";
     const medioPagoReal = g.medioPago || "EFECTIVO";
-    
-    let descFinal = g.descripcion || "-";
-    if (g.mesImpacto) {
-        const [y, m] = g.mesImpacto.split('-');
-        const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-        const nombreMes = mesesNombres[parseInt(m) - 1];
-        descFinal += `<br><span style="font-size: 0.7rem; color: #d97706; background: rgba(217, 119, 6, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 800; display: inline-block; margin-top: 4px;">➡️ Para ${nombreMes}</span>`;
-    }
 
     tbody.innerHTML += `<tr>
         <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
-        <td style="font-weight: bold; color: #334155; line-height: 1.4;">${descFinal}</td>
+        <td style="font-weight: bold; color: #334155;">${g.descripcion||"-"}</td>
         <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${g.categoriaNombre||"-"}</span></td>
         <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
         <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
@@ -766,6 +750,7 @@ function actualizarMediosDePagoSelects() {
         opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
     }
     
+    // Agregamos los ahorros como medio de pago
     let opcionesPago = opcionesBilleteras + `
         <option value="AHORROS_USD" style="color: #059669; font-weight: bold;">🐷 Ahorros (Dólares)</option>
         <option value="AHORROS_ARS" style="color: #0284c7; font-weight: bold;">🐷 Ahorros (Pesos)</option>
@@ -899,6 +884,7 @@ if (formPrestamo) {
     };
 }
 
+// --- SUBMIT GASTO FIJO ---
 const formGastoFijo = document.getElementById("formGastoFijo");
 if (formGastoFijo) {
     formGastoFijo.onsubmit = async (e) => { 
@@ -910,10 +896,7 @@ if (formGastoFijo) {
         try {
             const idAEditar = document.getElementById("gastoFijoId").value ? parseInt(document.getElementById("gastoFijoId").value) : null;
             const descripcion = document.getElementById("gastoDescripcionFijo").value;
-            
-            // ACA USAMOS LA FUNCIÓN NUEVA
-            const monto = obtenerMontoLimpio("gastoMontoFijo");
-            
+            const monto = parseFloat(document.getElementById("gastoMontoFijo").value.replace(',', '.'));
             const pagado = document.getElementById("gastoPagadoFijo").checked;
             const medioPago = pagado ? document.getElementById("gastoMedioFijo").value : "PENDIENTE";
             const repeticion = parseInt(document.getElementById("gastoRepeticionFijo").value || 0);
@@ -921,22 +904,64 @@ if (formGastoFijo) {
             let fechaVto = document.getElementById("gastoVencimientoFijo").value;
             const fechaReal = document.getElementById("gastoFechaFijo").value;
             
+            // ACA LEEMOS EL MES DE IMPACTO NUEVO
             const mesImpactoBase = document.getElementById("gastoMesImpactoFijo").value;
 
             if (!fechaVto) fechaVto = fechaReal ? fechaReal : new Date().toISOString().split('T')[0];
             let fechaBase = pagado ? fechaReal : fechaVto;
 
-            if (idAEditar) {
-                const body = {
-                    descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
-                    esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
-                    fechaVencimiento: fechaVto || null, pagado, 
-                    mesImpacto: mesImpactoBase ? mesImpactoBase + "-01" : null
-                };
-                const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
-                if (!res.ok) throw new Error("Error al guardar");
-                alert("¡Gasto fijo actualizado!");
-            } else {
+			if (idAEditar) {
+			                const editarFuturos = confirm("Al ser un gasto fijo... ¿Querés que los cambios apliquen también a TODOS los meses SIGUIENTES?\n\n👉 ACEPTAR: Actualiza este mes y los futuros (Concepto, Monto y Categoría).\n👉 CANCELAR: Actualiza SOLO este mes.");
+
+			                if (editarFuturos && gastoEnEdicion) {
+			                    // 1. Traemos todos los gastos
+			                    const resTodos = await fetch(`${API}/gastos/usuario/${user.id}`, { headers: authHeaders() });
+			                    const todosLosGastos = await resTodos.json();
+
+			                    // 2. Filtramos los clones hacia el futuro
+			                    const gastosAEditar = todosLosGastos.filter(g => 
+			                        (String(g.usuarioId) === String(user.id) || (g.usuario && String(g.usuario.id) === String(user.id))) &&
+			                        g.esFijo === true && 
+			                        g.descripcion === gastoEnEdicion.descripcion && 
+			                        (g.fecha || g.fechaVencimiento || "") >= (gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "")
+			                    );
+
+			                    // 3. Editamos uno por uno en la base de datos
+			                    for (const g of gastosAEditar) {
+			                        const esElActual = (String(g.id) === String(idAEditar));
+			                        
+			                        // Si es un clon del futuro, le respetamos sus fechas y estado de pago originales
+			                        const updateBody = {
+			                            descripcion: descripcion, 
+			                            monto: monto, 
+			                            categoriaId: categoriaId,
+			                            usuarioId: user.id,
+			                            esFijo: true,
+			                            
+			                            // Si es el actual (el de este mes), le metemos todos los datos que pusiste en el formulario
+			                            medioPago: esElActual ? medioPago : g.medioPago,
+			                            fecha: esElActual ? (pagado ? fechaReal : fechaVto) : g.fecha,
+			                            fechaVencimiento: esElActual ? fechaVto : g.fechaVencimiento,
+			                            pagado: esElActual ? pagado : g.pagado,
+			                            mesImpacto: esElActual ? (mesImpactoBase ? mesImpactoBase + "-01" : null) : g.mesImpacto
+			                        };
+
+			                        await fetch(`${API}/gastos/${g.id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(updateBody) });
+			                    }
+			                    alert("¡Se actualizó este gasto y todas sus repeticiones futuras!");
+			                } else {
+			                    // Lógica original: Editar SOLO el mes actual
+			                    const body = {
+			                        descripcion, monto, medioPago, fecha: pagado ? fechaReal : fechaVto,
+			                        esFijo: true, usuarioId: user.id, categoriaId: categoriaId,
+			                        fechaVencimiento: fechaVto || null, pagado, 
+			                        mesImpacto: mesImpactoBase ? mesImpactoBase + "-01" : null
+			                    };
+			                    const res = await fetch(`${API}/gastos/${idAEditar}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+			                    if (!res.ok) throw new Error("Error al guardar");
+			                    alert("¡Gasto fijo actualizado (solo este mes)!");
+			                }
+			            } else {
                 if (repeticion > 0) {
                     const [year, month, day] = fechaVto.split('-');
                     let saltoMes = 1;
@@ -954,6 +979,7 @@ if (formGastoFijo) {
                         let pFecha = (i === 0 && pagado) ? fechaReal : nuevoVto;
                         let mPago = isPagado ? medioPago : "PENDIENTE";
                         
+                        // LOGICA INTELIGENTE: Avanzamos el mes de impacto en el loop
                         let nuevoMesImpacto = null;
                         if (mesImpactoBase) {
                             let [mY, mM] = mesImpactoBase.split('-');
@@ -993,6 +1019,7 @@ if (formGastoFijo) {
     };
 }
 
+// --- SUBMIT GASTO VARIABLE ---
 const formGastoVariable = document.getElementById("formGastoVariable");
 if (formGastoVariable) {
     formGastoVariable.onsubmit = async (e) => { 
@@ -1004,9 +1031,7 @@ if (formGastoVariable) {
         try {
             const idAEditar = document.getElementById("gastoVariableId").value ? parseInt(document.getElementById("gastoVariableId").value) : null;
             const descripcion = document.getElementById("gastoDescripcionVariable").value;
-            
-            const monto = obtenerMontoLimpio("gastoMontoVariable");
-            
+            const monto = parseFloat(document.getElementById("gastoMontoVariable").value.replace(',', '.'));
             const medioPago = document.getElementById("gastoMedioVariable").value;
             const categoriaId = document.getElementById("gastoCategoriaVariable").value || null;
             const fechaReal = document.getElementById("gastoFechaVariable").value;
@@ -1015,7 +1040,7 @@ if (formGastoVariable) {
             const body = {
                 descripcion, monto, medioPago, fecha: fechaReal,
                 esFijo: false, usuarioId: user.id, categoriaId: categoriaId,
-                fechaVencimiento: fechaReal, pagado: true,
+                fechaVencimiento: fechaReal, pagado: true, // Siempre pagado
                 mesImpacto: mesImpacto ? mesImpacto + "-01" : null
             };
 
@@ -1038,20 +1063,22 @@ if (formGastoVariable) {
     };
 }
 
+
 const formIngreso = document.getElementById("formIngreso");
 if (formIngreso) {
     formIngreso.onsubmit = async (e) => { 
         e.preventDefault(); 
         const btnSubmit = document.querySelector("#formIngreso button[type='submit']");
         btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando..."; 
+        btnSubmit.textContent = "Guardando..."; // Feedback visual
         
         try {
             const mesImpacto = document.getElementById("ingresoMesImpacto").value;
 
             const body = {
                 descripcion: document.getElementById("ingresoDescripcion").value || "Ingreso",
-                monto: obtenerMontoLimpio("ingresoMonto"),
+                // 🐛 ARREGLO: Convertimos el monto a decimal real para que Java no lo rechace
+                monto: parseFloat(document.getElementById("ingresoMonto").value.replace(',', '.')),
                 medioPago: document.getElementById("ingresoMedio").value,
                 fecha: document.getElementById("ingresoFecha").value,
                 usuarioId: user.id,
@@ -1066,7 +1093,7 @@ if (formIngreso) {
             formIngreso.reset(); 
             await refreshAll(); 
             
-            alert("✅ ¡Ingreso registrado con éxito en " + body.medioPago + "!"); 
+            alert("✅ ¡Ingreso registrado con éxito en " + body.medioPago + "!"); // Aviso de éxito
         } catch(error) { 
             alert("❌ Error al guardar el ingreso."); 
         } finally { 
@@ -1085,9 +1112,7 @@ if (formTarjeta) {
         try {
             const descripcionBase = document.getElementById("tarjetaDescripcion").value;
             const moneda = document.getElementById("tarjetaMoneda").value;
-            
-            const montoTotal = obtenerMontoLimpio("tarjetaMontoTotal");
-            
+            const montoTotal = parseFloat(document.getElementById("tarjetaMontoTotal").value);
             const cuotas = parseInt(document.getElementById("tarjetaCuotas").value);
             const primeraCuota = document.getElementById("tarjetaPrimeraCuota").value;
             const fechaExacta = document.getElementById("tarjetaFechaExacta").value; 
@@ -1132,7 +1157,7 @@ if (formInversion) {
             const lugar = document.getElementById("invLugar").value;
             const instrumento = document.getElementById("invInstrumento").value;
             const moneda = document.getElementById("invMoneda").value;
-            const monto = obtenerMontoLimpio("invMonto");
+            const monto = document.getElementById("invMonto").value;
             const fechaHoy = new Date().toISOString().split('T')[0];
 
             const body = {
@@ -1216,8 +1241,7 @@ if (formEditarCuota) {
             const descripcionFinal = cuotaInfo ? `${descBase} (Cuota ${cuotaInfo})` : descBase;
 
             const body = {
-                descripcion: descripcionFinal, 
-                monto: obtenerMontoLimpio("editCuotaMonto"),
+                descripcion: descripcionFinal, monto: parseFloat(document.getElementById("editCuotaMonto").value),
                 medioPago: document.getElementById("editCuotaMedio").value, fecha: document.getElementById("editCuotaFecha").value,
                 categoriaId: document.getElementById("editCuotaCategoria").value || null, usuarioId: user.id, esFijo: false
             };
@@ -1244,8 +1268,10 @@ if (formEditarPrestamo) {
         e.preventDefault();
         try {
             const id = document.getElementById("editPrestamoId").value;
-            const total = obtenerMontoLimpio("editPrestamoTotal");
-            const otro = obtenerMontoLimpio("editPrestamoOtro");
+            const total = parseFloat(document.getElementById("editPrestamoTotal").value) || 0;
+            const otro = parseFloat(document.getElementById("editPrestamoOtro").value) || 0;
+            
+            // LA NUEVA MAGIA: Belén = Total - Otro
             const belen = total - otro; 
 
             const body = { montoTotal: total, aporteBelen: belen, aporteOtro: otro };
@@ -1279,21 +1305,25 @@ window.eliminarBilletera = async function(id) {
 
 window.abrirEditarPrestamo = function(id, total, belen) {
     document.getElementById("editPrestamoId").value = id;
-    document.getElementById("editPrestamoTotal").value = formatearNumeroAInput(total);
+    document.getElementById("editPrestamoTotal").value = total > 0 ? total : "";
     
+    // Calculamos cuánto había puesto el otro para pre-llenar el input
     let otro = total > 0 ? (total - belen) : "";
-    document.getElementById("editPrestamoOtro").value = formatearNumeroAInput(otro);
+    document.getElementById("editPrestamoOtro").value = otro !== "" ? otro : "";
     
+    const inTotal = document.getElementById("editPrestamoTotal");
+    const inOtro = document.getElementById("editPrestamoOtro");
     const outCalc = document.getElementById("calculoAportado");
     
+    // Calculadora en tiempo real
     const recalcular = () => {
-        const t = obtenerMontoLimpio("editPrestamoTotal");
-        const o = obtenerMontoLimpio("editPrestamoOtro");
-        outCalc.textContent = formatoMoneda(t - o); 
+        const t = Number(inTotal.value) || 0;
+        const o = Number(inOtro.value) || 0;
+        outCalc.textContent = formatoMoneda(t - o); // Muestra lo que te toca a vos
     };
     
-    document.getElementById("editPrestamoTotal").onkeyup = recalcular;
-    document.getElementById("editPrestamoOtro").onkeyup = recalcular;
+    inTotal.onkeyup = recalcular;
+    inOtro.onkeyup = recalcular;
     recalcular();
 
     document.getElementById("modalEditarPrestamo").style.display = "flex";
@@ -1342,6 +1372,7 @@ window.eliminarGasto = async function(id) {
 
 window.editarGasto = async function(id) {
     await fetchCategorias();
+    // 🐛 ARREGLO: Forzamos la comparación a texto para que no falle nunca
     gastoEnEdicion = globalGastos.find(g => String(g.id) === String(id));
     if (!gastoEnEdicion) return;
 
@@ -1350,16 +1381,17 @@ window.editarGasto = async function(id) {
 	if (gastoEnEdicion.esFijo) {
 	        document.getElementById("gastoFijoId").value = gastoEnEdicion.id;
 	        document.getElementById("gastoDescripcionFijo").value = gastoEnEdicion.descripcion;
-	        document.getElementById("gastoMontoFijo").value = formatearNumeroAInput(gastoEnEdicion.monto);
+	        document.getElementById("gastoMontoFijo").value = gastoEnEdicion.monto;
 	        document.getElementById("gastoMedioFijo").value = gastoEnEdicion.medioPago || "EFECTIVO";
 	        
 	        setTimeout(() => {
 	            const selectCat = document.getElementById("gastoCategoriaFijo");
-	            if (selectCat) selectCat.value = String(catId);
+	            if (selectCat) selectCat.value = catId;
 	        }, 0);
 	        
 	        document.getElementById("gastoVencimientoFijo").value = gastoEnEdicion.fechaVencimiento || gastoEnEdicion.fecha || "";
 
+	        // ACA CARGAMOS EL MES DE IMPACTO AL EDITAR
 	        if(gastoEnEdicion.mesImpacto){
 	            document.getElementById("gastoMesImpactoFijo").value = gastoEnEdicion.mesImpacto.slice(0,7);
 	        } else {
@@ -1368,6 +1400,7 @@ window.editarGasto = async function(id) {
 
 	        const isPagado = gastoEnEdicion.pagado || false;
 	        document.getElementById("gastoPagadoFijo").checked = isPagado;
+	// ... el resto sigue igual
 
         const divFechaPago = document.getElementById("divFechaPagoRealFijo");
         if (isPagado) {
@@ -1381,32 +1414,33 @@ window.editarGasto = async function(id) {
         document.getElementById("camposFijosDiv").style.display = 'none';
         document.getElementById("modalGastoFijo").style.display = "flex";
 
-    } else {
-        // ES VARIABLE
-        document.getElementById("gastoVariableId").value = gastoEnEdicion.id;
-        document.getElementById("gastoDescripcionVariable").value = gastoEnEdicion.descripcion;
-        document.getElementById("gastoMontoVariable").value = formatearNumeroAInput(gastoEnEdicion.monto);
-        document.getElementById("gastoMedioVariable").value = gastoEnEdicion.medioPago || "EFECTIVO";
-        
-        setTimeout(() => {
-            const selectCat = document.getElementById("gastoCategoriaVariable");
-            if (selectCat) selectCat.value = String(catId);
-        }, 0);
-        
-        document.getElementById("gastoFechaVariable").value = gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "";
-        
-        if(gastoEnEdicion.mesImpacto){
-            document.getElementById("gastoMesImpactoVariable").value = gastoEnEdicion.mesImpacto.slice(0,7);
-        } else {
-            document.getElementById("gastoMesImpactoVariable").value = "";
-        }
+		} else {
+		        // ES VARIABLE
+		        document.getElementById("gastoVariableId").value = gastoEnEdicion.id;
+		        document.getElementById("gastoDescripcionVariable").value = gastoEnEdicion.descripcion;
+		        document.getElementById("gastoMontoVariable").value = gastoEnEdicion.monto;
+		        document.getElementById("gastoMedioVariable").value = gastoEnEdicion.medioPago || "EFECTIVO";
+		        
+		        setTimeout(() => {
+		            const selectCat = document.getElementById("gastoCategoriaVariable");
+		            // 🐛 ARREGLO: Forzamos el ID de la categoría a String
+		            if (selectCat) selectCat.value = String(catId);
+		        }, 0);
+		        
+		        document.getElementById("gastoFechaVariable").value = gastoEnEdicion.fecha || gastoEnEdicion.fechaVencimiento || "";
+		        
+		        if(gastoEnEdicion.mesImpacto){
+		            document.getElementById("gastoMesImpactoVariable").value = gastoEnEdicion.mesImpacto.slice(0,7);
+		        } else {
+		            document.getElementById("gastoMesImpactoVariable").value = "";
+		        }
 
-        document.getElementById("modalGastoVariable").style.display = "flex";
-    }
+		        document.getElementById("modalGastoVariable").style.display = "flex";
+		    }
 };
 
 window.abrirModalPago = function(id) {
-    const gasto = globalGastos.find(g => String(g.id) === String(id));
+    const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
 
     document.getElementById("pagoGastoId").value = gasto.id;
@@ -1453,9 +1487,18 @@ window.crearCategoria = async function() {
 window.eliminarCategoria = async function(id) { 
     if(confirm("¿Seguro que querés eliminar esta categoría?")) { 
         try {
-            await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
+            const res = await fetch(`${API}/categorias/${id}`, { method: "DELETE", headers: authHeaders() }); 
+            
+            // Si el servidor tira error (como el 500 de la foto)
+            if (!res.ok) {
+                throw new Error("No se puede borrar. Seguramente hay gastos o ingresos usando esta categoría. ¡Cambiales la categoría primero!");
+            }
+            
             await refreshAll(); 
-        } catch(e) { alert("Error al eliminar la categoría."); }
+        } catch(e) { 
+            // Te muestra el mensaje exacto en una alerta normal
+            alert(e.message || "Error al eliminar la categoría."); 
+        }
     } 
 };
 
@@ -1471,13 +1514,13 @@ window.eliminarMiTarjeta = async function(id) {
 window.editarCuotaTarjeta = async function(id) {
     await fetchCategorias(); 
 
-    const gasto = globalGastos.find(g => String(g.id) === String(id));
+    const gasto = globalGastos.find(g => g.id === id);
     if (!gasto) return;
 
     document.getElementById("editCuotaId").value = gasto.id;
-    document.getElementById("editCuotaMedio").value = gasto.medioPago || ""; 
-    document.getElementById("editCuotaFecha").value = gasto.fecha || gasto.fechaVencimiento || "";
-    document.getElementById("editCuotaMonto").value = formatearNumeroAInput(gasto.monto);
+    document.getElementById("editCuotaMedio").value = gasto.medioPago; 
+    document.getElementById("editCuotaFecha").value = gasto.fecha || "";
+    document.getElementById("editCuotaMonto").value = gasto.monto;
 
     let desc = gasto.descripcion || "";
     let cuotaStr = "";
@@ -1491,7 +1534,7 @@ window.editarCuotaTarjeta = async function(id) {
 
     const eSelect = document.getElementById("editCuotaCategoria");
     const catId = gasto.categoria ? gasto.categoria.id : (gasto.categoriaId || "");
-    if(eSelect) eSelect.value = String(catId);
+    if(eSelect) eSelect.value = catId;
 
     document.getElementById("modalEditarCuota").style.display = "flex";
 };
@@ -1684,7 +1727,7 @@ async function refreshAll() {
     });
 
     const catFilter = document.getElementById("filtroCategoriaSelect") ? document.getElementById("filtroCategoriaSelect").value : "all";
-    let gParaTablasYGrafico = [...gFiltradosMes]; 
+    let gParaTablasYGrafico = gFiltradosMes.filter(g => !(g.descripcion || "").startsWith("[PAGO_VIRTUAL]")); 
     
     if (catFilter !== "all" && catFilter !== "") {
         gParaTablasYGrafico = gFiltradosMes.filter(g => String(g.categoriaId) === String(catFilter) || g.categoriaNombre === "🤝 Préstamos");
@@ -1756,45 +1799,45 @@ async function refreshAll() {
 	if (porcentajeGastado > 75) colorTermometro = '#f59e0b'; 
 	if (porcentajeGastado > 90) colorTermometro = '#ef4444'; 
 
-    const gastosPorCategoria = {};
-    let sumaTotalCategorias = 0; 
-    
-    gFiltradosMes.forEach(g => {
-        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos" && !(g.descripcion||"").startsWith("[PAGO_VIRTUAL]")) {
-            let nombreCat = g.categoriaNombre;
-            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
-                nombreCat = "💳 Consumos de Tarjeta"; 
-            }
-            const montoCatLoop = Number(g.monto) || 0;
-            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + montoCatLoop;
-            sumaTotalCategorias += montoCatLoop; 
-        }
-    });
-		    
-    const topCats = Object.entries(gastosPorCategoria)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0, 3);
+	const gastosPorCategoria = {};
+	    let sumaTotalCategorias = 0; // 🌟 NUEVO: Creamos un pozo solo para las categorías
+	    
+	    gFiltradosMes.forEach(g => {
+	        if(!g.esVirtual && g.categoriaNombre !== "🤝 Préstamos" && !(g.descripcion||"").startsWith("[PAGO_VIRTUAL]")) {
+	            let nombreCat = g.categoriaNombre;
+	            if (!nombreCat || String(nombreCat).toLowerCase() === 'null' || String(nombreCat) === 'undefined') {
+	                nombreCat = "💳 Consumos de Tarjeta"; 
+	            }
+	            const monto = Number(g.monto) || 0;
+	            gastosPorCategoria[nombreCat] = (gastosPorCategoria[nombreCat] || 0) + monto;
+	            sumaTotalCategorias += monto; // Vamos sumando al pozo
+	        }
+	    });
+			    
+	    const topCats = Object.entries(gastosPorCategoria)
+	        .sort((a,b) => b[1] - a[1])
+	        .slice(0, 3);
 
-    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
-    
-    topCats.forEach(cat => {
-        const nombreCat = cat[0];
-        const montoCat = cat[1];
-        const pctCat = sumaTotalCategorias > 0 ? (montoCat / sumaTotalCategorias) * 100 : 0;
-        
-        htmlTopCats += `
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
-                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
-                </div>
-                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
-                </div>
-            </div>
-        `;
-    });
-    
+	    let htmlTopCats = '<div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 15px;"><div style="font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 15px; text-transform: uppercase;">🔥 Top Categorías del Mes</div>';
+	    
+	    topCats.forEach(cat => {
+	        const nombreCat = cat[0];
+	        const montoCat = cat[1];
+	        // 🐛 ARREGLO: Calculamos el porcentaje en base a la suma total de las categorías, no sobre la plata pagada
+	        const pctCat = sumaTotalCategorias > 0 ? (montoCat / sumaTotalCategorias) * 100 : 0;
+	        
+	        htmlTopCats += `
+	            <div style="margin-bottom: 12px;">
+	                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+	                    <span style="color: #334155; font-weight: 600;">${nombreCat}</span>
+	                    <span style="color: #64748b; font-weight: bold;">${formatoMoneda(montoCat)} <span style="font-size: 0.7rem; font-weight: normal;">(${pctCat.toFixed(1)}%)</span></span>
+	                </div>
+	                <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+	                    <div style="width: ${pctCat}%; background: #3b82f6; height: 100%; border-radius: 4px; transition: width 1s ease;"></div>
+	                </div>
+	            </div>
+	        `;
+	    });
     if(topCats.length === 0) htmlTopCats += '<p style="font-size: 0.85rem; color: #94a3b8;">Aún no hay gastos categorizados este mes.</p>';
     htmlTopCats += '</div>';
 
@@ -1974,32 +2017,27 @@ async function refreshAll() {
     renderConsumosCuotas(gParaTablasYGrafico); 
     renderPrestamos(pTodos); 
 
-    const gHistoricos = gTodos.filter(g => (g.fecha || g.fechaVencimiento || "") <= mesSeleccionado + "-31");
-    const iHistoricos = iTodos.filter(i => (i.fecha || "") <= mesSeleccionado + "-31");
+	// Las billeteras ahora calculan solo la plata ingresada y gastada en el MES SELECCIONADO (cada mes arranca de cero)
+	    const ingresosParaSaldos = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
-    const ingresosParaSaldos = iHistoricos.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
-
-    calcularSaldosPorCuenta(gHistoricos, ingresosParaSaldos);
+	    calcularSaldosPorCuenta(gFiltradosMes.filter(g => !g.esVirtual), ingresosParaSaldos);
     actualizarMediosDePagoSelects();
     renderProyeccion(ingresosNormales, gFijosParaTablaFinal, gVariablesParaTabla, inversiones);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 🌟 APLICAMOS EL FORMATO INTELIGENTE A LOS INPUTS DE MONTO
-    const inputsMontoIds = [
-        "gastoMontoFijo", "gastoMontoVariable", "ingresoMonto", 
-        "tarjetaMontoTotal", "invMonto", "editCuotaMonto", 
-        "editPrestamoTotal", "editPrestamoOtro"
-    ];
-    inputsMontoIds.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.setAttribute("type", "text");
-            input.setAttribute("inputmode", "decimal");
-            input.addEventListener("input", formatearInputMoneda);
-        }
-    });
-
+	// 🌟 APLICAMOS EL FORMATO INTELIGENTE A TODOS LOS INPUTS
+	    const inputsMontoIds = [
+	        "gastoMontoFijo", "gastoMontoVariable", "ingresoMonto", 
+	        "tarjetaMontoTotal", "invMonto", "editCuotaMonto", 
+	        "editPrestamoTotal", "editPrestamoOtro"
+	    ];
+	    inputsMontoIds.forEach(id => {
+	        const input = document.getElementById(id);
+	        if (input) {
+	            input.addEventListener("input", formatearInputMoneda);
+	        }
+	    });
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -2024,11 +2062,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const sectionId = item.getAttribute('data-section');
             if(!sectionId) return;
-
-            if (sectionId === "proyeccion") {
-                document.getElementById('modalProyeccion').style.display = 'flex';
-                return;
-            }
 
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
