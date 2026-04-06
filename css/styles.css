@@ -1336,3 +1336,27 @@ body.premium-landing {
     font-size: 24px !important; /* Más chico para que no desborde la barra */
     letter-spacing: -0.5px;
 }
+
+/* ==========================================================================
+   ✨ ESTILOS PARA LA NUEVA IMAGEN DEL LOGO FINTY
+   ========================================================================== */
+
+.finty-logo-img {
+    width: 42px; /* Tamaño para PC */
+    height: 42px;
+    object-fit: contain; /* Para que no se deforme */
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* Le da un poco de relieve */
+    flex-shrink: 0;
+}
+
+/* Efecto al pasar el mouse (solo PC) */
+.brand:hover .finty-logo-img {
+    transform: scale(1.15) rotate(5deg);
+}
+
+/* Tamaño para Celular */
+.finty-logo-img.mini {
+    width: 34px;
+    height: 34px;
+}
