@@ -523,7 +523,8 @@ function renderProyeccion(ingresos, gastosFijos, gastosVariables, ahorros) {
     if (!tbody) return;
 
     const totalIngreso = ingresos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
-    const realFijos = gastosFijos.reduce((s, x) => s + (Number(x.monto) || 0), 0);
+	// 🐛 ARREGLO: Solo suma los que están marcados como pagado (x.pagado === true)
+	const realFijos = gastosFijos.reduce((s, x) => x.pagado ? s + (Number(x.monto) || 0) : s, 0);
     const realVariables = gastosVariables.reduce((s, x) => s + (Number(x.monto) || 0), 0);
     const realAhorro = ahorros.reduce((s, x) => s + (Number(x.monto) || 0), 0);
 
