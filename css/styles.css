@@ -1239,124 +1239,54 @@ body.premium-landing {
 }
 
 /* ==========================================================================
-   ✨ REDISEÑO MODERNO DEL LOGO FINTY (PC Y MOBILE)
+   ✨ FUSIÓN EXACTA DEL LOGO FINTY (Estilo Fintech Gris/Plateado)
    ========================================================================== */
 
-/* Alineación general del bloque del logo */
+/* Contenedor principal */
 .brand, .brand-mobile {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: center; /* Alinea al centro para que la F destaque hacia arriba y abajo */
+    gap: 3px; /* Una micro separación entre la F y la i */
     padding: 10px 0;
     text-decoration: none;
     user-select: none;
 }
 
-/* 1. La cajita del logo (El cuadradito con la F) */
-.finty-logo-container {
-    position: relative;
-    width: 42px;
-    height: 42px;
-    background: linear-gradient(135deg, #2ac9bb 0%, #0d9488 100%);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(42, 201, 187, 0.4);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    flex-shrink: 0;
+/* Estilo para la imagen 'F' */
+.finty-integrated-f {
+    height: 44px; /* 💡 La F un poquito más grande que el texto */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: transform 0.2s ease;
 }
 
-/* Efecto hover dinámico solo para PC */
-.brand:hover .finty-logo-container {
-    transform: scale(1.08) rotate(-5deg);
+/* Efecto hover suave (solo PC) */
+.brand:hover .finty-integrated-f {
+    transform: scale(1.05);
 }
 
-/* 2. La letra F adentro de la cajita */
-.finty-f {
-    color: #ffffff;
-    font-size: 26px;
-    font-weight: 900;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-style: italic;
-    letter-spacing: -1px;
-    margin-right: 2px; /* Centra visualmente la cursiva */
-    text-shadow: 1px 2px 3px rgba(0,0,0,0.2);
-}
-
-/* 3. El puntito decorativo amarillo */
-.finty-dot {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 12px;
-    height: 12px;
-    background: #ffce56;
-    border-radius: 50%;
-    border: 3px solid #1e293b; /* Borde del color de tu menú lateral */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-/* 4. El texto principal "Finty" */
+/* Estilo para el texto "inty" */
 .brand h1, .brand-mobile h2 {
     margin: 0;
-    font-size: 32px;
-    font-weight: 800;
+    font-size: 38px;
+    font-weight: 800; /* Letra bien gordita/pesada */
     font-family: 'Inter', system-ui, sans-serif;
-    /* Degradado plateado/blanco para el texto */
-    background: linear-gradient(to right, #ffffff, #94a3b8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #cbd5e1; /* 🎨 EL COLOR EXACTO: Gris plateado */
     letter-spacing: -1px;
+    line-height: 1;
+    padding-top: 6px; /* Baja el texto un poquitito para que el punto de la 'i' quede alineado */
 }
 
 /* ==========================================================================
    📱 ADAPTACIÓN PERFECTA PARA CELULARES (MOBILE)
    ========================================================================== */
-.brand-mobile .finty-logo-container.mini {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(42, 201, 187, 0.3);
-}
 
-.brand-mobile .finty-logo-container.mini .finty-f {
-    font-size: 20px;
-}
-
-.brand-mobile .finty-logo-container.mini .finty-dot {
-    width: 10px;
-    height: 10px;
-    top: -2px;
-    right: -2px;
-    border-width: 2px;
+.finty-integrated-f.mini {
+    height: 32px; /* Escala reducida para el celu */
 }
 
 .brand-mobile h2 {
-    font-size: 24px !important; /* Más chico para que no desborde la barra */
-    letter-spacing: -0.5px;
-}
-
-/* ==========================================================================
-   ✨ ESTILOS PARA LA NUEVA IMAGEN DEL LOGO FINTY
-   ========================================================================== */
-
-.finty-logo-img {
-    width: 42px; /* Tamaño para PC */
-    height: 42px;
-    object-fit: contain; /* Para que no se deforme */
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* Le da un poco de relieve */
-    flex-shrink: 0;
-}
-
-/* Efecto al pasar el mouse (solo PC) */
-.brand:hover .finty-logo-img {
-    transform: scale(1.15) rotate(5deg);
-}
-
-/* Tamaño para Celular */
-.finty-logo-img.mini {
-    width: 34px;
-    height: 34px;
+    font-size: 28px !important;
+    padding-top: 4px;
 }
