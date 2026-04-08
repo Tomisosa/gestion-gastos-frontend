@@ -897,7 +897,7 @@ if (formGastoFijo) {
         try {
             const idAEditar = document.getElementById("gastoFijoId").value ? parseInt(document.getElementById("gastoFijoId").value) : null;
             const descripcion = document.getElementById("gastoDescripcionFijo").value;
-            const monto = parseFloat(document.getElementById("gastoMontoFijo").value.replace(',', '.'));
+            const monto = obtenerMontoLimpio("gastoMontoFijo");
             const pagado = document.getElementById("gastoPagadoFijo").checked;
             const medioPago = pagado ? document.getElementById("gastoMedioFijo").value : "PENDIENTE";
             const repeticion = parseInt(document.getElementById("gastoRepeticionFijo").value || 0);
@@ -1032,7 +1032,7 @@ if (formGastoVariable) {
         try {
             const idAEditar = document.getElementById("gastoVariableId").value ? parseInt(document.getElementById("gastoVariableId").value) : null;
             const descripcion = document.getElementById("gastoDescripcionVariable").value;
-            const monto = parseFloat(document.getElementById("gastoMontoVariable").value.replace(',', '.'));
+            const monto = obtenerMontoLimpio("gastoMontoVariable");
             const medioPago = document.getElementById("gastoMedioVariable").value;
             const categoriaId = document.getElementById("gastoCategoriaVariable").value || null;
             const fechaReal = document.getElementById("gastoFechaVariable").value;
