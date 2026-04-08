@@ -143,6 +143,14 @@
       
     }, 3000); // A los 3 segundos empieza a irse
   </script>
-
+  <script>
+      if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+              navigator.serviceWorker.register('./sw.js')
+                  .then(reg => console.log('Finty SW registrado', reg))
+                  .catch(err => console.log('Error al registrar SW', err));
+          });
+      }
+  </script>
 </body>
 </html>
