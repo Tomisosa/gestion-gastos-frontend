@@ -2026,6 +2026,65 @@ async function refreshAll() {
     renderProyeccion(ingresosNormales, gFijosParaTablaFinal, gVariablesParaTabla, inversiones);
 }
 
+/* ==========================================================================
+   📊 FUNCIÓN PARA EXPORTAR A EXCEL (CSV)
+   ========================================================================== */
+window.exportarCSV = function() {
+    if (globalGastos.length === 0 && globalIngresos.length === 0) {
+        alert("Todavía no hay datos para exportar.");
+        return;
+    }
+
+    // 1. Crear cabeceras (usamos punto y coma para que Excel lo abra bien en Español)
+    let csvContent = "Tipo;Fecha;Concepto;Categoria;Medio de Pago;Monto;Estado\n";
+
+    // Función para limpiar textos (evita que comas en los títulos rompan el Excel)
+    const limpiarTexto = (texto) => `"${String(texto || "").replace(/"/g, '""')}"`;
+
+    // 2. Formatear Ingresos
+    globalIngresos.forEach(i => {
+        const tipo = "Ingreso";
+        const fecha = i.fecha || "-";
+        const concepto = limpiarTexto(i.descripcion);
+        const categoria = limpiarTexto(i.categoriaNombre || "-");
+        const medio = limpiarTexto(i.medioPago || "EFECTIVO");
+        const monto = String(i.monto || 0).replace('.', ','); // Cambiamos punto por coma para Excel
+        const estado = "Completado";
+
+        csvContent += `${tipo};${fecha};${concepto};${categoria};${medio};${monto};${estado}\n`;
+    });
+
+    // 3. Formatear Gastos
+    globalGastos.forEach(g => {
+        const tipo = g.esFijo ? "Gasto Fijo" : "Gasto Variable";
+        const fecha = g.fecha || g.fechaVencimiento || "-";
+        const concepto = limpiarTexto(g.descripcion);
+        const categoria = limpiarTexto(g.categoriaNombre || "-");
+        const medio = limpiarTexto(g.medioPago || "-");
+        const monto = String(g.monto || 0).replace('.', ','); // Cambiamos punto por coma para Excel
+        const estado = g.pagado ? "Pagado" : "Pendiente";
+
+        csvContent += `${tipo};${fecha};${concepto};${categoria};${medio};${monto};${estado}\n`;
+    });
+
+    // 4. BOM (Byte Order Mark) para que Excel reconozca los tildes y las ñ
+    const bom = "\uFEFF"; 
+    
+    // 5. Crear el archivo invisible y descargarlo
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    // Nombre del archivo con la fecha de hoy
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `Finty_Exportacion_${fechaHoy}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
 	// 🌟 APLICAMOS EL FORMATO INTELIGENTE A TODOS LOS INPUTS
 	    const inputsMontoIds = [
