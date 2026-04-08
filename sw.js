@@ -1,16 +1,25 @@
 const CACHE_NAME = 'finty-cache-v1';
 
-self.addEventListener('install', (e) => {
-    console.log('Finty: Service Worker Instalado');
-    self.skipWaiting();
+// 1. Cuando se instala la app, guardamos lo básico en la memoria del celular
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll([
+                './',
+                './index.html',
+                './css/styles.css',
+                './finty-logo.png'
+            ]);
+        })
+    );
 });
 
-self.addEventListener('activate', (e) => {
-    console.log('Finty: Service Worker Activado');
-    return self.clients.claim();
-});
-
-self.addEventListener('fetch', (e) => {
-    // Deja pasar todas las peticiones a la API y la web normalmente
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+// 2. LA MAGIA QUE PIDE PWABUILDER: El evento "fetch"
+// Intenta buscar en internet. Si no hay internet, muestra lo guardado en caché.
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
+    );
 });
