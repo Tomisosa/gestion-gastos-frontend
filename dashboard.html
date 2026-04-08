@@ -269,22 +269,34 @@
 				<div id="perfil" class="page">
 				                    <div class="panel">
 				                        <h3>⚙️ Configuración de Seguridad</h3>
-				                        <form id="formCambiarPass" class="form" style="max-width: 400px; margin-bottom: 30px;">
+				                        <form id="formCambiarPass" class="form" style="max-width: 400px;">
 				                            <label>Contraseña Actual</label><input type="password" id="currentPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
 				                            <label>Nueva Contraseña</label><input type="password" id="newPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
 				                            <label>Confirmar Contraseña</label><input type="password" id="confirmPassword" required style="width:100%; padding:10px; margin-bottom:15px; background:#1a1a1a; color:white; border:1px solid #333; border-radius:5px;">
 				                            <button type="submit" class="btn">Actualizar Contraseña</button>
 				                        </form>
 
-				                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+				                        <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-left: 5px solid #10b981; border-radius: 12px; padding: 25px; margin-top: 40px; position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+				                            
+				                            <div style="flex: 1; min-width: 250px; position: relative; z-index: 2;">
+				                                <h3 style="color: #0f172a; font-size: 1.25rem; margin: 0 0 10px 0; display: flex; align-items: center; gap: 10px; border-bottom: none; padding-bottom: 0;">
+				                                    <div style="background: #10b981; color: white; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">
+				                                        <span class="material-icons" style="font-size: 20px;">table_view</span>
+				                                    </div>
+				                                    Exportar mis Datos
+				                                </h3>
+				                                <p style="color: #64748b; margin: 0; font-size: 0.95rem; line-height: 1.5;">
+				                                    Descargá tu historial completo de finanzas en formato <b>Excel (CSV)</b>. Guardá un respaldo de tu información o usalo para armar tus propios gráficos.
+				                                </p>
+				                            </div>
+
+				                            <button onclick="exportarCSV()" class="btn" style="width: auto; padding: 12px 24px; background: #10b981; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); white-space: nowrap; position: relative; z-index: 2; margin: 0;">
+				                                <span class="material-icons">file_download</span> Descargar Archivo
+				                            </button>
+				                            
+				                            <span class="material-icons" style="position: absolute; right: -10px; top: -10px; font-size: 150px; color: #10b981; opacity: 0.05; pointer-events: none; z-index: 1;">analytics</span>
+				                        </div>
 				                        
-				                        <h3 style="color: #0f766e;">📊 Exportar mis Datos</h3>
-				                        <p style="color: #64748b; margin-bottom: 15px; font-size: 0.95rem; max-width: 500px;">
-				                            Descargá el historial completo de tus ingresos y gastos en formato Excel (CSV) para tener un respaldo o analizarlo por tu cuenta.
-				                        </p>
-				                        <button onclick="exportarCSV()" class="btn" style="max-width: 300px; background-color: #10b981; display: flex; justify-content: center; align-items: center; gap: 8px;">
-				                            <span class="material-icons">file_download</span> Descargar Excel (.csv)
-				                        </button>
 				                    </div>
 				                </div>
 
@@ -590,6 +602,6 @@
             </section>
         </main>
     </div>
-    <script src="js/dashboard.js?v=170"></script>
+    <script src="js/dashboard.js?v=171"></script>
 </body>
 </html>
