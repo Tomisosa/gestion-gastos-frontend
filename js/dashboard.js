@@ -740,7 +740,9 @@ function actualizarMediosDePagoSelects() {
     const ingresoMedio = document.getElementById("ingresoMedio");
     const tarjetaTipo = document.getElementById("tarjetaTipo"); 
     const pagoGastoMedio = document.getElementById("pagoGastoMedio"); 
-    const filtroTarjeta = document.getElementById("filtroTarjetaSelect"); 
+    const filtroTarjeta = document.getElementById("filtroTarjetaSelect");
+    const transfOrigen = document.getElementById("transfOrigen");   // <-- Declaramos acá
+    const transfDestino = document.getElementById("transfDestino"); // <-- Declaramos acá
     
     let opcionesBilleteras = "";
     globalBilleteras.forEach(b => {
@@ -751,6 +753,10 @@ function actualizarMediosDePagoSelects() {
         opcionesBilleteras = `<option value="EFECTIVO">💵 Efectivo (Creá tus cuentas en Inicio)</option>`;
     }
     
+    // 👉 RECIÉN ACÁ ABAJO SE LLENAN LAS LISTAS (Porque ya existen las opciones)
+    if (transfOrigen) transfOrigen.innerHTML = opcionesBilleteras;
+    if (transfDestino) transfDestino.innerHTML = opcionesBilleteras;
+    
     // Agregamos los ahorros como medio de pago
     let opcionesPago = opcionesBilleteras + `
         <option value="AHORROS_USD" style="color: #059669; font-weight: bold;">🐷 Ahorros (Dólares)</option>
@@ -758,6 +764,7 @@ function actualizarMediosDePagoSelects() {
     `;
     
     if (gastoMedioFijo) gastoMedioFijo.innerHTML = opcionesPago;
+ 
     if (gastoMedioVar) gastoMedioVar.innerHTML = opcionesPago;
     if (pagoGastoMedio) pagoGastoMedio.innerHTML = opcionesPago;
     
@@ -1645,6 +1652,80 @@ window.abrirModalPagoVirtual = function(idVirtual, desc, monto) {
     
     document.getElementById("modalPagarGasto").style.display = "flex";
 };
+// --- BOTÓN FLOTANTE TRANSFERENCIA ---
+    const btnFabTransferencia = document.getElementById('btnFabTransferencia');
+    if (btnFabTransferencia) {
+        btnFabTransferencia.onclick = () => { 
+            document.getElementById('formTransferencia').reset(); 
+            document.getElementById('transfFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modalTransferencia').style.display = 'flex'; 
+        };
+    }
+
+    // --- SUBMIT TRANSFERENCIA ---
+    const formTransferencia = document.getElementById("formTransferencia");
+    if (formTransferencia) {
+        formTransferencia.onsubmit = async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.querySelector("#formTransferencia button[type='submit']");
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Transfiriendo...";
+
+            try {
+                const monto = obtenerMontoLimpio("transfMonto");
+                const origen = document.getElementById("transfOrigen").value;
+                const destino = document.getElementById("transfDestino").value;
+                const fecha = document.getElementById("transfFecha").value;
+
+                if (origen === destino) {
+                    alert("⚠️ La cuenta de origen y destino no pueden ser la misma.");
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = "Realizar Transferencia";
+                    return;
+                }
+
+                // 1. Crear Gasto (Sale la plata del Origen)
+                const bodyGasto = {
+                    descripcion: `[TRANSFERENCIA] Hacia ${destino}`,
+                    monto: monto,
+                    medioPago: origen,
+                    fecha: fecha,
+                    esFijo: false,
+                    usuarioId: user.id,
+                    categoriaId: null, 
+                    fechaVencimiento: fecha,
+                    pagado: true 
+                };
+
+                // 2. Crear Ingreso (Entra la plata al Destino)
+                const bodyIngreso = {
+                    descripcion: `[TRANSFERENCIA] Desde ${origen}`,
+                    monto: monto,
+                    medioPago: destino,
+                    fecha: fecha,
+                    usuarioId: user.id,
+                    categoriaId: null
+                };
+
+                // Enviamos ambas cosas a Java al mismo tiempo
+                await Promise.all([
+                    fetch(`${API}/gastos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyGasto) }),
+                    fetch(`${API}/ingresos`, { method: "POST", headers: authHeaders(), body: JSON.stringify(bodyIngreso) })
+                ]);
+
+                document.getElementById("modalTransferencia").style.display = "none";
+                formTransferencia.reset();
+                await refreshAll();
+                alert(`✅ Transferiste ${formatoMoneda(monto)} de ${origen} a ${destino} con éxito.`);
+
+            } catch (error) {
+                alert("❌ Error al realizar la transferencia.");
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "Realizar Transferencia";
+            }
+        };
+    }
 
 /* ==========================================================================
    8. CORAZÓN DE LA APLICACIÓN (refreshAll, DOMContentLoaded e Init)
@@ -2087,10 +2168,10 @@ window.exportarCSV = function() {
 
 document.addEventListener('DOMContentLoaded', () => {
 	// 🌟 APLICAMOS EL FORMATO INTELIGENTE A TODOS LOS INPUTS
-	    const inputsMontoIds = [
+	     const inputsMontoIds = [
 	        "gastoMontoFijo", "gastoMontoVariable", "ingresoMonto", 
 	        "tarjetaMontoTotal", "invMonto", "editCuotaMonto", 
-	        "editPrestamoTotal", "editPrestamoOtro"
+	        "editPrestamoTotal", "editPrestamoOtro", "transfMonto"
 	    ];
 	    inputsMontoIds.forEach(id => {
 	        const input = document.getElementById(id);
@@ -2129,21 +2210,23 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
             document.getElementById(sectionId).classList.add('visible');
 
-            const btnIngreso = document.getElementById('btnFabIngreso');
-            const btnGastoFijo = document.getElementById('btnFabGastoFijo');
-            const btnGastoVariable = document.getElementById('btnFabGastoVariable');
-            const fabContainer = document.querySelector('.fab-container'); 
+			const btnIngreso = document.getElementById('btnFabIngreso');
+			const btnGastoFijo = document.getElementById('btnFabGastoFijo');
+			const btnGastoVariable = document.getElementById('btnFabGastoVariable');
+			const btnTransferencia = document.getElementById('btnFabTransferencia'); // <-- NUEVO
+			const fabContainer = document.querySelector('.fab-container'); 
 
-            if (btnIngreso && btnGastoFijo && btnGastoVariable && fabContainer) {
-                if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
-                    fabContainer.style.display = 'none';
-                } else {
-                    fabContainer.style.display = 'flex';
-                    btnIngreso.style.display = 'flex';
-                    btnGastoFijo.style.display = 'flex';
-                    btnGastoVariable.style.display = 'flex';
-                }
-            }
+			  if (btnIngreso && btnGastoFijo && btnGastoVariable && fabContainer) {
+			     if (sectionId === 'ahorros' || sectionId === 'perfil' || sectionId === 'prestamos') {
+			                    fabContainer.style.display = 'none';
+			     } else {
+			       fabContainer.style.display = 'flex';
+			          btnIngreso.style.display = 'flex';
+			            btnGastoFijo.style.display = 'flex';
+			            btnGastoVariable.style.display = 'flex';
+			            if (btnTransferencia) btnTransferencia.style.display = 'flex'; // <-- NUEVO
+			        }
+			     }
         };
     });
 

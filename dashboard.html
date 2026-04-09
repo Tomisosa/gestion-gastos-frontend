@@ -302,6 +302,7 @@
 
 				<div class="fab-container" id="mainFabContainer">
 				    <div class="fab-options" id="fabOptions">
+						<div class="fab-label-container" id="btnFabTransferencia"><span class="fab-label">Transferir</span><button class="fab-mini-btn" style="color: #3b82f6;"><span class="material-icons">sync_alt</span></button></div>
 				        <div class="fab-label-container" id="btnFabIngreso"><span class="fab-label">Agregar Ingreso</span><button class="fab-mini-btn" style="color: #2ac9bb;"><span class="material-icons">attach_money</span></button></div>
 				        <div class="fab-label-container" id="btnFabGastoFijo"><span class="fab-label">Gasto Fijo</span><button class="fab-mini-btn" style="color: #f59e0b;"><span class="material-icons">lock</span></button></div>
 				        <div class="fab-label-container" id="btnFabGastoVariable"><span class="fab-label">Gasto Variable</span><button class="fab-mini-btn" style="color: #ff6384;"><span class="material-icons">shopping_cart</span></button></div>
@@ -384,6 +385,26 @@
                         </form>
                     </div>
                 </div>
+				<div id="modalTransferencia" class="modal">
+				    <div class="modal-content" style="border-left: 5px solid #3b82f6;">
+				        <span class="close" onclick="document.getElementById('modalTransferencia').style.display='none'">&times;</span>
+				        <h3 style="color: #3b82f6;">🔄 Transferir entre cuentas</h3>
+				        <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">Mové plata de una billetera a otra.</p>
+				        <form id="formTransferencia" class="form">
+				            <label>Monto a transferir <input id="transfMonto" type="text" inputmode="decimal" placeholder="0.00" required /></label>
+				            
+				            <div style="display: flex; gap: 15px; margin-top: 10px;">
+				                <label style="flex: 1; color: #ef4444;">Sale de: <select id="transfOrigen" required></select></label>
+				                <label style="flex: 1; color: #10b981;">Entra en: <select id="transfDestino" required></select></label>
+				            </div>
+				            
+				            <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;">
+				            <label>📅 Fecha del movimiento <input id="transfFecha" type="date" required /></label>
+				            
+				            <button type="submit" class="btn" style="margin-top: 15px; background-color: #3b82f6;">Realizar Transferencia</button>
+				        </form>
+				    </div>
+				</div>
 
                 <div id="modalTarjeta" class="modal">
                     <div class="modal-content">
