@@ -289,6 +289,30 @@ async function fetchYRenderizarMisTarjetas() {
            contenedorAlertas.style.display = "none";
        }
    }
+   
+   window.irAGastos = function() {
+       // 1. Apagamos todos los botones del menú y encendemos el de Gastos
+       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+       document.querySelector('[data-section="ver-gastos"]').classList.add('active');
+       
+       // 2. Ocultamos todas las páginas y mostramos la de Gastos
+       document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
+       document.getElementById('ver-gastos').classList.add('visible');
+       
+       // 3. Mostramos los botones flotantes de abajo a la derecha
+       const fabContainer = document.querySelector('.fab-container');
+       if (fabContainer) {
+           fabContainer.style.display = 'flex';
+           document.getElementById('btnFabIngreso').style.display = 'flex';
+           document.getElementById('btnFabGastoFijo').style.display = 'flex';
+           document.getElementById('btnFabGastoVariable').style.display = 'flex';
+           const btnTransf = document.getElementById('btnFabTransferencia');
+           if (btnTransf) btnTransf.style.display = 'flex';
+       }
+       
+       // 4. Llevamos la pantalla bien arriba
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+   };
 
 function generarGrafico(gastos) {
   const canvas = document.getElementById('gastosChart');
