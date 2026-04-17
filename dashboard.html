@@ -108,6 +108,25 @@
                     <div class="filter-controls" style="margin-bottom: 1.5rem;">
                         <label>Filtrar por Categoría: <select id="filtroCategoriaSelect"><option value="all">Mostrar todas</option></select></label>
                     </div>
+					
+					<div class="panel" style="border-left: 5px solid #3b82f6; margin-bottom: 2rem;" id="panelTransferencias">
+					                        <div style="display:flex; justify-content:space-between; align-items:center;">
+					                            <h3>🔄 MOVIMIENTOS (Transferencias Propias)</h3>
+					                        </div>
+					                        <div class="table-wrapper tabla-con-scroll">
+					                            <table id="tablaTransferencias" class="table">
+					                                <thead>
+					                                    <tr>
+					                                        <th>Fecha</th>
+					                                        <th>Concepto</th>
+					                                        <th>Monto</th>
+					                                        <th>Acciones</th>
+					                                    </tr>
+					                                </thead>
+					                                <tbody></tbody>
+					                            </table>
+					                        </div>
+					                    </div>
 
                     <div class="panel" style="border-left: 5px solid #FF5454; margin-bottom: 2rem;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -634,6 +653,6 @@
 	        });
 	    }
 	</script>
-    <script src="js/dashboard.js?v=172"></script>
+    <script src="js/dashboard.js?v=173"></script>
 </body>
 </html>

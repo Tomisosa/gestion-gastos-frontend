@@ -480,15 +480,19 @@ function renderGastosFijos(lista) {
 }
 
 function renderGastosVariables(lista) {
-  const tbody = document.querySelector("#tablaGastosVariables tbody");
-  if (!tbody) return; 
-  tbody.innerHTML = "";
-  let total = 0;
+  const tbodyGastos = document.querySelector("#tablaGastosVariables tbody");
+  const tbodyTransferencias = document.querySelector("#tablaTransferencias tbody");
+  const panelTransferencias = document.getElementById("panelTransferencias");
+  
+  if (tbodyGastos) tbodyGastos.innerHTML = "";
+  if (tbodyTransferencias) tbodyTransferencias.innerHTML = "";
+  
+  let totalGastos = 0;
+  let hayTransferencias = false;
   
   lista.sort((a, b) => new Date(a.fecha || a.fechaVencimiento || 0) - new Date(b.fecha || b.fechaVencimiento || 0));
   
   lista.forEach(g => {
-    total += (Number(g.monto) || 0);
     const acciones = `
         <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
         <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
@@ -496,19 +500,42 @@ function renderGastosVariables(lista) {
     
     const fechaPagoReal = g.fecha || g.fechaVencimiento || "-";
     const medioPagoReal = g.medioPago || "EFECTIVO";
+    const esTransferencia = (g.descripcion || "").includes("[TRANSFERENCIA]");
 
-    tbody.innerHTML += `<tr>
-        <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
-        <td style="font-weight: bold; color: #334155;">${g.descripcion||"-"}</td>
-        <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${g.categoriaNombre||"-"}</span></td>
-        <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
-        <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
-        <td>${acciones}</td>
-    </tr>`;
+    if (esTransferencia) {
+        hayTransferencias = true;
+        // Va a la tabla de Movimientos (No suma al total de gastos)
+        if (tbodyTransferencias) {
+            tbodyTransferencias.innerHTML += `<tr>
+                <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
+                <td style="font-weight: bold; color: #3b82f6;">${g.descripcion||"-"}</td>
+                <td style="font-weight: bold; color: #334155;">${formatoMoneda(g.monto)}</td>
+                <td>${acciones}</td>
+            </tr>`;
+        }
+    } else {
+        // Va a la tabla normal de Gastos
+        totalGastos += (Number(g.monto) || 0);
+        if (tbodyGastos) {
+            tbodyGastos.innerHTML += `<tr>
+                <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
+                <td style="font-weight: bold; color: #334155;">${g.descripcion||"-"}</td>
+                <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${g.categoriaNombre||"-"}</span></td>
+                <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
+                <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
+                <td>${acciones}</td>
+            </tr>`;
+        }
+    }
   });
   
+  // Ocultamos el panel de transferencias si este mes no hubo ninguna
+  if (panelTransferencias) {
+      panelTransferencias.style.display = hayTransferencias ? "block" : "none";
+  }
+
   if (document.getElementById("totalVariables")) {
-      document.getElementById("totalVariables").textContent = formatoMoneda(total);
+      document.getElementById("totalVariables").textContent = formatoMoneda(totalGastos);
   }
 }
 
