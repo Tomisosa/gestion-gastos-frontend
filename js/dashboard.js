@@ -493,29 +493,38 @@ function renderGastosVariables(lista) {
   lista.sort((a, b) => new Date(a.fecha || a.fechaVencimiento || 0) - new Date(b.fecha || b.fechaVencimiento || 0));
   
   lista.forEach(g => {
-    const acciones = `
-        <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
-        <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
-    `;
-    
     const fechaPagoReal = g.fecha || g.fechaVencimiento || "-";
     const medioPagoReal = g.medioPago || "EFECTIVO";
     const esTransferencia = (g.descripcion || "").includes("[TRANSFERENCIA]");
 
     if (esTransferencia) {
         hayTransferencias = true;
-        // Va a la tabla de Movimientos (No suma al total de gastos)
+        
+        // 🔥 Acciones especiales para transferencias (Sin botón de editar)
+        const accionesTransferencia = `
+            <button onclick="eliminarTransferencia(${g.id}, '${fechaPagoReal}', ${g.monto})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Deshacer Transferencia">🗑️</button>
+        `;
+
         if (tbodyTransferencias) {
+            // Le borramos el texto "[TRANSFERENCIA]" para que quede más limpio
+            let descLimpia = (g.descripcion||"-").replace("[TRANSFERENCIA] ", "");
+            
             tbodyTransferencias.innerHTML += `<tr>
                 <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
-                <td style="font-weight: bold; color: #3b82f6;">${g.descripcion||"-"}</td>
+                <td style="font-weight: bold; color: #3b82f6;">${descLimpia}</td>
                 <td style="font-weight: bold; color: #334155;">${formatoMoneda(g.monto)}</td>
-                <td>${acciones}</td>
+                <td>${accionesTransferencia}</td>
             </tr>`;
         }
     } else {
-        // Va a la tabla normal de Gastos
         totalGastos += (Number(g.monto) || 0);
+        
+        // 🔥 Acciones normales para los gastos variables
+        const accionesGastos = `
+            <button onclick="editarGasto(${g.id})" class="btn-edit" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; margin-right: 5px;" title="Editar">✏️</button>
+            <button onclick="eliminarGasto(${g.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>
+        `;
+
         if (tbodyGastos) {
             tbodyGastos.innerHTML += `<tr>
                 <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
@@ -523,13 +532,12 @@ function renderGastosVariables(lista) {
                 <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${g.categoriaNombre||"-"}</span></td>
                 <td><span style="color: #00aae4; font-weight: bold; font-size: 0.85rem;">${medioPagoReal}</span></td>
                 <td class="monto-gasto">${formatoMoneda(g.monto)}</td>
-                <td>${acciones}</td>
+                <td>${accionesGastos}</td>
             </tr>`;
         }
     }
   });
   
-  // Ocultamos el panel de transferencias si este mes no hubo ninguna
   if (panelTransferencias) {
       panelTransferencias.style.display = hayTransferencias ? "block" : "none";
   }
@@ -1481,6 +1489,35 @@ window.eliminarGasto = async function(id) {
     }
     
     await refreshAll(); 
+};
+
+window.eliminarTransferencia = async function(idGasto, fecha, monto) {
+    if (!confirm("¿Seguro que querés deshacer esta transferencia? Se devolverá la plata a la cuenta de origen.")) return;
+
+    try {
+        // 1. Borramos el Gasto (la salida de plata de la cuenta origen)
+        await fetch(`${API}/gastos/${idGasto}`, { method: "DELETE", headers: authHeaders() });
+
+        // 2. Buscamos el Ingreso fantasma asociado (la entrada de plata a la cuenta destino)
+        const resIngresos = await fetch(`${API}/ingresos/usuario/${user.id}`, { headers: authHeaders() });
+        const ingresos = await resIngresos.json();
+        
+        const ingresoAsociado = ingresos.find(i => 
+            (i.fecha === fecha || i.fechaVencimiento === fecha) && 
+            Number(i.monto) === Number(monto) && 
+            (i.descripcion || "").includes("[TRANSFERENCIA]")
+        );
+
+        // 3. Si lo encontramos, lo borramos también para que las cuentas queden intactas
+        if (ingresoAsociado) {
+            await fetch(`${API}/ingresos/${ingresoAsociado.id}`, { method: "DELETE", headers: authHeaders() });
+        }
+
+        await refreshAll();
+        alert("Transferencia deshecha con éxito.");
+    } catch (e) {
+        alert("Error al intentar deshacer la transferencia.");
+    }
 };
 
 window.editarGasto = async function(id) {
