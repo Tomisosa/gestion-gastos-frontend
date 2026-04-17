@@ -505,17 +505,25 @@ function renderGastosVariables(lista) {
             <button onclick="eliminarTransferencia(${g.id}, '${fechaPagoReal}', ${g.monto})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Deshacer Transferencia">🗑️</button>
         `;
 
-        if (tbodyTransferencias) {
-            // Le borramos el texto "[TRANSFERENCIA]" para que quede más limpio
-            let descLimpia = (g.descripcion||"-").replace("[TRANSFERENCIA] ", "");
-            
-            tbodyTransferencias.innerHTML += `<tr>
-                <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
-                <td style="font-weight: bold; color: #3b82f6;">${descLimpia}</td>
-                <td style="font-weight: bold; color: #334155;">${formatoMoneda(g.monto)}</td>
-                <td>${accionesTransferencia}</td>
-            </tr>`;
-        }
+		if (tbodyTransferencias) {
+		            // Sacamos la palabra destino y armamos el caminito visual
+		            let destino = (g.descripcion||"").replace("[TRANSFERENCIA] Hacia ", "").replace("[TRANSFERENCIA] ", "");
+		            let origen = g.medioPago || "Desconocido";
+		            
+		            // Armamos el texto final con una flechita
+		            let textoMovimiento = `${origen} ➔ ${destino}`;
+		            
+		            tbodyTransferencias.innerHTML += `<tr>
+		                <td style="color: #64748b; font-weight: 600;">${fechaPagoReal}</td>
+		                <td style="font-weight: bold; color: #3b82f6;">
+		                    <span style="color: #64748b; font-size: 0.85rem;">${origen}</span> 
+		                    <span style="margin: 0 5px;">➔</span> 
+		                    <span>${destino}</span>
+		                </td>
+		                <td style="font-weight: bold; color: #334155;">${formatoMoneda(g.monto)}</td>
+		                <td>${accionesTransferencia}</td>
+		            </tr>`;
+		        }
     } else {
         totalGastos += (Number(g.monto) || 0);
         
