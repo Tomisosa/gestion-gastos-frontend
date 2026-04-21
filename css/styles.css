@@ -1246,7 +1246,8 @@ body.premium-landing {
 .brand, .brand-mobile {
     display: flex;
     align-items: center;
-    gap: 0px; /* <--- Clave para que no haya separación */
+    flex-wrap: nowrap; /* <-- AGREGAR ESTA LÍNEA (evita que se parta en dos renglones) */
+    gap: 0px; 
     padding: 10px 0;
     text-decoration: none;
     user-select: none;
