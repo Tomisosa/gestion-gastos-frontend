@@ -812,10 +812,13 @@ select:focus, #filtroFechaMes:focus {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(1.6); 
-      opacity: 0;
-      animation: aparecerLogoComplex 1.5s ease-out forwards, floatLogo 4s ease-in-out infinite;
+      opacity: 0; /* Arranca totalmente invisible */
+      
+      /* 🔥 LA MAGIA: Le sumamos 2.5s de espera (delay) a la entrada, y 4s de espera al efecto de flotar */
+      animation: aparecerLogoComplex 1.5s ease-out 2.5s forwards, floatLogo 4s ease-in-out 4s infinite;
+      
       filter: drop-shadow(0 0 15px rgba(42, 201, 187, 0.8)); 
-    }
+}
 
 .finty-logo-container.mini {
     width: 30px;
