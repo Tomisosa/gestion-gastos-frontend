@@ -559,12 +559,15 @@ function renderIngresos(ingresos) {
   const tbody = document.querySelector('#tablaIngresos tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  ingresos.forEach(i => {
+  
+  // 🔥 LA MAGIA: Filtramos la lista para esconder las transferencias
+  const ingresosReales = ingresos.filter(i => !(i.descripcion || "").includes("[TRANSFERENCIA]"));
+
+  ingresosReales.forEach(i => {
     const acciones = `<button onclick="eliminarIngreso(${i.id})" class="btn-delete" style="background: none; border: none; cursor: pointer; font-size: 1.1rem;" title="Eliminar">🗑️</button>`;
     tbody.innerHTML += `<tr><td>${i.fecha}</td><td>${i.descripcion||'-'}</td><td>${i.medioPago||'EFECTIVO'}</td><td>${i.categoriaNombre||'-'}</td><td class="monto-ingreso">${formatoMoneda(i.monto)}</td><td>${acciones}</td></tr>`;
   });
 }
-
 function renderConsumosCuotas(lista) {
     const tbody = document.querySelector("#tablaTarjetas tbody");
     if (!tbody) return;
