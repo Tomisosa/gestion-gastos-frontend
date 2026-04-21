@@ -922,26 +922,32 @@ function actualizarMediosDePagoSelects() {
    6. EVENTOS DE FORMULARIOS (SUBMITS, MODALES)
    ========================================================================== */
 
-const formBilletera = document.getElementById("formBilletera");
-if (formBilletera) {
-    formBilletera.onsubmit = async (e) => {
-        e.preventDefault();
-        const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Guardando..."; 
+   const formBilletera = document.getElementById("formBilletera");
+   if (formBilletera) {
+       formBilletera.onsubmit = async (e) => {
+           e.preventDefault();
+           const btnSubmit = document.querySelector("#formBilletera button[type='submit']");
+           btnSubmit.disabled = true;
+           btnSubmit.textContent = "Guardando..."; 
 
-        try {
-            const body = { nombre: document.getElementById("billeteraNombre").value.trim(), usuario: { id: user.id } };
-            const res = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
-            handleAuthError(res);
-            if(!res.ok) throw new Error("Error al guardar cuenta");
+           try {
+               // 🔥 ARREGLO: Ahora sí capturamos el color del select y se lo mandamos a la base de datos
+               const body = { 
+                   nombre: document.getElementById("billeteraNombre").value.trim(), 
+                   color: document.getElementById("billeteraColor").value, 
+                   usuario: { id: user.id } 
+               };
+               
+               const res = await fetch(`${API}/billeteras`, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+               handleAuthError(res);
+               if(!res.ok) throw new Error("Error al guardar cuenta");
 
-            document.getElementById("modalBilletera").style.display = "none";
-            formBilletera.reset();
-            await refreshAll();
-        } catch(err) { alert("Error técnico al guardar: " + err.message); } finally { btnSubmit.disabled = false; btnSubmit.textContent = "Crear Cuenta"; }
-    };
-}
+               document.getElementById("modalBilletera").style.display = "none";
+               formBilletera.reset();
+               await refreshAll();
+           } catch(err) { alert("Error técnico al guardar: " + err.message); } finally { btnSubmit.disabled = false; btnSubmit.textContent = "Crear Cuenta"; }
+       };
+   }
 
 const formEditarBilletera = document.getElementById("formEditarBilletera");
 if (formEditarBilletera) {
