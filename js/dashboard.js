@@ -418,6 +418,13 @@ function renderGastosFijos(lista) {
   
   let total = 0, pagado = 0, faltaPagar = 0;
 
+  // 🔥 NUEVO: Ordenar alfabéticamente por Concepto (de la A a la Z)
+  lista.sort((a, b) => {
+      const nombreA = (a.descripcion || "").toLowerCase();
+      const nombreB = (b.descripcion || "").toLowerCase();
+      return nombreA.localeCompare(nombreB);
+  });
+
   lista.forEach(g => {
     const montoNum = Number(g.monto) || 0;
     total += montoNum;
