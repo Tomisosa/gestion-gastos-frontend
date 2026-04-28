@@ -2260,13 +2260,17 @@ async function refreshAll() {
 	    // 🔥 ACÁ VA EL PASO B: Llamamos al verificador de alertas
 	    verificarVencimientos(gFijosParaTablaFinal);
 
-	    renderGastosVariables(gVariablesParaTabla); 
-	    renderGastosFijos(gFijosParaTablaFinal); 
-	    renderIngresos(ingresosNormales);
-	    renderInversiones(inversiones);
-	    generarGrafico(gParaTablasYGrafico);
+		renderGastosVariables(gVariablesParaTabla); 
+			    renderGastosFijos(gFijosParaTablaFinal); 
+			    renderIngresos(ingresosNormales);
+			    renderInversiones(inversiones);
+			    generarGrafico(gParaTablasYGrafico);
 
-	// Las billeteras ahora calculan solo la plata ingresada y gastada en el MES SELECCIONADO (cada mes arranca de cero)
+		        // 🔥 ESTAS DOS LÍNEAS ERAN LAS QUE FALTABAN:
+		        renderConsumosCuotas(gParaTablasYGrafico); 
+		        renderPrestamos(pTodos); 
+
+			// Las billeteras ahora calculan solo la plata ingresada y gastada en el MES SELECCIONADO (cada mes arranca de cero)
 	    const ingresosParaSaldos = iFiltradosMes.filter(i => !(i.descripcion || "").includes("INV:") && !(i.descripcion || "").includes("[CONFIG_TC]"));
 
 	    calcularSaldosPorCuenta(gFiltradosMes.filter(g => !g.esVirtual), ingresosParaSaldos);
