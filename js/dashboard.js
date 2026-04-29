@@ -254,29 +254,29 @@ async function fetchYRenderizarMisTarjetas() {
                const fechaVto = new Date(year, month - 1, day);
                fechaVto.setHours(0, 0, 0, 0);
 
-               if (fechaVto < hoy) {
-                   // 🔴 YA VENCIÓ (Ej: El gym que vencía el 9 y hoy es 13)
-                   alertasHTML += `
-                       <div style="background: #fee2e2; border-left: 5px solid #ef4444; color: #991b1b; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                           <div style="font-size: 0.9rem;">
-                               <strong style="font-size: 1rem;">⚠️ ¡Pago Vencido!</strong><br>
-                               Acordate de pagar <b>${g.descripcion}</b> (Venció el ${day}/${month}).
-                           </div>
-                           <button onclick="document.querySelector('[data-section=\\'ver-gastos\\']').click()" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; margin-left: 10px;">Ir a Pagar</button>
-                       </div>
-                   `;
-               } else if (fechaVto.getTime() === hoy.getTime()) {
-                   // 🟠 VENCE EXACTAMENTE HOY
-                   alertasHTML += `
-                       <div style="background: #fef3c7; border-left: 5px solid #f59e0b; color: #92400e; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                           <div style="font-size: 0.9rem;">
-                               <strong style="font-size: 1rem;">⏰ ¡Vence Hoy!</strong><br>
-                               Hoy es el último día para pagar <b>${g.descripcion}</b>.
-                           </div>
-                           <button onclick="document.querySelector('[data-section=\\'ver-gastos\\']').click()" style="background: #f59e0b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; margin-left: 10px;">Pagar ahora</button>
-                       </div>
-                   `;
-               }
+			   if (fechaVto < hoy) {
+			                      // 🔴 YA VENCIÓ 
+			                      alertasHTML += `
+			                          <div style="background: #fee2e2; border-left: 5px solid #ef4444; color: #991b1b; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+			                              <div style="font-size: 0.9rem;">
+			                                  <strong style="font-size: 1rem;">⚠️ ¡Pago Vencido!</strong><br>
+			                                  Acordate de pagar <b>${g.descripcion}</b> (Venció el ${day}/${month}).
+			                              </div>
+			                              <button onclick="abrirModalPagoDirecto(${g.id})" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; margin-left: 10px;">Ir a Pagar</button>
+			                          </div>
+			                      `;
+			                  } else if (fechaVto.getTime() === hoy.getTime()) {
+			                      // 🟠 VENCE EXACTAMENTE HOY
+			                      alertasHTML += `
+			                          <div style="background: #fef3c7; border-left: 5px solid #f59e0b; color: #92400e; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+			                              <div style="font-size: 0.9rem;">
+			                                  <strong style="font-size: 1rem;">⏰ ¡Vence Hoy!</strong><br>
+			                                  Hoy es el último día para pagar <b>${g.descripcion}</b>.
+			                              </div>
+			                              <button onclick="abrirModalPagoDirecto(${g.id})" style="background: #f59e0b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; margin-left: 10px;">Pagar ahora</button>
+			                          </div>
+			                      `;
+			                  }
            }
        });
 
@@ -289,6 +289,18 @@ async function fetchYRenderizarMisTarjetas() {
            contenedorAlertas.style.display = "none";
        }
    }
+   
+   window.abrirModalPagoDirecto = function(id) {
+          // Primero navegamos visualmente a la sección de gastos
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelector('[data-section="ver-gastos"]').classList.add('active');
+          document.querySelectorAll('.page').forEach(page => page.classList.remove('visible'));
+          document.getElementById('ver-gastos').classList.add('visible');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          // Y luego, mágicamente, abrimos el modal de pago de ese gasto específico
+          abrirModalPago(id);
+      };
    
    window.irAGastos = function() {
        // 1. Apagamos todos los botones del menú y encendemos el de Gastos
